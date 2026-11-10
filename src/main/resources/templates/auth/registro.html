@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Registro · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <script defer th:src="@{/js/auth.js}">
+    </script>
+  </head>
+  <body>
+    <main>
+      <h1>Crear cuenta</h1>
+      <form method="post" th:action="@{/registro}" th:object="${registroForm}">
+        <div id="resumen-errores" role="alert" tabindex="-1" th:if="${#fields.hasAnyErrors()}">
+          <p>Revisa los datos del formulario:</p>
+          <ul><li th:each="error : ${#fields.allErrors()}" th:text="${error}"></li></ul>
+        </div>
+        <p class="error" role="alert" th:each="error : ${#fields.globalErrors()}" th:text="${error}">
+        </p>
+        <label for="nombre">Nombre</label>
+        <input th:field="*{nombre}" th:attr="aria-invalid=${#fields.hasErrors('nombre')},aria-describedby=${#fields.hasErrors('nombre') ? 'error-nombre' : null}" required maxlength="100" autocomplete="name">
+        <p id="error-nombre" class="error" th:errors="*{nombre}">
+        </p>
+        <label for="correo">Correo institucional</label>
+        <input type="email" th:field="*{correo}" th:attr="aria-invalid=${#fields.hasErrors('correo')},aria-describedby=${#fields.hasErrors('correo') ? 'error-correo' : null}" required maxlength="254" autocomplete="email">
+        <p id="error-correo" class="error" th:errors="*{correo}">
+        </p>
+        <label for="contrasena">Contraseña (8 caracteres como mínimo, letras y números)</label>
+        <input id="contrasena" name="contrasena" th:attr="aria-invalid=${#fields.hasErrors('contrasena')},aria-describedby=${#fields.hasErrors('contrasena') ? 'error-contrasena' : null}" type="password" required minlength="8" autocomplete="new-password">
+        <p id="error-contrasena" class="error" th:errors="*{contrasena}">
+        </p>
+        <button type="button" data-password="contrasena" aria-pressed="false">Mostrar contraseña</button>
+        <label for="confirmacion">Confirmar contraseña</label>
+        <input id="confirmacion" name="confirmacion" th:attr="aria-invalid=${#fields.hasErrors('confirmacion')},aria-describedby=${#fields.hasErrors('confirmacion') ? 'error-confirmacion' : null}" type="password" required autocomplete="new-password">
+        <p id="error-confirmacion" class="error" th:errors="*{confirmacion}">
+        </p>
+        <label for="rol">Rol solicitado</label>
+        <select th:field="*{rol}" th:attr="aria-invalid=${#fields.hasErrors('rol')},aria-describedby=${#fields.hasErrors('rol') ? 'error-rol' : null}" required>
+          <option value="">Selecciona</option>
+          <option value="ESTUDIANTE">Estudiante</option>
+          <option value="DOCENTE">Docente (requiere autorización)</option>
+        </select>
+        <p id="error-rol" class="error" th:errors="*{rol}">
+        </p>
+        <fieldset id="estudiante">
+          <legend>Solo estudiantes</legend>
+          <label for="grado">Grado</label>
+          <input type="number" min="1" max="5" th:field="*{grado}" th:attr="aria-invalid=${#fields.hasErrors('grado')},aria-describedby=${#fields.hasErrors('grado') ? 'error-grado' : null}">
+          <p id="error-grado" class="error" th:errors="*{grado}">
+          </p>
+          <label for="seccion">Sección</label>
+          <select th:field="*{seccion}" th:attr="aria-invalid=${#fields.hasErrors('seccion')},aria-describedby=${#fields.hasErrors('seccion') ? 'error-seccion' : null}">
+            <option value="">Selecciona</option>
+            <option th:each="s : ${ {'A','B','C','D','E','F'} }" th:value="${s}" th:text="${s}">
+            </option>
+          </select>
+          <p id="error-seccion" class="error" th:errors="*{seccion}">
+          </p>
+        </fieldset>
+        <fieldset id="docente">
+          <legend>Solo docentes</legend>
+          <label for="area">Área</label>
+          <input th:field="*{area}" th:attr="aria-invalid=${#fields.hasErrors('area')},aria-describedby=${#fields.hasErrors('area') ? 'error-area' : null}" maxlength="100">
+          <p id="error-area" class="error" th:errors="*{area}">
+          </p>
+          <p>Una persona autorizada por la institución debe aprobar tu cuenta antes de que puedas ingresar.</p>
+        </fieldset>
+        <button type="submit">Registrarme</button>
+      </form>
+      <a th:href="@{/login}">Volver al inicio de sesión</a>
+    </main>
+  </body>
+</html>
+
+

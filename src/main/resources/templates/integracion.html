@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Sesión · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+  </head>
+  <body>
+    <main>
+      <h1>Sesión iniciada</h1>
+      <p th:text="${usuario.nombre}">
+      </p>
+      <p th:text="${usuario.rol}">
+      </p>
+      <p>Destino temporal de integración. El onboarding, inicio y panel docente pertenecen a historias futuras.</p>
+      <form method="post" th:action="@{/logout}">
+        <button type="submit">Cerrar sesión</button>
+      </form>
+    </main>
+  </body>
+</html>
