@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Perfil estudiantil · Kaichaini</title>
+    <script defer th:src="@{/js/perfil.js}"></script>
+  </head>
+  <body>
+    <main>
+      <h1>Mi perfil</h1>
+      <p>Grado: <span th:text="${grado}"></span></p>
+      <p>Sección: <span th:text="${seccion}"></span></p>
+      <p role="status" th:if="${mensaje}" th:text="${mensaje}"></p>
+      <form method="post" th:action="@{/estudiante/perfil}" th:object="${perfilForm}" data-autoguardado>
+        <div role="alert" tabindex="-1" th:if="${#fields.hasAnyErrors()}">
+          <p>Revisa los datos del formulario:</p>
+          <ul><li th:each="error : ${#fields.allErrors()}" th:text="${error}"></li></ul>
+        </div>
+        <label for="nombre">Nombre visible</label>
+        <input id="nombre" th:field="*{nombre}" maxlength="100" required autocomplete="name">
+        <p role="alert" th:errors="*{nombre}"></p>
+        <label for="avatar">Avatar</label>
+        <select id="avatar" th:field="*{avatar}" required>
+          <option th:each="opcion : ${avatares}" th:value="${opcion.name()}" th:text="|${opcion.icono} ${opcion.nombre}|"></option>
+        </select>
+        <p role="alert" th:errors="*{avatar}"></p>
+        <button type="submit">Guardar perfil</button>
+      </form>
+      <a th:href="@{/cuenta/contrasena}">Cambiar contraseña</a>
+      <a th:href="${destino}">Volver</a>
+    </main>
+  </body>
+</html>

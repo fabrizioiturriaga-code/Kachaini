@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Cambiar contraseña · Kaichaini</title>
+  </head>
+  <body>
+    <main>
+      <h1>Cambiar contraseña</h1>
+      <p role="status" th:if="${mensaje}" th:text="${mensaje}"></p>
+      <form method="post" th:action="@{/cuenta/contrasena}" th:object="${cambioContrasenaForm}">
+        <div role="alert" tabindex="-1" th:if="${#fields.hasAnyErrors()}">
+          <p>Revisa los datos del formulario:</p>
+          <ul><li th:each="error : ${#fields.allErrors()}" th:text="${error}"></li></ul>
+        </div>
+        <label for="contrasenaActual">Contraseña actual</label>
+        <input id="contrasenaActual" type="password" th:field="*{contrasenaActual}" required autocomplete="current-password">
+        <p role="alert" th:errors="*{contrasenaActual}"></p>
+        <label for="contrasenaNueva">Nueva contraseña (8 caracteres como mínimo, letras y números)</label>
+        <input id="contrasenaNueva" type="password" th:field="*{contrasenaNueva}" required minlength="8" autocomplete="new-password">
+        <p role="alert" th:errors="*{contrasenaNueva}"></p>
+        <label for="confirmacion">Confirmar nueva contraseña</label>
+        <input id="confirmacion" type="password" th:field="*{confirmacion}" required autocomplete="new-password">
+        <p role="alert" th:errors="*{confirmacion}"></p>
+        <button type="submit">Actualizar contraseña</button>
+      </form>
+      <a th:href="${destino}">Volver</a>
+    </main>
+  </body>
+</html>

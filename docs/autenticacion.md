@@ -18,6 +18,10 @@ La aplicación utiliza MVC: devuelve HTML o redirecciones, no JSON. Los POST rec
 | GET | `/login` | Ninguna | HTML del formulario de acceso. |
 | POST | `/login` | `correo`, `contrasena`, `_csrf` | Éxito: sesión autenticada y redirección por rol. Error: redirección a `/login?error`. |
 | POST | `/logout` | `_csrf` y sesión actual | Invalida la sesión y redirige a `/login?logout`. |
+| GET | `/estudiante/perfil` | Sesión de estudiante | Muestra datos básicos y formulario con nombre visible y avatares prediseñados. |
+| POST | `/estudiante/perfil` | `nombre`, `avatar`, `_csrf` | Guarda automáticamente los cambios y redirige al formulario con confirmación. |
+| GET | `/cuenta/contrasena` | Sesión autenticada | Formulario de cambio de contraseña. |
+| POST | `/cuenta/contrasena` | `contrasenaActual`, `contrasenaNueva`, `confirmacion`, `_csrf` | Valida y guarda el cambio; errores conservan el formulario sin devolver contraseñas. |
 | GET | `/onboarding` | Sesión de estudiante | Destino temporal para estudiantes con onboarding pendiente. |
 | GET | `/inicio` | Sesión de estudiante | Destino temporal para estudiantes con onboarding completo. |
 | GET | `/docente/panel` | Sesión de docente autorizado | Destino temporal para docentes. |
@@ -78,13 +82,13 @@ Los tipos pertenecen a `kanichi.dto.UsuarioSesion` y `kanichi.model.Rol`. Spring
 | `UsuarioRepository` | `findById(id)`, `findByCorreo(correoNormalizado)` y `existsByCorreo(correoNormalizado)`; inyectarlo en servicios. |
 | `PoliticaCorreo.normalizar(correo)` | Mantener el mismo formato antes de consultar correos. |
 | `PasswordEncoder` | Inyectar el bean existente; `encode` para guardar y `matches` para verificar. |
-| `ValidadorContrasena.esValida(valor)` | Reutilizar la regla en el futuro cambio de contraseña. |
-| `SecurityConfig` | Añadir permisos por ruta antes de `anyRequest()`. No crear un mecanismo de autenticación paralelo. |
+| `ValidadorContrasena.esValida(valor)` | Regla reutilizada por HU-05 para validar la nueva contraseña. |
+| `SecurityConfig` | Mantener permisos por ruta antes de `anyRequest()`. No crear un mecanismo de autenticación paralelo. |
 | `Estudiante.onboardingCompletado` | Estado reservado para HU-06; el destino guardado en el principal se calcula al iniciar sesión. Tras cambiarlo, actualizar la identidad de sesión o solicitar un nuevo login. |
 
-HU-03 puede consultar y actualizar el perfil por ID autenticado; HU-05 puede reutilizar la política de contraseña y BCrypt; HU-08 puede consultar nombre y rol para navegación. Cada módulo debe añadir sus propios DTO, controladores, servicios y vistas sin duplicar `Usuario`, su repositorio ni la configuración de seguridad.
+HU-03 permite a estudiantes consultar y actualizar su nombre visible y avatar prediseñado en `/estudiante/perfil`. HU-05 permite a estudiantes y docentes cambiar la contraseña en `/cuenta/contrasena`, validando la contraseña actual y aplicando la política existente. Cada módulo reutiliza `Usuario`, su repositorio y la configuración de seguridad.
 
-Los cambios de datos deben ejecutarse en servicios transaccionales. Añadir migraciones desde `V3__...sql`, sin modificar las ya aplicadas. Coordinar cambios en entidades compartidas, principal de sesión y reglas de permisos.
+Los cambios de datos deben ejecutarse en servicios transaccionales. La migración `V3__perfil_estudiante.sql` añade el avatar prediseñado; futuras migraciones deben continuar desde V4 sin modificar las ya aplicadas.
 
 ## Políticas de configuración
 

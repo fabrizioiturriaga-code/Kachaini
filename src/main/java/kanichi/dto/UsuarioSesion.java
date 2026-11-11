@@ -7,7 +7,7 @@ import org.springframework.security.core.userdetails.User;
 
 public class UsuarioSesion extends User {
   private final Long id;
-  private final String nombre;
+  private String nombre;
   private final Rol rol;
   private final boolean onboardingCompletado;
 
@@ -39,6 +39,10 @@ public class UsuarioSesion extends User {
 
   public String getNombre() {
     return nombre;
+  }
+
+  public void actualizarNombreVisible(String nombre) {
+    this.nombre = nombre;
   }
 
   public Rol getRol() {

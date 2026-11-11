@@ -2,6 +2,8 @@ package kanichi.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 
 @Entity
@@ -15,6 +17,10 @@ public class Estudiante extends Usuario {
 
   @Column(name = "onboarding_completado", nullable = false)
   private boolean onboardingCompletado = false;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, length = 20)
+  private AvatarEstudiante avatar = AvatarEstudiante.KAI;
 
   protected Estudiante() {}
 
@@ -35,6 +41,14 @@ public class Estudiante extends Usuario {
 
   public boolean isOnboardingCompletado() {
     return onboardingCompletado;
+  }
+
+  public AvatarEstudiante getAvatar() {
+    return avatar;
+  }
+
+  public void actualizarAvatar(AvatarEstudiante avatar) {
+    this.avatar = avatar;
   }
 
   public Rol getRol() {

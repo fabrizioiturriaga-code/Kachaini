@@ -37,10 +37,14 @@ public class SecurityConfig {
             permisos
                 .requestMatchers("/", "/registro", "/login", "/css/**", "/js/**", "/error")
                 .permitAll()
+                .requestMatchers("/estudiante/**")
+                .hasRole("ESTUDIANTE")
                 .requestMatchers("/onboarding", "/inicio")
                 .hasRole("ESTUDIANTE")
                 .requestMatchers("/docente/**")
                 .hasRole("DOCENTE")
+                .requestMatchers("/cuenta/**")
+                .authenticated()
                 .anyRequest()
                 .authenticated());
 
