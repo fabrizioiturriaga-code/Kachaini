@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Retos · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+  </head>
+  <body class="con-barra-inferior">
+    <main>
+      <h1><span aria-hidden="true">🎯</span> Retos</h1>
+      <p>Aquí verás tus retos y desafíos disponibles.</p>
+      <p>Esta sección se implementará en una historia de usuario posterior.</p>
+    </main>
+    <nav th:replace="~{fragments/navegacion :: barra('retos')}"></nav>
+  </body>
+</html>

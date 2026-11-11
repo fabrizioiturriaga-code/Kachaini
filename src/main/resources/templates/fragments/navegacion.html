@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <nav th:fragment="barra(activo)" class="barra-inferior" aria-label="Navegación principal">
+      <a th:href="@{/inicio}" class="barra-inferior__enlace"
+         th:classappend="${activo == 'inicio'} ? 'barra-inferior__enlace--activo'"
+         th:attr="aria-current=${activo == 'inicio'} ? 'page'">
+        <span class="barra-inferior__icono" aria-hidden="true">🏠</span>
+        <span class="barra-inferior__texto">Inicio</span>
+      </a>
+      <a th:href="@{/estudiante/retos}" class="barra-inferior__enlace"
+         th:classappend="${activo == 'retos'} ? 'barra-inferior__enlace--activo'"
+         th:attr="aria-current=${activo == 'retos'} ? 'page'">
+        <span class="barra-inferior__icono" aria-hidden="true">🎯</span>
+        <span class="barra-inferior__texto">Retos</span>
+      </a>
+      <a th:href="@{/estudiante/comunidad}" class="barra-inferior__enlace"
+         th:classappend="${activo == 'comunidad'} ? 'barra-inferior__enlace--activo'"
+         th:attr="aria-current=${activo == 'comunidad'} ? 'page'">
+        <span class="barra-inferior__icono" aria-hidden="true">❤️</span>
+        <span class="barra-inferior__texto">Comunidad</span>
+      </a>
+      <a th:href="@{/estudiante/perfil}" class="barra-inferior__enlace"
+         th:classappend="${activo == 'perfil'} ? 'barra-inferior__enlace--activo'"
+         th:attr="aria-current=${activo == 'perfil'} ? 'page'">
+        <span class="barra-inferior__icono" aria-hidden="true">⋯</span>
+        <span class="barra-inferior__texto">Perfil</span>
+      </a>
+    </nav>
+  </body>
+</html>

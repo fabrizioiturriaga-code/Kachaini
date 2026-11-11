@@ -4,9 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Perfil estudiantil · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
     <script defer th:src="@{/js/perfil.js}"></script>
   </head>
-  <body>
+  <body class="con-barra-inferior">
     <main>
       <h1>Mi perfil</h1>
       <p>Grado: <span th:text="${grado}"></span></p>
@@ -30,5 +32,6 @@
       <a th:href="@{/cuenta/contrasena}">Cambiar contraseña</a>
       <a th:href="${destino}">Volver</a>
     </main>
+    <nav th:replace="~{fragments/navegacion :: barra('perfil')}"></nav>
   </body>
 </html>

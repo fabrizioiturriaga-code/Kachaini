@@ -8,6 +8,7 @@ import kanichi.dto.UsuarioSesion;
 import kanichi.exception.CambioContrasenaInvalidoException;
 import kanichi.model.AvatarEstudiante;
 import kanichi.model.Estudiante;
+import kanichi.model.Rol;
 import kanichi.service.CambioContrasenaService;
 import kanichi.service.PerfilEstudianteService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -64,7 +65,7 @@ public class CuentaController {
       UsuarioSesion usuario, Estudiante estudiante, Model model) {
     model.addAttribute("grado", estudiante.getGrado());
     model.addAttribute("seccion", estudiante.getSeccion());
-    model.addAttribute("destino", usuario.destino());
+    agregarNavegacion(usuario, model);
     model.addAttribute("avatares", Arrays.asList(AvatarEstudiante.values()));
   }
 
@@ -72,7 +73,7 @@ public class CuentaController {
   public String formularioContrasena(
       @AuthenticationPrincipal UsuarioSesion usuario, Model model) {
     model.addAttribute("cambioContrasenaForm", new CambioContrasenaForm());
-    model.addAttribute("destino", usuario.destino());
+    agregarNavegacion(usuario, model);
     return "cuenta/contrasena";
   }
 
@@ -85,7 +86,7 @@ public class CuentaController {
       RedirectAttributes mensajes) {
     if (resultado.hasErrors()) {
       limpiarContrasenas(formulario);
-      model.addAttribute("destino", usuario.destino());
+      agregarNavegacion(usuario, model);
       return "cuenta/contrasena";
     }
 
@@ -94,12 +95,17 @@ public class CuentaController {
     } catch (CambioContrasenaInvalidoException exception) {
       resultado.rejectValue(exception.getCampo(), "cambio", exception.getMessage());
       limpiarContrasenas(formulario);
-      model.addAttribute("destino", usuario.destino());
+      agregarNavegacion(usuario, model);
       return "cuenta/contrasena";
     }
 
     mensajes.addFlashAttribute("mensaje", "Contraseña actualizada.");
     return "redirect:/cuenta/contrasena";
+  }
+
+  private void agregarNavegacion(UsuarioSesion usuario, Model model) {
+    model.addAttribute("destino", usuario.destino());
+    model.addAttribute("esEstudiante", usuario.getRol() == Rol.ESTUDIANTE);
   }
 
   private void limpiarContrasenas(CambioContrasenaForm formulario) {

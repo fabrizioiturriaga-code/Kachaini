@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Inicio · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+  </head>
+  <body class="con-barra-inferior">
+    <main>
+      <h1>¡Hola, <span th:text="${nombre}">estudiante</span>!</h1>
+      <section aria-labelledby="titulo-mapa">
+        <h2 id="titulo-mapa">Mapa de misiones</h2>
+        <p th:if="${unidadActiva}">
+          Continúa con la unidad
+          <strong th:text="|${unidadActiva.numero()}. ${unidadActiva.titulo()}|"></strong>.
+        </p>
+        <ol class="mapa-misiones">
+          <li th:each="unidad : ${unidades}" class="unidad" th:classappend="${unidad.claseCss()}"
+              th:attr="aria-current=${unidad.isActiva()} ? 'step'">
+            <span class="unidad__numero" th:text="${unidad.numero()}">1</span>
+            <div>
+              <p class="unidad__titulo" th:text="${unidad.titulo()}">Unidad</p>
+              <p class="unidad__estado"
+                 th:text="${unidad.isActiva()} ? 'En progreso' : (${unidad.isBloqueada()} ? '🔒 Bloqueada' : '✅ Completada')">
+              </p>
+            </div>
+          </li>
+        </ol>
+      </section>
+    </main>
+    <nav th:replace="~{fragments/navegacion :: barra('inicio')}"></nav>
+  </body>
+</html>

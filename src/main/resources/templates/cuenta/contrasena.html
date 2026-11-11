@@ -4,8 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Cambiar contraseña · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
   </head>
-  <body>
+  <body th:classappend="${esEstudiante} ? 'con-barra-inferior'">
     <main>
       <h1>Cambiar contraseña</h1>
       <p role="status" th:if="${mensaje}" th:text="${mensaje}"></p>
@@ -27,5 +29,8 @@
       </form>
       <a th:href="${destino}">Volver</a>
     </main>
+    <th:block th:if="${esEstudiante}">
+      <nav th:replace="~{fragments/navegacion :: barra('perfil')}"></nav>
+    </th:block>
   </body>
 </html>
