@@ -46,12 +46,20 @@ public abstract class Usuario {
     return nombre;
   }
 
+  public void actualizarNombreVisible(String nombre) {
+    this.nombre = nombre;
+  }
+
   public String getCorreo() {
     return correo;
   }
 
   public String getContrasenaHash() {
     return contrasenaHash;
+  }
+
+  public void actualizarContrasenaHash(String contrasenaHash) {
+    this.contrasenaHash = contrasenaHash;
   }
 
   public Instant getFechaRegistro() {
