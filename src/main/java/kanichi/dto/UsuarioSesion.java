@@ -9,7 +9,7 @@ public class UsuarioSesion extends User {
   private final Long id;
   private String nombre;
   private final Rol rol;
-  private final boolean onboardingCompletado;
+  private boolean onboardingCompletado;
 
   public UsuarioSesion(
       Long id,
@@ -47,6 +47,15 @@ public class UsuarioSesion extends User {
 
   public Rol getRol() {
     return rol;
+  }
+
+  public boolean isOnboardingCompletado() {
+    return onboardingCompletado;
+  }
+
+  /** Actualiza la identidad de la sesión cuando el estudiante termina el módulo inicial. */
+  public void marcarOnboardingCompletado() {
+    this.onboardingCompletado = true;
   }
 
   public String destino() {

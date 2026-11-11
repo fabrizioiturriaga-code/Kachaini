@@ -10,8 +10,24 @@
   <body class="con-barra-inferior">
     <main>
       <h1><span aria-hidden="true">❤️</span> Comunidad</h1>
-      <p>Aquí podrás ver a tus compañeros y su progreso.</p>
-      <p>Esta sección se implementará en una historia de usuario posterior.</p>
+      <section aria-labelledby="titulo-ranking">
+        <h2 id="titulo-ranking">Ranking de tu salón</h2>
+        <p th:text="|${ranking.grado()}.° grado · Sección ${ranking.seccion()}|"></p>
+        <p>
+          Tu puesto: <strong th:text="${ranking.miPosicion()}">1</strong>
+          · XP: <strong th:text="${ranking.miXp()}">0</strong>
+        </p>
+        <ol>
+          <li th:each="posicion : ${ranking.posiciones()}"
+              th:attr="aria-current=${posicion.esActual()} ? 'true'">
+            <span th:text="|#${posicion.puesto()}|"></span>
+            <span aria-hidden="true" th:text="${posicion.avatar()}"></span>
+            <strong th:text="${posicion.nombre()}">Estudiante</strong>
+            <span th:text="|${posicion.xp()} XP|"></span>
+            <span th:if="${posicion.esActual()}">(Tú)</span>
+          </li>
+        </ol>
+      </section>
     </main>
     <nav th:replace="~{fragments/navegacion :: barra('comunidad')}"></nav>
   </body>

@@ -1,9 +1,11 @@
 package kanichi.service;
 
 import java.util.List;
+import java.util.stream.IntStream;
 import kanichi.dto.UnidadMapa;
 import kanichi.dto.UnidadMapa.Estado;
 import org.springframework.stereotype.Service;
+
 @Service
 public class MapaMisionesService {
   private static final List<String> UNIDADES =
@@ -15,10 +17,22 @@ public class MapaMisionesService {
           "Virreinato del Perú",
           "Independencia del Perú");
 
-  public List<UnidadMapa> obtenerMapa(Long estudianteId) {
-    return java.util.stream.IntStream.range(0, UNIDADES.size())
+  /**
+   * Las unidades permanecen bloqueadas hasta completar el módulo inicial (HU-06); al completarlo
+   * se desbloquea automáticamente la primera.
+   */
+  public List<UnidadMapa> obtenerMapa(boolean moduloInicialCompletado) {
+    return IntStream.range(0, UNIDADES.size())
         .mapToObj(
-            i -> new UnidadMapa(i + 1, UNIDADES.get(i), i == 0 ? Estado.ACTIVA : Estado.BLOQUEADA))
+            i ->
+                new UnidadMapa(
+                    i + 1,
+                    UNIDADES.get(i),
+                    i == 0 && moduloInicialCompletado ? Estado.ACTIVA : Estado.BLOQUEADA))
         .toList();
+  }
+
+  public String primeraUnidad() {
+    return UNIDADES.get(0);
   }
 }

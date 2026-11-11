@@ -10,8 +10,21 @@
   <body class="con-barra-inferior">
     <main>
       <h1><span aria-hidden="true">🎯</span> Retos</h1>
-      <p>Aquí verás tus retos y desafíos disponibles.</p>
-      <p>Esta sección se implementará en una historia de usuario posterior.</p>
+      <section aria-labelledby="titulo-logros">
+        <h2 id="titulo-logros">Mis logros</h2>
+        <p>XP acumulada: <strong th:text="${progreso.xp()}">0</strong></p>
+        <ul>
+          <li th:each="logro : ${catalogoLogros}">
+            <span aria-hidden="true" th:text="${progreso.tieneLogro(logro)} ? ${logro.icono} : '🔒'"></span>
+            <strong th:text="${logro.nombre}">Logro</strong>:
+            <span th:text="${logro.descripcion}"></span>
+            <span th:text="${progreso.tieneLogro(logro)} ? '(Obtenido)' : '(Por desbloquear)'"></span>
+          </li>
+        </ul>
+      </section>
+      <p th:unless="${progreso.completado()}">
+        <a th:href="@{/onboarding}">Continúa el módulo inicial</a> para ganar más XP e insignias.
+      </p>
     </main>
     <nav th:replace="~{fragments/navegacion :: barra('retos')}"></nav>
   </body>

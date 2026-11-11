@@ -171,6 +171,44 @@ class PostgresIntegrationTest {
   }
 
   @Test
+  void completarModuloInicialPersisteRecompensasYDesbloqueaInicio() throws Exception {
+    auth.registrar(form("ana@example.org"));
+    var sesion =
+        (MockHttpSession)
+            mvc.perform(
+                    post("/login")
+                        .with(csrf())
+                        .param("correo", "ana@example.org")
+                        .param("contrasena", "Historia123"))
+                .andExpect(redirectedUrl("/onboarding"))
+                .andReturn()
+                .getRequest()
+                .getSession(false);
+
+    mvc.perform(get("/inicio").session(sesion)).andExpect(redirectedUrl("/onboarding"));
+    for (String mision : new String[] {"bienvenida", "que-es-la-historia", "linea-de-tiempo"}) {
+      mvc.perform(post("/onboarding/misiones/" + mision).session(sesion).with(csrf()))
+          .andExpect(redirectedUrl("/onboarding"));
+    }
+    mvc.perform(
+            post("/onboarding/misiones/reto-de-bienvenida")
+                .param("respuesta", "1")
+                .session(sesion)
+                .with(csrf()))
+        .andExpect(redirectedUrl("/inicio"));
+    mvc.perform(get("/inicio").session(sesion)).andExpect(status().isOk());
+
+    assertEquals(
+        kanichi.model.MisionInicial.xpTotal(),
+        jdbc.queryForObject("SELECT xp FROM estudiantes", Integer.class));
+    assertEquals(
+        Boolean.TRUE,
+        jdbc.queryForObject("SELECT onboarding_completado FROM estudiantes", Boolean.class));
+    assertEquals(4, jdbc.queryForObject("SELECT count(*) FROM misiones_completadas", Integer.class));
+    assertEquals(3, jdbc.queryForObject("SELECT count(*) FROM logros_estudiante", Integer.class));
+  }
+
+  @Test
   void revocarDocenteInvalidaSesionYRegistraAuditoria() throws Exception {
     RegistroForm docente = form("docente@example.org");
     docente.setRol(Rol.DOCENTE);

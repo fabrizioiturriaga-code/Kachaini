@@ -22,13 +22,13 @@ La aplicación utiliza MVC: devuelve HTML o redirecciones, no JSON. Los POST rec
 | POST | `/estudiante/perfil` | `nombre`, `avatar`, `_csrf` | Guarda automáticamente los cambios y redirige al formulario con confirmación. |
 | GET | `/cuenta/contrasena` | Sesión autenticada | Formulario de cambio de contraseña. |
 | POST | `/cuenta/contrasena` | `contrasenaActual`, `contrasenaNueva`, `confirmacion`, `_csrf` | Valida y guarda el cambio; errores conservan el formulario sin devolver contraseñas. |
-| GET | `/onboarding` | Sesión de estudiante | Destino temporal para estudiantes con onboarding pendiente. |
-| GET | `/inicio` | Sesión de estudiante | Destino temporal para estudiantes con onboarding completo. |
+| GET | `/onboarding` | Sesión de estudiante | Módulo inicial (HU-06), ver [modulo-inicial.md](modulo-inicial.md). |
+| GET | `/inicio` | Sesión de estudiante | Mapa de misiones (HU-08). Con onboarding pendiente redirige a `/onboarding`. |
 | GET | `/docente/panel` | Sesión de docente autorizado | Destino temporal para docentes. |
 
 Las redirecciones utilizan HTTP 302; los formularios y destinos HTML correctos responden HTTP 200. Una petición sin CSRF válido recibe HTTP 403. Tras alcanzar el límite temporal, POST `/login` devuelve HTTP 429 y la cabecera `Retry-After` con los segundos de espera; no se consultan las credenciales durante ese intervalo. El acceso anónimo a rutas privadas redirige al login; una sesión con rol incorrecto recibe HTTP 403.
 
-Los tres destinos privados son puntos de integración, no implementaciones de onboarding, navegación ni panel docente.
+El panel docente sigue siendo un destino temporal de integración.
 
 ### Campos de POST /registro
 
@@ -84,11 +84,11 @@ Los tipos pertenecen a `kanichi.dto.UsuarioSesion` y `kanichi.model.Rol`. Spring
 | `PasswordEncoder` | Inyectar el bean existente; `encode` para guardar y `matches` para verificar. |
 | `ValidadorContrasena.esValida(valor)` | Regla reutilizada por HU-05 para validar la nueva contraseña. |
 | `SecurityConfig` | Mantener permisos por ruta antes de `anyRequest()`. No crear un mecanismo de autenticación paralelo. |
-| `Estudiante.onboardingCompletado` | Estado reservado para HU-06; el destino guardado en el principal se calcula al iniciar sesión. Tras cambiarlo, actualizar la identidad de sesión o solicitar un nuevo login. |
+| `Estudiante.onboardingCompletado` | Lo marca HU-06 al completar el módulo inicial; también actualiza el principal de la sesión con `UsuarioSesion.marcarOnboardingCompletado()`. |
 
 HU-03 permite a estudiantes consultar y actualizar su nombre visible y avatar prediseñado en `/estudiante/perfil`. HU-05 permite a estudiantes y docentes cambiar la contraseña en `/cuenta/contrasena`, validando la contraseña actual y aplicando la política existente. Cada módulo reutiliza `Usuario`, su repositorio y la configuración de seguridad.
 
-Los cambios de datos deben ejecutarse en servicios transaccionales. La migración `V3__perfil_estudiante.sql` añade el avatar prediseñado; futuras migraciones deben continuar desde V4 sin modificar las ya aplicadas.
+Los cambios de datos deben ejecutarse en servicios transaccionales. La migración `V3__perfil_estudiante.sql` añade el avatar prediseñado; `V4__modulo_inicial.sql` añade XP, misiones completadas y logros; futuras migraciones deben continuar desde V5 sin modificar las ya aplicadas.
 
 ## Políticas de configuración
 

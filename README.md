@@ -38,3 +38,5 @@ La aplicación queda disponible en [localhost:8080](http://localhost:8080). Las 
 ## Documentación
 
 [Autenticación: HU-01, HU-02 y contratos de integración](docs/autenticacion.md).
+
+[Módulo inicial: HU-06](docs/modulo-inicial.md).
