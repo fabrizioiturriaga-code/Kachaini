@@ -25,10 +25,11 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @org.junit.jupiter.api.extension.ExtendWith(
     org.springframework.boot.test.system.OutputCaptureExtension.class)
-@WebMvcTest({AuthController.class, IntegracionController.class})
+@WebMvcTest({AuthController.class, IntegracionController.class, OnboardingController.class})
 @Import({
   SecurityConfig.class,
   UsuarioDetailsService.class,
+  MapaMisionesService.class,
   kanichi.security.LimiteIntentosLogin.class
 })
 class SecurityMvcTest {
@@ -36,11 +37,15 @@ class SecurityMvcTest {
   @Autowired PasswordEncoder encoder;
   @MockBean UsuarioRepository usuarios;
   @MockBean AuthService auth;
+  @MockBean ModuloInicialService moduloInicial;
 
   @MockBean kanichi.security.LimiteIntentosLogin limite;
 
   @BeforeEach
   void setup() {
+    when(moduloInicial.obtenerProgreso(any()))
+        .thenReturn(
+            new kanichi.dto.ProgresoModulo(java.util.List.of(), 0, java.util.List.of(), false));
     when(usuarios.findByCorreo("ana@example.org"))
         .thenReturn(
             Optional.of(

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Módulo inicial · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+  </head>
+  <body class="con-barra-inferior">
+    <main>
+      <h1>¡Bienvenido, <span th:text="${nombre}">estudiante</span>!</h1>
+      <p role="status" th:if="${mensaje}" th:text="${mensaje}"></p>
+      <p role="alert" th:if="${error}" th:text="${error}"></p>
+      <section aria-labelledby="titulo-modulo">
+        <h2 id="titulo-modulo">Módulo inicial</h2>
+        <p th:unless="${progreso.completado()}">
+          Completa estas misiones introductorias para desbloquear la primera unidad del mapa de misiones.
+        </p>
+        <p>
+          Progreso: <strong th:text="|${progreso.completadas()} de ${progreso.total()} misiones|"></strong>
+          · XP: <strong th:text="|${progreso.xp()} / ${xpTotal}|"></strong>
+        </p>
+        <ol class="mapa-misiones">
+          <li th:each="estado : ${progreso.misiones()}" class="unidad" th:classappend="${estado.claseCss()}"
+              th:attr="aria-current=${estado.disponible() and !estado.completada()} ? 'step'">
+            <span class="unidad__numero" th:text="${estado.mision().numero}">1</span>
+            <div>
+              <p class="unidad__titulo">
+                <a th:if="${estado.disponible()}" th:href="@{/onboarding/misiones/{c}(c=${estado.mision().codigo})}"
+                   th:text="${estado.mision().titulo}">Misión</a>
+                <span th:unless="${estado.disponible()}" th:text="${estado.mision().titulo}">Misión</span>
+              </p>
+              <p class="unidad__estado"
+                 th:text="${estado.completada()} ? '✅ Completada' : (${estado.disponible()} ? |Disponible · +${estado.mision().xp} XP| : '🔒 Bloqueada')">
+              </p>
+            </div>
+          </li>
+        </ol>
+        <p th:if="${progreso.completado()}">
+          ¡Completaste el módulo inicial! <a th:href="@{/inicio}">Ir al mapa de misiones</a>
+        </p>
+      </section>
+    </main>
+    <nav th:replace="~{fragments/navegacion :: barra('inicio')}"></nav>
+  </body>
+</html>

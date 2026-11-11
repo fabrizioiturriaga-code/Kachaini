@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title th:text="|${mision.titulo} · Kaichaini|">Misión · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+  </head>
+  <body class="con-barra-inferior">
+    <main>
+      <p th:text="|Misión ${mision.numero} · ${mision.tipo.etiqueta}|"></p>
+      <h1 th:text="${mision.titulo}">Misión</h1>
+      <p role="alert" th:if="${error}" th:text="${error}"></p>
+      <p th:each="parrafo : ${mision.contenido}" th:text="${parrafo}"></p>
+      <p>
+        Recompensa: <strong th:text="|${mision.xp} XP|"></strong>
+        <span th:if="${mision.insignia.present}"
+              th:text="|y la insignia ${mision.insignia.get().icono} ${mision.insignia.get().nombre}|"></span>
+      </p>
+      <p role="status" th:if="${completada}">✅ Ya completaste esta misión.</p>
+      <form th:unless="${completada}" method="post"
+            th:action="@{/onboarding/misiones/{c}(c=${mision.codigo})}">
+        <fieldset th:if="${mision.pregunta != null}">
+          <legend th:text="${mision.pregunta.enunciado()}">Pregunta</legend>
+          <th:block th:each="opcion, i : ${mision.pregunta.opciones()}">
+            <label>
+              <input type="radio" name="respuesta" th:value="${i.index}" required>
+              <span th:text="${opcion}">Opción</span>
+            </label>
+          </th:block>
+        </fieldset>
+        <button type="submit" th:text="${mision.pregunta != null} ? 'Responder' : 'Completar misión'">Completar misión</button>
+      </form>
+      <a th:href="@{/onboarding}">Volver al módulo inicial</a>
+    </main>
+    <nav th:replace="~{fragments/navegacion :: barra('inicio')}"></nav>
+  </body>
+</html>

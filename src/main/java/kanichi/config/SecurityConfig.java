@@ -39,7 +39,7 @@ public class SecurityConfig {
                 .permitAll()
                 .requestMatchers("/estudiante/**")
                 .hasRole("ESTUDIANTE")
-                .requestMatchers("/onboarding", "/inicio")
+                .requestMatchers("/onboarding", "/onboarding/**", "/inicio")
                 .hasRole("ESTUDIANTE")
                 .requestMatchers("/docente/**")
                 .hasRole("DOCENTE")

@@ -10,6 +10,7 @@
   <body class="con-barra-inferior">
     <main>
       <h1>¡Hola, <span th:text="${nombre}">estudiante</span>!</h1>
+      <p role="status" th:if="${mensaje}" th:text="${mensaje}"></p>
       <section aria-labelledby="titulo-mapa">
         <h2 id="titulo-mapa">Mapa de misiones</h2>
         <p th:if="${unidadActiva}">
@@ -28,6 +29,7 @@
             </div>
           </li>
         </ol>
+        <p><a th:href="@{/onboarding}">Repasar el módulo inicial</a></p>
       </section>
     </main>
     <nav th:replace="~{fragments/navegacion :: barra('inicio')}"></nav>
