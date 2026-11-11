@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class IntegracionController {
-  @GetMapping({"/onboarding", "/inicio", "/docente/panel"})
+  @GetMapping({"/onboarding", "/docente/panel"})
   public String destino(@AuthenticationPrincipal UsuarioSesion usuario, Model model) {
     model.addAttribute("usuario", usuario);
     return "integracion";
