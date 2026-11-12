@@ -1,0 +1,172 @@
+/* HU-13: colección de insignias y aviso de logro desbloqueado. HU-14: ranking semanal y ligas. */
+
+.coleccion {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: .8rem;
+  margin: 1rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.insignia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .3rem;
+  padding: 1rem .75rem;
+  border: 2px solid #d7dde4;
+  border-radius: .75rem;
+  background: #fff;
+  text-align: center;
+}
+
+.insignia__icono {
+  font-size: 2.2rem;
+  line-height: 1.1;
+}
+
+.insignia__descripcion,
+.insignia__como {
+  margin: 0;
+  font-size: .85rem;
+  color: #3d4756;
+}
+
+.insignia__estado {
+  font-size: .75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.insignia--obtenida {
+  border-color: #e0a800;
+  background: #fffaf0;
+}
+
+.insignia--obtenida .insignia__estado {
+  color: #8a5a00;
+}
+
+.insignia--bloqueada {
+  opacity: .5;
+  filter: grayscale(1);
+}
+
+.logro-desbloqueado {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 2px solid #e0a800;
+  border-radius: .75rem;
+  background: #fff4d6;
+  animation: logro-aparece 600ms ease-out;
+}
+
+.logro-desbloqueado__titulo {
+  margin: 0 0 .5rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.logro-desbloqueado .insignia {
+  margin-bottom: .5rem;
+  animation: insignia-brilla 1.2s ease-out;
+}
+
+@keyframes logro-aparece {
+  0% { opacity: 0; transform: translateY(-.5rem) scale(.95); }
+  60% { opacity: 1; transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+@keyframes insignia-brilla {
+  0% { box-shadow: 0 0 0 0 rgba(224, 168, 0, .7); }
+  100% { box-shadow: 0 0 0 1rem rgba(224, 168, 0, 0); }
+}
+
+.liga-actual {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  margin: 1rem 0;
+  padding: .9rem 1rem;
+  border: 2px solid #154f9a;
+  border-radius: .75rem;
+  background: #f2f7fe;
+}
+
+.liga-actual__icono {
+  font-size: 2.4rem;
+}
+
+.liga-actual p {
+  margin: .15rem 0;
+}
+
+.liga-actual progress {
+  width: 100%;
+}
+
+.ligas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin: .5rem 0 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.ligas li {
+  padding: .35rem .6rem;
+  border: 1px solid #d7dde4;
+  border-radius: 1rem;
+  font-size: .85rem;
+}
+
+.ligas li[aria-current] {
+  border-color: #154f9a;
+  background: #e8f0fb;
+  font-weight: 700;
+}
+
+.ranking {
+  margin: 1rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ranking li {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .55rem .75rem;
+  border-bottom: 1px solid #e6e9ee;
+}
+
+.ranking li[aria-current] {
+  border-radius: .5rem;
+  background: #e8f0fb;
+  font-weight: 700;
+}
+
+.ranking__puesto {
+  min-width: 2.2rem;
+  font-weight: 700;
+}
+
+.ranking__xp {
+  margin-left: auto;
+}
+
+.historial {
+  color: #3d4756;
+  font-size: .9rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logro-desbloqueado,
+  .logro-desbloqueado .insignia {
+    animation: none;
+  }
+}

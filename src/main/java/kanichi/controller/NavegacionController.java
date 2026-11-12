@@ -1,9 +1,13 @@
 package kanichi.controller;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import kanichi.dto.MapaAprendizaje;
 import kanichi.dto.UnidadMapa;
 import kanichi.dto.UsuarioSesion;
+import kanichi.model.Liga;
 import kanichi.model.Logro;
 import kanichi.service.LeccionService;
 import kanichi.service.ModuloInicialService;
@@ -28,7 +32,6 @@ public class NavegacionController {
     this.rankingService = rankingService;
   }
 
-  /** Lecciones: mapa de aprendizaje y energía. Requiere haber completado el módulo inicial. */
   @GetMapping("/inicio")
   public String inicio(@AuthenticationPrincipal UsuarioSesion usuario, Model model) {
     if (!usuario.isOnboardingCompletado()) {
@@ -45,7 +48,6 @@ public class NavegacionController {
     return "estudiante/inicio";
   }
 
-  /** Logros: XP acumulada e insignias obtenidas o por obtener. */
   @GetMapping("/estudiante/retos")
   public String retos(@AuthenticationPrincipal UsuarioSesion usuario, Model model) {
     model.addAttribute("progreso", moduloInicialService.obtenerProgreso(usuario.getId()));
@@ -53,10 +55,12 @@ public class NavegacionController {
     return "estudiante/retos";
   }
 
-  /** Ranking del salón por XP. */
   @GetMapping("/estudiante/comunidad")
   public String comunidad(@AuthenticationPrincipal UsuarioSesion usuario, Model model) {
     model.addAttribute("ranking", rankingService.obtenerRankingDelSalon(usuario.getId()));
+    List<Liga> ligas = new ArrayList<>(Arrays.asList(Liga.values()));
+    Collections.reverse(ligas);
+    model.addAttribute("ligas", ligas);
     return "estudiante/comunidad";
   }
 }

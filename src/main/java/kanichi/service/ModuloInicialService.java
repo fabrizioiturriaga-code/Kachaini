@@ -1,5 +1,5 @@
 package kanichi.service;
-
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -49,6 +49,7 @@ public class ModuloInicialService {
     }
 
     estudiante.registrarMision(mision);
+    estudianteRepository.registrarXp(estudianteId, mision.getXp(), Instant.now());
     List<Logro> logrosNuevos = new ArrayList<>();
     mision.getInsignia().filter(estudiante::otorgarLogro).ifPresent(logrosNuevos::add);
 

@@ -103,6 +103,7 @@ public class LeccionController {
         model.addAttribute("unidadCompletada", resultado.unidadCompletada());
         model.addAttribute("diasRacha", resultado.diasRacha());
         model.addAttribute("rachaAumentada", resultado.rachaAumentada());
+        model.addAttribute("logrosNuevos", resultado.logrosNuevos());
         agregarRespuestaElegida(model, leccion, respuesta);
         break;
       case YA_COMPLETADA:

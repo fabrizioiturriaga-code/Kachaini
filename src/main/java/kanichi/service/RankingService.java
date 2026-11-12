@@ -1,21 +1,39 @@
 package kanichi.service;
 
+import java.time.Clock;
+import java.time.DayOfWeek;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import kanichi.dto.RankingSalon;
 import kanichi.dto.RankingSalon.Posicion;
+import kanichi.model.AvatarEstudiante;
 import kanichi.model.Estudiante;
 import kanichi.repository.EstudianteRepository;
+import kanichi.repository.EstudianteRepository.XpDelPeriodo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** Ranking por XP del salón (mismo grado y sección). Los empates comparten puesto. */
 @Service
 public class RankingService {
-  private final EstudianteRepository estudianteRepository;
+  public static final ZoneId ZONA = ZoneId.of("America/Lima");
+  public static final int TAMANO_RANKING = 10;
 
+  private final EstudianteRepository estudianteRepository;
+  private final Clock reloj;
+
+  @Autowired
   public RankingService(EstudianteRepository estudianteRepository) {
+    this(estudianteRepository, Clock.systemUTC());
+  }
+
+  public RankingService(EstudianteRepository estudianteRepository, Clock reloj) {
     this.estudianteRepository = estudianteRepository;
+    this.reloj = reloj;
   }
 
   @Transactional(readOnly = true)
@@ -25,31 +43,50 @@ public class RankingService {
             .findById(estudianteId)
             .orElseThrow(() -> new IllegalStateException("No se encontró el estudiante."));
 
-    List<Estudiante> mejores =
-        estudianteRepository.findTop10ByGradoAndSeccionOrderByXpDescNombreAsc(
-            actual.getGrado(), actual.getSeccion());
+    LocalDate lunes =
+        LocalDate.now(reloj.withZone(ZONA))
+            .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+    Instant inicio = lunes.atStartOfDay(ZONA).toInstant();
+    Instant fin = lunes.plusWeeks(1).atStartOfDay(ZONA).toInstant();
+    Instant inicioSemanaPasada = lunes.minusWeeks(1).atStartOfDay(ZONA).toInstant();
+
+    List<XpDelPeriodo> salon =
+        estudianteRepository.xpDelSalonEntre(actual.getGrado(), actual.getSeccion(), inicio, fin);
 
     List<Posicion> posiciones = new ArrayList<>();
-    for (int i = 0; i < mejores.size(); i++) {
-      Estudiante estudiante = mejores.get(i);
+    int miXp = 0;
+    long miPosicion = 1;
+    for (int i = 0; i < salon.size(); i++) {
+      XpDelPeriodo fila = salon.get(i);
+      int xp = fila.getPuntos() == null ? 0 : fila.getPuntos();
       int puesto =
-          i > 0 && estudiante.getXp() == mejores.get(i - 1).getXp()
-              ? posiciones.get(i - 1).puesto()
-              : i + 1;
+          i > 0 && xp == posiciones.get(i - 1).xp() ? posiciones.get(i - 1).puesto() : i + 1;
+      boolean esActual = actual.getId().equals(fila.getId());
+      if (esActual) {
+        miXp = xp;
+        miPosicion = puesto;
+      }
       posiciones.add(
-          new Posicion(
-              puesto,
-              estudiante.getNombre(),
-              estudiante.getAvatar().getIcono(),
-              estudiante.getXp(),
-              estudiante.getId().equals(actual.getId())));
+          new Posicion(puesto, fila.getNombre(), iconoDe(fila.getAvatar()), xp, esActual));
     }
 
-    long miPosicion =
-        estudianteRepository.countByGradoAndSeccionAndXpGreaterThan(
-                actual.getGrado(), actual.getSeccion(), actual.getXp())
-            + 1;
     return new RankingSalon(
-        actual.getGrado(), actual.getSeccion(), posiciones, miPosicion, actual.getXp());
+        actual.getGrado(),
+        actual.getSeccion(),
+        List.copyOf(posiciones.subList(0, Math.min(TAMANO_RANKING, posiciones.size()))),
+        miPosicion,
+        miXp,
+        estudianteRepository.sumarXpEntre(estudianteId, inicioSemanaPasada, inicio),
+        actual.getXp(),
+        lunes,
+        lunes.plusDays(6));
+  }
+
+  private static String iconoDe(String avatar) {
+    try {
+      return AvatarEstudiante.valueOf(avatar).getIcono();
+    } catch (IllegalArgumentException | NullPointerException e) {
+      return AvatarEstudiante.KAI.getIcono();
+    }
   }
 }

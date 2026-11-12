@@ -17,6 +17,7 @@ import kanichi.dto.VistaUnidad;
 import kanichi.exception.MisionNoPermitidaException;
 import kanichi.model.Estudiante;
 import kanichi.model.Leccion;
+import kanichi.model.Logro;
 import kanichi.repository.EntregaDesarrolloRepository;
 import kanichi.repository.EstudianteRepository;
 import kanichi.service.LeccionService;
@@ -25,7 +26,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.server.ResponseStatusException;
 
-/** HU-12 (energía) y HU-18 (lecciones y desbloqueo de unidades). */
 class LeccionServiceTest {
   private static final Leccion PRIMERA = Leccion.U1_PRIMEROS_POBLADORES;
   private static final int CORRECTA = PRIMERA.getPregunta().respuestaCorrecta();
@@ -64,6 +64,24 @@ class LeccionServiceTest {
     assertEquals(PRIMERA.getXp(), estudiante.getXp());
     assertTrue(estudiante.haCompletado(PRIMERA));
     assertEquals(5, resultado.energia().actual());
+  }
+
+  @Test
+  void laPrimeraLeccionDesbloqueaUnLogroYRegistraLaXpParaElRankingSemanal() {
+    ResultadoLeccion resultado = servicioEn(t0).responder(1L, PRIMERA, CORRECTA, UUID.randomUUID());
+
+    assertEquals(List.of(Logro.APRENDIZ_DE_HISTORIA), resultado.logrosNuevos());
+    assertTrue(estudiante.tieneLogro(Logro.APRENDIZ_DE_HISTORIA));
+    verify(repository).registrarXp(1L, PRIMERA.getXp(), t0);
+  }
+
+  @Test
+  void unaRespuestaIncorrectaNoDaLogrosNiXpSemanal() {
+    ResultadoLeccion resultado =
+        servicioEn(t0).responder(1L, PRIMERA, INCORRECTA, UUID.randomUUID());
+
+    assertTrue(resultado.logrosNuevos().isEmpty());
+    verify(repository, never()).registrarXp(anyLong(), anyInt(), any());
   }
 
   @Test

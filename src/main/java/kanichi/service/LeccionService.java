@@ -16,6 +16,7 @@ import kanichi.exception.MisionNoPermitidaException;
 import kanichi.model.EntregaDesarrollo;
 import kanichi.model.Estudiante;
 import kanichi.model.Leccion;
+import kanichi.model.Logro;
 import kanichi.repository.EntregaDesarrolloRepository;
 import kanichi.repository.EstudianteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 /**
  * HU-18: mapa de aprendizaje con lecciones por unidad. HU-12: energía que baja con cada error y se
- * recupera con el tiempo.
+ * recupera con el tiempo. HU-13: logros al completar lecciones. HU-14: registra la XP con su fecha
+ * para el ranking semanal.
  */
 @Service
 public class LeccionService {
@@ -173,6 +175,8 @@ public class LeccionService {
 
     boolean rachaAumentada = !estudiante.rachaEn(ahora).completadaHoy();
     estudiante.registrarLeccion(leccion, ahora);
+    estudianteRepository.registrarXp(estudianteId, leccion.getXp(), ahora);
+    List<Logro> logrosNuevos = EvaluadorLogros.otorgarNuevos(estudiante, ahora);
     boolean unidadCompletada =
         Leccion.deUnidad(leccion.getUnidad()).stream().allMatch(estudiante::haCompletado);
     Integer desbloqueada =
@@ -186,7 +190,8 @@ public class LeccionService {
         unidadCompletada,
         desbloqueada,
         estudiante.rachaEn(ahora).dias(),
-        rachaAumentada);
+        rachaAumentada,
+        logrosNuevos);
   }
 
   /** Las lecciones se completan en orden y solo después del módulo inicial. */

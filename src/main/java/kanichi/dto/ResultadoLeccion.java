@@ -1,13 +1,8 @@
 package kanichi.dto;
 
-/**
- * Resultado de responder la pregunta de una lección.
- *
- * @param xpGanada XP otorgada (0 salvo que la respuesta sea correcta y sea la primera vez)
- * @param energia energía del estudiante después de la respuesta
- * @param unidadCompletada si con esta lección el estudiante terminó la unidad
- * @param unidadDesbloqueada número de la unidad que se desbloquea, o null si no hay una nueva
- */
+import java.util.List;
+import kanichi.model.Logro;
+
 public record ResultadoLeccion(
     Resultado resultado,
     int xpGanada,
@@ -15,7 +10,31 @@ public record ResultadoLeccion(
     boolean unidadCompletada,
     Integer unidadDesbloqueada,
     int diasRacha,
-    boolean rachaAumentada) {
+    boolean rachaAumentada,
+    List<Logro> logrosNuevos) {
+
+  public ResultadoLeccion {
+    logrosNuevos = logrosNuevos == null ? List.of() : List.copyOf(logrosNuevos);
+  }
+
+  public ResultadoLeccion(
+      Resultado resultado,
+      int xpGanada,
+      EstadoEnergia energia,
+      boolean unidadCompletada,
+      Integer unidadDesbloqueada,
+      int diasRacha,
+      boolean rachaAumentada) {
+    this(
+        resultado,
+        xpGanada,
+        energia,
+        unidadCompletada,
+        unidadDesbloqueada,
+        diasRacha,
+        rachaAumentada,
+        List.of());
+  }
 
   public enum Resultado {
     CORRECTA,

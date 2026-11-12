@@ -6,19 +6,30 @@
     <title>Retos · Kaichaini</title>
     <link rel="stylesheet" th:href="@{/css/auth.css}">
     <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/logros.css}">
   </head>
   <body class="con-barra-inferior">
     <main>
       <h1><span aria-hidden="true">🎯</span> Retos</h1>
-      <section aria-labelledby="titulo-logros">
-        <h2 id="titulo-logros">Mis logros</h2>
-        <p>XP acumulada: <strong th:text="${progreso.xp()}">0</strong></p>
-        <ul>
-          <li th:each="logro : ${catalogoLogros}">
-            <span aria-hidden="true" th:text="${progreso.tieneLogro(logro)} ? ${logro.icono} : '🔒'"></span>
-            <strong th:text="${logro.nombre}">Logro</strong>:
-            <span th:text="${logro.descripcion}"></span>
-            <span th:text="${progreso.tieneLogro(logro)} ? '(Obtenido)' : '(Por desbloquear)'"></span>
+      <section aria-labelledby="titulo-coleccion">
+        <h2 id="titulo-coleccion">Mi colección</h2>
+        <p>
+          XP acumulada: <strong th:text="${progreso.xp()}">0</strong>
+          · Insignias: <strong th:text="|${progreso.logros().size()} de ${catalogoLogros.size()}|">0 de 0</strong>
+        </p>
+        <ul class="coleccion">
+          <li th:each="logro : ${catalogoLogros}"
+              th:with="obtenido=${progreso.tieneLogro(logro)}"
+              class="insignia"
+              th:classappend="${obtenido} ? 'insignia--obtenida' : 'insignia--bloqueada'">
+            <span class="insignia__icono" aria-hidden="true"
+                  th:text="${obtenido} ? ${logro.icono} : '🔒'">🏅</span>
+            <strong th:text="${logro.nombre}">Logro</strong>
+            <span class="insignia__estado" th:text="${obtenido} ? 'Obtenido' : 'Bloqueado'"></span>
+            <p class="insignia__descripcion" th:if="${obtenido}" th:text="${logro.descripcion}"></p>
+            <p class="insignia__como" th:unless="${obtenido}">
+              <strong>Cómo conseguirlo:</strong> <span th:text="${logro.comoConseguirlo}"></span>
+            </p>
           </li>
         </ul>
       </section>

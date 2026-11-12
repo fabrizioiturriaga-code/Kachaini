@@ -7,6 +7,7 @@
     <link rel="stylesheet" th:href="@{/css/auth.css}">
     <link rel="stylesheet" th:href="@{/css/navegacion.css}">
     <link rel="stylesheet" th:href="@{/css/mapa.css}">
+    <link rel="stylesheet" th:href="@{/css/logros.css}">
     <script defer th:src="@{/js/leccion.js}"></script>
   </head>
   <body class="con-barra-inferior">
@@ -21,6 +22,16 @@
         <th:block th:if="${acierto}">
           <div th:replace="~{fragments/racha :: contador(${diasRacha}, ${rachaAumentada})}"></div>
         </th:block>
+        <div class="logro-desbloqueado" role="status"
+             th:if="${logrosNuevos != null and !logrosNuevos.isEmpty()}">
+          <p class="logro-desbloqueado__titulo">🎉 ¡Logro desbloqueado!</p>
+          <div class="insignia insignia--obtenida" th:each="logro : ${logrosNuevos}">
+            <span class="insignia__icono" aria-hidden="true" th:text="${logro.icono}">🏅</span>
+            <strong th:text="${logro.nombre}">Logro</strong>
+            <p class="insignia__descripcion" th:text="${logro.descripcion}"></p>
+          </div>
+          <a th:href="@{/estudiante/retos}">Ver mi colección</a>
+        </div>
         <p role="alert" th:if="${error}" th:text="${error}"></p>
         <p th:if="${respuestaElegida}">
           <strong>Tu respuesta:</strong> <span th:text="${respuestaElegida}"></span>

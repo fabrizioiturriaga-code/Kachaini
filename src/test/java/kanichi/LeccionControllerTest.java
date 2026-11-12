@@ -27,6 +27,7 @@ import kanichi.exception.MisionNoPermitidaException;
 import kanichi.model.Docente;
 import kanichi.model.Estudiante;
 import kanichi.model.Leccion;
+import kanichi.model.Logro;
 import kanichi.model.Rol;
 import kanichi.repository.UsuarioRepository;
 import kanichi.security.LimiteIntentosLogin;
@@ -41,7 +42,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
-/** HU-18: unidades y lecciones. HU-12: barra de energía y bloqueo al agotarla. */
 @WebMvcTest(LeccionController.class)
 @Import({
   SecurityConfig.class,
@@ -222,6 +222,51 @@ class LeccionControllerTest {
         .andExpect(content().string(containsString("¡Correcto! Ganaste 20 XP.")))
         .andExpect(content().string(containsString(LECCION.getPregunta().explicacion())))
         .andExpect(content().string(containsString("Continuar a la unidad")));
+  }
+
+  @Test
+  void unLogroDesbloqueadoSeMuestraConSuInsignia() throws Exception {
+    when(leccionService.responder(1L, LECCION, 1, INTENTO))
+        .thenReturn(
+            new ResultadoLeccion(
+                Resultado.CORRECTA,
+                20,
+                new EstadoEnergia(5, 5, 0),
+                false,
+                null,
+                1,
+                true,
+                List.of(Logro.APRENDIZ_DE_HISTORIA)));
+
+    mvc.perform(
+            post(RUTA)
+                .param("respuesta", "1")
+                .param("intento", INTENTO.toString())
+                .with(csrf())
+                .with(user(estudiante())))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("¡Logro desbloqueado!")))
+        .andExpect(content().string(containsString("Aprendiz de historia")))
+        .andExpect(content().string(containsString("📜")))
+        .andExpect(content().string(containsString("Ver mi colección")));
+  }
+
+  @Test
+  void sinLogrosNuevosNoSeMuestraElAviso() throws Exception {
+    when(leccionService.responder(1L, LECCION, 1, INTENTO))
+        .thenReturn(
+            new ResultadoLeccion(
+                Resultado.CORRECTA, 20, new EstadoEnergia(5, 5, 0), false, null, 1, true));
+
+    mvc.perform(
+            post(RUTA)
+                .param("respuesta", "1")
+                .param("intento", INTENTO.toString())
+                .with(csrf())
+                .with(user(estudiante())))
+        .andExpect(status().isOk())
+        .andExpect(
+            content().string(org.hamcrest.Matchers.not(containsString("¡Logro desbloqueado!"))));
   }
 
   @Test
