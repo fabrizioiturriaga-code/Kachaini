@@ -1,9 +1,11 @@
 package kanichi.controller;
 
 import java.util.Arrays;
+import kanichi.dto.MapaAprendizaje;
+import kanichi.dto.UnidadMapa;
 import kanichi.dto.UsuarioSesion;
 import kanichi.model.Logro;
-import kanichi.service.MapaMisionesService;
+import kanichi.service.LeccionService;
 import kanichi.service.ModuloInicialService;
 import kanichi.service.RankingService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -13,30 +15,32 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class NavegacionController {
-  private final MapaMisionesService mapaMisionesService;
+  private final LeccionService leccionService;
   private final ModuloInicialService moduloInicialService;
   private final RankingService rankingService;
 
   public NavegacionController(
-      MapaMisionesService mapaMisionesService,
+      LeccionService leccionService,
       ModuloInicialService moduloInicialService,
       RankingService rankingService) {
-    this.mapaMisionesService = mapaMisionesService;
+    this.leccionService = leccionService;
     this.moduloInicialService = moduloInicialService;
     this.rankingService = rankingService;
   }
 
-  /** Lecciones: mapa de unidades. Requiere haber completado el módulo inicial. */
+  /** Lecciones: mapa de aprendizaje y energía. Requiere haber completado el módulo inicial. */
   @GetMapping("/inicio")
   public String inicio(@AuthenticationPrincipal UsuarioSesion usuario, Model model) {
     if (!usuario.isOnboardingCompletado()) {
       return "redirect:/onboarding";
     }
-    var unidades = mapaMisionesService.obtenerMapa(true);
+    MapaAprendizaje mapa = leccionService.obtenerMapa(usuario.getId());
     model.addAttribute("nombre", usuario.getNombre());
-    model.addAttribute("unidades", unidades);
+    model.addAttribute("unidades", mapa.unidades());
     model.addAttribute(
-        "unidadActiva", unidades.stream().filter(u -> u.isActiva()).findFirst().orElse(null));
+        "unidadActiva",
+        mapa.unidades().stream().filter(UnidadMapa::isActiva).findFirst().orElse(null));
+    model.addAttribute("energia", mapa.energia());
     return "estudiante/inicio";
   }
 

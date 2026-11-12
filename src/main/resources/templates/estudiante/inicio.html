@@ -6,11 +6,14 @@
     <title>Inicio · Kaichaini</title>
     <link rel="stylesheet" th:href="@{/css/auth.css}">
     <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/mapa.css}">
   </head>
   <body class="con-barra-inferior">
     <main>
       <h1>¡Hola, <span th:text="${nombre}">estudiante</span>!</h1>
       <p role="status" th:if="${mensaje}" th:text="${mensaje}"></p>
+      <p role="alert" th:if="${error}" th:text="${error}"></p>
+      <div th:replace="~{fragments/energia :: barra(${energia})}"></div>
       <section aria-labelledby="titulo-mapa">
         <h2 id="titulo-mapa">Mapa de misiones</h2>
         <p th:if="${unidadActiva}">
@@ -21,11 +24,21 @@
           <li th:each="unidad : ${unidades}" class="unidad" th:classappend="${unidad.claseCss()}"
               th:attr="aria-current=${unidad.isActiva()} ? 'step'">
             <span class="unidad__numero" th:text="${unidad.numero()}">1</span>
-            <div>
-              <p class="unidad__titulo" th:text="${unidad.titulo()}">Unidad</p>
+            <div class="unidad__cuerpo">
+              <p class="unidad__titulo">
+                <a th:if="${!unidad.isBloqueada()}" th:href="@{/estudiante/unidades/{n}(n=${unidad.numero()})}"
+                   th:text="${unidad.titulo()}">Unidad</a>
+                <span th:if="${unidad.isBloqueada()}" th:text="${unidad.titulo()}">Unidad</span>
+              </p>
               <p class="unidad__estado"
                  th:text="${unidad.isActiva()} ? 'En progreso' : (${unidad.isBloqueada()} ? '🔒 Bloqueada' : '✅ Completada')">
               </p>
+              <progress class="unidad__progreso" max="100" th:value="${unidad.porcentaje()}"
+                        th:attr="aria-label=|Progreso de la unidad ${unidad.numero()}|"
+                        th:text="|${unidad.porcentaje()}%|">0%</progress>
+              <p class="unidad__estrellas"
+                 th:attr="aria-label=|${unidad.leccionesCompletadas()} de ${unidad.leccionesTotal()} lecciones completadas|"
+                 th:text="${unidad.estrellas()}">☆☆☆</p>
             </div>
           </li>
         </ol>

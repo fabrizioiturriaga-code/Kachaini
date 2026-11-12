@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title th:text="|${leccion.titulo} · Kaichaini|">Lección · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/mapa.css}">
+  </head>
+  <body class="con-barra-inferior">
+    <main>
+      <p><a th:href="@{/estudiante/unidades/{n}(n=${leccion.unidad})}">← Volver a la unidad</a></p>
+      <div th:replace="~{fragments/energia :: barra(${energia})}"></div>
+      <h1 th:text="${leccion.titulo}">Lección</h1>
+      <p role="alert" th:if="${error}" th:text="${error}"></p>
+      <p role="status" th:if="${explicacion}">
+        <strong>Pista:</strong> <span th:text="${explicacion}"></span>
+      </p>
+      <p th:each="parrafo : ${leccion.contenido}" th:text="${parrafo}"></p>
+      <p>Recompensa: <strong th:text="|${leccion.xp} XP|"></strong></p>
+      <p role="status" th:if="${completada}">✅ Ya completaste esta lección.</p>
+      <p role="alert" th:if="${!completada and energia.isAgotada() and error == null}"
+         th:text="|Sin energía. Vuelve en ${energia.minutosParaRecarga()} min o repasa el contenido de la lección.|"></p>
+      <form th:if="${!completada and !energia.isAgotada()}" method="post"
+            th:action="@{/estudiante/lecciones/{c}(c=${leccion.codigo})}">
+        <fieldset>
+          <legend th:text="${leccion.pregunta.enunciado()}">Pregunta</legend>
+          <th:block th:each="opcion, i : ${leccion.pregunta.opciones()}">
+            <label>
+              <input type="radio" name="respuesta" th:value="${i.index}" required>
+              <span th:text="${opcion}">Opción</span>
+            </label>
+          </th:block>
+        </fieldset>
+        <button type="submit">Responder</button>
+      </form>
+    </main>
+    <nav th:replace="~{fragments/navegacion :: barra('inicio')}"></nav>
+  </body>
+</html>

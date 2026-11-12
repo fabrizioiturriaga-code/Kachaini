@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <!-- HU-12: barra de energía; recibe el estado de energía del estudiante. -->
+    <div th:fragment="barra(energia)" class="energia" th:classappend="${energia.isAgotada()} ? 'energia--agotada'">
+      <span class="energia__etiqueta"><span aria-hidden="true">⚡</span> Energía</span>
+      <div class="energia__barra" role="progressbar" aria-valuemin="0"
+           th:attr="aria-valuemax=${energia.maxima()},aria-valuenow=${energia.actual()},aria-label=|Energía: ${energia.actual()} de ${energia.maxima()}|">
+        <span th:each="i : ${#numbers.sequence(1, energia.maxima())}" class="energia__segmento"
+              th:classappend="${i le energia.actual()} ? 'segmento-llena' : 'segmento-vacia'"></span>
+      </div>
+      <span class="energia__valor" th:text="|${energia.actual()}/${energia.maxima()}|">5/5</span>
+      <p class="energia__recarga" th:if="${energia.isRecargando()}"
+         th:text="|Próxima recarga en ${energia.minutosParaRecarga()} min|">Próxima recarga en 10 min</p>
+    </div>
+  </body>
+</html>

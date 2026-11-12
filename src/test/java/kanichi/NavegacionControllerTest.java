@@ -18,9 +18,12 @@ import kanichi.model.Estudiante;
 import kanichi.model.Rol;
 import kanichi.repository.UsuarioRepository;
 import kanichi.security.LimiteIntentosLogin;
+import kanichi.dto.EstadoEnergia;
+import kanichi.dto.MapaAprendizaje;
 import kanichi.dto.ProgresoModulo;
 import kanichi.dto.RankingSalon;
 import kanichi.model.Logro;
+import kanichi.service.LeccionService;
 import kanichi.service.MapaMisionesService;
 import kanichi.service.ModuloInicialService;
 import kanichi.service.RankingService;
@@ -50,9 +53,14 @@ class NavegacionControllerTest {
   @MockBean LimiteIntentosLogin limiteIntentosLogin;
   @MockBean ModuloInicialService moduloInicialService;
   @MockBean RankingService rankingService;
+  @MockBean LeccionService leccionService;
 
   @BeforeEach
   void setup() {
+    when(leccionService.obtenerMapa(1L))
+        .thenReturn(
+            new MapaAprendizaje(
+                new MapaMisionesService().obtenerMapa(true), new EstadoEnergia(4, 5, 300)));
     when(moduloInicialService.obtenerProgreso(1L))
         .thenReturn(new ProgresoModulo(List.of(), 10, List.of(Logro.PRIMEROS_PASOS), false));
     when(rankingService.obtenerRankingDelSalon(1L))
@@ -118,6 +126,17 @@ class NavegacionControllerTest {
   }
 
   @Test
+  void inicioMuestraLaEnergiaYElAvanceDeCadaUnidad() throws Exception {
+    mvc.perform(get("/inicio").with(user(estudianteSesion())))
+        .andExpect(status().isOk())
+        .andExpect(model().attributeExists("energia"))
+        .andExpect(content().string(containsString("4/5")))
+        .andExpect(content().string(containsString("Próxima recarga en 5 min")))
+        .andExpect(content().string(containsString("href=\"/estudiante/unidades/1\"")))
+        .andExpect(content().string(containsString("☆☆☆")));
+  }
+
+  @Test
   void inicioRedirigeAlModuloInicialSiNoLoCompleto() throws Exception {
     var pendiente =
         new UsuarioSesion(1L, "Ana", "ana@example.org", "hash", Rol.ESTUDIANTE, true, false);
@@ -165,4 +184,4 @@ class NavegacionControllerTest {
     return new UsuarioSesion(
         2L, "Docente", "docente@example.org", "hash", Rol.DOCENTE, true, false);
   }
-}
+}
