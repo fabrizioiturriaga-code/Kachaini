@@ -10,6 +10,7 @@ public class UsuarioSesion extends User {
   private String nombre;
   private final Rol rol;
   private boolean onboardingCompletado;
+  private String avatar;
 
   public UsuarioSesion(
       Long id,
@@ -43,6 +44,14 @@ public class UsuarioSesion extends User {
 
   public void actualizarNombreVisible(String nombre) {
     this.nombre = nombre;
+  }
+
+  public String getAvatar() {
+    return avatar;
+  }
+
+  public void actualizarAvatar(String avatar) {
+    this.avatar = avatar;
   }
 
   public Rol getRol() {

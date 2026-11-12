@@ -19,8 +19,10 @@ import kanichi.model.Leccion;
 import kanichi.repository.EntregaDesarrolloRepository;
 import kanichi.repository.EstudianteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * HU-18: mapa de aprendizaje con lecciones por unidad. HU-12: energía que baja con cada error y se
@@ -57,7 +59,9 @@ public class LeccionService {
     Estudiante estudiante = buscar(estudianteId);
     return new MapaAprendizaje(
         mapaMisionesService.obtenerMapa(
-            estudiante.isOnboardingCompletado(), estudiante.getLeccionesCompletadas()),
+            estudiante.getGrado(),
+            estudiante.isOnboardingCompletado(),
+            estudiante.getLeccionesCompletadas()),
         estudiante.estadoEnergia(reloj.instant()));
   }
 
@@ -67,8 +71,12 @@ public class LeccionService {
     Estudiante estudiante = buscar(estudianteId);
     UnidadMapa unidad =
         mapaMisionesService
-            .obtenerMapa(estudiante.isOnboardingCompletado(), estudiante.getLeccionesCompletadas())
-            .get(numero - 1);
+            .buscarUnidad(
+                estudiante.getGrado(),
+                estudiante.isOnboardingCompletado(),
+                estudiante.getLeccionesCompletadas(),
+                numero)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     List<EstadoLeccion> lecciones =
         Leccion.deUnidad(numero).stream()
             .map(
@@ -81,6 +89,9 @@ public class LeccionService {
   @Transactional(readOnly = true)
   public VistaLeccion obtenerLeccion(Long estudianteId, Leccion leccion) {
     Estudiante estudiante = buscar(estudianteId);
+    if (!esDeSuGrado(estudiante, leccion)) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
     return new VistaLeccion(
         leccion,
         estudiante.haCompletado(leccion),
@@ -133,6 +144,9 @@ public class LeccionService {
     if (!estudiante.isOnboardingCompletado()) {
       throw new MisionNoPermitidaException("Completa primero el módulo inicial.");
     }
+    if (!esDeSuGrado(estudiante, leccion)) {
+      throw new MisionNoPermitidaException("Esta lección no corresponde a tu grado.");
+    }
     if (estudiante.haCompletado(leccion)) {
       return new ResultadoLeccion(
           Resultado.YA_COMPLETADA, 0, estudiante.estadoEnergia(ahora), false, null);
@@ -158,7 +172,7 @@ public class LeccionService {
     boolean unidadCompletada =
         Leccion.deUnidad(leccion.getUnidad()).stream().allMatch(estudiante::haCompletado);
     Integer desbloqueada =
-        unidadCompletada && leccion.getUnidad() < mapaMisionesService.totalUnidades()
+        unidadCompletada && !mapaMisionesService.esUltimaDelGrado(leccion.getUnidad())
             ? leccion.getUnidad() + 1
             : null;
     return new ResultadoLeccion(
@@ -172,7 +186,12 @@ public class LeccionService {
   /** Las lecciones se completan en orden y solo después del módulo inicial. */
   private static boolean estaDisponible(Estudiante estudiante, Leccion leccion) {
     return estudiante.isOnboardingCompletado()
+        && esDeSuGrado(estudiante, leccion)
         && leccion.anterior().map(estudiante::haCompletado).orElse(true);
+  }
+
+  private static boolean esDeSuGrado(Estudiante estudiante, Leccion leccion) {
+    return estudiante.getGrado() != null && estudiante.getGrado() == leccion.getGrado();
   }
 
   private Estudiante buscar(Long estudianteId) {

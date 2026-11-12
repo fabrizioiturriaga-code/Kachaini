@@ -60,7 +60,7 @@ class NavegacionControllerTest {
     when(leccionService.obtenerMapa(1L))
         .thenReturn(
             new MapaAprendizaje(
-                new MapaMisionesService().obtenerMapa(true), new EstadoEnergia(4, 5, 300)));
+                new MapaMisionesService().obtenerMapa(1, true), new EstadoEnergia(4, 5, 300)));
     when(moduloInicialService.obtenerProgreso(1L))
         .thenReturn(new ProgresoModulo(List.of(), 10, List.of(Logro.PRIMEROS_PASOS), false));
     when(rankingService.obtenerRankingDelSalon(1L))
@@ -118,7 +118,7 @@ class NavegacionControllerTest {
   void inicioMuestraElMapaDeMisionesConLaUnidadActiva() throws Exception {
     mvc.perform(get("/inicio").with(user(estudianteSesion())))
         .andExpect(status().isOk())
-        .andExpect(model().attribute("unidades", hasSize(6)))
+        .andExpect(model().attribute("unidades", hasSize(2)))
         .andExpect(model().attributeExists("unidadActiva"))
         .andExpect(content().string(containsString("Mapa de misiones")))
         .andExpect(content().string(containsString("unidad--activa")))

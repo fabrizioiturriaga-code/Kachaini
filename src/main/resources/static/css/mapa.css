@@ -137,3 +137,38 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
+.accesos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .8rem;
+  margin: 1rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.accesos a {
+  display: block;
+  padding: 1rem 1.2rem;
+  border: 2px solid #c9d2dc;
+  border-radius: .5rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.accesos a:hover {
+  border-color: #2478ca;
+  background: #eef5fd;
+}
+
+@media (min-width: 900px) {
+  .mapa-misiones {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .mapa-misiones .unidad {
+    margin: 0;
+  }
+}

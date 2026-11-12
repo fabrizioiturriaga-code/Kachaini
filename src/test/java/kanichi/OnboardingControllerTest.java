@@ -151,7 +151,7 @@ class OnboardingControllerTest {
             flash()
                 .attribute(
                     "mensaje",
-                    containsString("se desbloqueó la unidad 1: Poblamiento de América y del Perú")));
+                    containsString("se desbloqueó la primera unidad de tu grado")));
 
     assertTrue(sesion.isOnboardingCompletado());
     assertEquals("/inicio", sesion.destino());

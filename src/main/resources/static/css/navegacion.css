@@ -1,0 +1,86 @@
+body.con-barra-inferior {
+  padding-bottom: 5rem;
+}
+
+.barra-inferior {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: space-around;
+  padding: .3rem 0;
+  border-top: 1px solid #d5d9de;
+  background: white;
+}
+
+.barra-inferior__enlace {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .1rem;
+  padding: .3rem .8rem;
+  border-radius: .5rem;
+  color: #5d6773;
+  font-size: .8rem;
+  text-decoration: none;
+}
+
+.barra-inferior__icono {
+  font-size: 1.3rem;
+  line-height: 1.2;
+}
+
+.barra-inferior__enlace--activo {
+  background: #eef5fd;
+  color: #154f9a;
+  font-weight: 700;
+}
+
+@media (min-width: 900px) {
+  body.con-barra-inferior {
+    padding: 0 0 0 15rem;
+  }
+
+  body.con-barra-inferior main {
+    max-width: 68rem;
+    margin: 2rem auto;
+    padding: 2rem 2.5rem;
+  }
+
+  .barra-inferior {
+    top: 0;
+    right: auto;
+    width: 15rem;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: .3rem;
+    padding: 1.5rem 1rem;
+    border-top: none;
+    border-right: 1px solid #d5d9de;
+  }
+
+  .barra-inferior::before {
+    content: "Kaichaini";
+    padding: 0 .8rem 1.5rem;
+    color: #154f9a;
+    font-size: 1.5rem;
+    font-weight: 800;
+  }
+
+  .barra-inferior__enlace {
+    flex-direction: row;
+    gap: .8rem;
+    padding: .7rem .8rem;
+    font-size: 1rem;
+  }
+
+  .barra-inferior__enlace:hover {
+    background: #f3f5f7;
+  }
+
+  .barra-inferior__enlace--activo:hover {
+    background: #eef5fd;
+  }
+}

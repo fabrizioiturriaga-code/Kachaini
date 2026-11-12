@@ -31,6 +31,9 @@
       </form>
       <a th:href="@{/cuenta/contrasena}">Cambiar contraseña</a>
       <a th:href="${destino}">Volver</a>
+      <form method="post" th:action="@{/logout}" class="cerrar-sesion">
+        <button type="submit">Cerrar sesión</button>
+      </form>
     </main>
     <nav th:replace="~{fragments/navegacion :: barra('perfil')}"></nav>
   </body>

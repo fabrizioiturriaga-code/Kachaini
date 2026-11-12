@@ -57,6 +57,7 @@ public class CuentaController {
 
     perfilEstudianteService.actualizar(usuario.getId(), formulario);
     usuario.actualizarNombreVisible(formulario.getNombre().strip());
+    usuario.actualizarAvatar(AvatarEstudiante.valueOf(formulario.getAvatar()).getIcono());
     mensajes.addFlashAttribute("mensaje", "Perfil actualizado.");
     return "redirect:/estudiante/perfil";
   }

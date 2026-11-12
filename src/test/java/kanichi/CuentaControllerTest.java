@@ -165,6 +165,35 @@ class CuentaControllerTest {
     verifyNoInteractions(cambioContrasenaService);
   }
 
+  @Test
+  void elPerfilMuestraElBotonDeCerrarSesion() throws Exception {
+    mvc.perform(get("/estudiante/perfil").with(user(estudianteSesion())))
+        .andExpect(status().isOk())
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("action=\"/logout\"")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Cerrar sesión")));
+  }
+
+  @Test
+  void cerrarSesionLlevaAlLogin() throws Exception {
+    mvc.perform(post("/logout").with(user(estudianteSesion())).with(csrf()))
+        .andExpect(redirectedUrl("/login?logout"));
+  }
+
+  @Test
+  void guardarElPerfilActualizaElAvatarDeLaSesion() throws Exception {
+    UsuarioSesion sesion = estudianteSesion();
+
+    mvc.perform(
+            post("/estudiante/perfil")
+                .with(user(sesion))
+                .with(csrf())
+                .param("nombre", "Ana")
+                .param("avatar", "ZORRO"))
+        .andExpect(redirectedUrl("/estudiante/perfil"));
+
+    org.junit.jupiter.api.Assertions.assertEquals("🦊", sesion.getAvatar());
+  }
+
   private UsuarioSesion estudianteSesion() {
     return new UsuarioSesion(1L, "Ana", "ana@example.org", "hash", Rol.ESTUDIANTE, true, false);
   }

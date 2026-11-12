@@ -10,7 +10,9 @@
   </head>
   <body class="con-barra-inferior">
     <main>
-      <h1>¡Hola, <span th:text="${nombre}">estudiante</span>!</h1>
+      <h1><span class="saludo__avatar" aria-hidden="true" th:if="${avatarSesion}"
+                th:text="${avatarSesion}">✨</span>
+        ¡Hola, <span th:text="${nombre}">estudiante</span>!</h1>
       <p role="status" th:if="${mensaje}" th:text="${mensaje}"></p>
       <p role="alert" th:if="${error}" th:text="${error}"></p>
       <div th:replace="~{fragments/energia :: barra(${energia})}"></div>
@@ -43,6 +45,13 @@
           </li>
         </ol>
         <p><a th:href="@{/onboarding}">Repasar el módulo inicial</a></p>
+      </section>
+      <section aria-labelledby="titulo-practica">
+        <h2 id="titulo-practica">Práctica</h2>
+        <ul class="accesos">
+          <li><a th:href="@{/estudiante/lecturas}">📖 Lecturas</a></li>
+          <li><a th:href="@{/estudiante/arrastre}">🧩 Arrastrar y soltar</a></li>
+        </ul>
       </section>
     </main>
     <nav th:replace="~{fragments/navegacion :: barra('inicio')}"></nav>

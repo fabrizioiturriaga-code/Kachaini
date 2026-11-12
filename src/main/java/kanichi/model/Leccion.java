@@ -3,6 +3,7 @@ package kanichi.model;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 /**
  * Lecciones de cada unidad del mapa de aprendizaje, en el orden en que deben completarse. Cada
@@ -315,10 +316,222 @@ public enum Leccion {
           0,
           "Ayacucho fue la batalla decisiva que selló la independencia.",
           "Busca el enfrentamiento de diciembre de 1824 que puso fin a la resistencia realista.")),
+  U7_PRIMEROS_ANOS(
+      "primeros-anos-republica",
+      7,
+      "Los primeros años de la República",
+      List.of(
+          "Después de la independencia, el Perú tuvo que organizarse como un país nuevo. En 1823 se"
+              + " aprobó la primera Constitución.",
+          "Durante varias décadas gobernaron caudillos militares, jefes que habían luchado en la"
+              + " independencia y que se disputaban el poder con frecuencia."),
+      20,
+      new Pregunta(
+          "¿Quiénes gobernaron el Perú en sus primeros años como república?",
+          List.of(
+              "Caudillos militares que se disputaban el poder",
+              "Los virreyes enviados desde España",
+              "Los incas descendientes de Atahualpa"),
+          0,
+          "Tras la independencia, los jefes militares se turnaron en el gobierno.",
+          "Piensa en quiénes tenían prestigio y ejércitos después de las guerras de independencia.")),
+  U7_ERA_DEL_GUANO(
+      "era-del-guano",
+      7,
+      "La era del guano",
+      List.of(
+          "El guano es el excremento de las aves marinas que se acumula en las islas de la costa,"
+              + " como las islas Chincha.",
+          "Desde 1840 el Perú lo vendió a Europa, donde se usaba como fertilizante. Con ese dinero"
+              + " el Estado pagó deudas y construyó obras como ferrocarriles."),
+      20,
+      new Pregunta(
+          "¿Para qué se usaba el guano peruano en Europa?",
+          List.of(
+              "Como combustible para los barcos",
+              "Como fertilizante para los campos",
+              "Como material para construir casas"),
+          1,
+          "El guano es rico en nutrientes y abonaba los campos de cultivo.",
+          "Recuerda que se usaba en la agricultura.")),
+  U7_RAMON_CASTILLA(
+      "ramon-castilla",
+      7,
+      "Ramón Castilla",
+      List.of(
+          "Ramón Castilla fue presidente del Perú en dos ocasiones. Aprovechó el dinero del guano"
+              + " para modernizar el país.",
+          "En 1854 abolió la esclavitud de la población afrodescendiente y eliminó el tributo que"
+              + " pagaban los indígenas."),
+      20,
+      new Pregunta(
+          "¿Qué medidas tomó Ramón Castilla en 1854?",
+          List.of(
+              "Declaró la guerra a España",
+              "Fundó la ciudad de Lima",
+              "Abolió la esclavitud y el tributo indígena"),
+          2,
+          "En 1854 Castilla terminó con la esclavitud y con el tributo indígena.",
+          "Busca las medidas que dieron más libertad a parte de la población.")),
+  U8_CAUSAS_DE_LA_GUERRA(
+      "causas-guerra-pacifico",
+      8,
+      "Causas de la Guerra del Pacífico",
+      List.of(
+          "En el desierto de Atacama había grandes depósitos de salitre, un mineral muy valioso"
+              + " para fabricar fertilizantes y explosivos.",
+          "Chile y Bolivia se enfrentaron por ese territorio. Como el Perú tenía un tratado de"
+              + " alianza con Bolivia, en 1879 Chile también le declaró la guerra."),
+      20,
+      new Pregunta(
+          "¿Qué recurso estaba en disputa en la Guerra del Pacífico?",
+          List.of(
+              "El salitre del desierto de Atacama", "El oro de Cajamarca", "El caucho de la selva"),
+          0,
+          "El control del salitre de Atacama fue la principal causa del conflicto.",
+          "Fíjate en el mineral que había en el desierto de Atacama.")),
+  U8_HEROES_DE_LA_GUERRA(
+      "heroes-de-la-guerra",
+      8,
+      "Héroes de la Guerra del Pacífico",
+      List.of(
+          "Miguel Grau comandó el monitor Huáscar y defendió el mar peruano durante meses. Murió en"
+              + " el combate de Angamos el 8 de octubre de 1879.",
+          "Francisco Bolognesi defendió Arica y, antes de rendirse, prefirió luchar \"hasta quemar"
+              + " el último cartucho\". Murió en el morro de Arica en 1880."),
+      20,
+      new Pregunta(
+          "¿Qué barco comandaba Miguel Grau?",
+          List.of("La Esmeralda", "El Huáscar", "La Covadonga"),
+          1,
+          "Grau comandó el monitor Huáscar hasta el combate de Angamos.",
+          "Es el barco peruano más famoso de la guerra.")),
+  U8_RECONSTRUCCION(
+      "reconstruccion-nacional",
+      8,
+      "La Reconstrucción Nacional",
+      List.of(
+          "La guerra terminó en 1883 con el Tratado de Ancón. El Perú perdió Tarapacá, y Tacna y"
+              + " Arica quedaron bajo administración chilena.",
+          "Después vino la Reconstrucción Nacional: el país tuvo que recuperar su economía, que"
+              + " había quedado destruida por la guerra."),
+      20,
+      new Pregunta(
+          "¿Qué tratado puso fin a la Guerra del Pacífico?",
+          List.of("El Tratado de Lima", "El Tratado de Versalles", "El Tratado de Ancón"),
+          2,
+          "El Tratado de Ancón, firmado en 1883, terminó la guerra.",
+          "El tratado lleva el nombre de un balneario cercano a Lima.")),
+  U9_REPUBLICA_ARISTOCRATICA(
+      "republica-aristocratica",
+      9,
+      "La República Aristocrática",
+      List.of(
+          "Entre 1895 y 1919 gobernó el Perú un pequeño grupo de familias ricas, agrupadas sobre"
+              + " todo en el Partido Civil.",
+          "La economía dependía de la exportación de azúcar, algodón, caucho y minerales, mientras"
+              + " la mayoría de la población tenía pocos derechos."),
+      20,
+      new Pregunta(
+          "¿Quiénes gobernaron durante la República Aristocrática?",
+          List.of(
+              "Un pequeño grupo de familias ricas",
+              "Los sindicatos de obreros",
+              "Las comunidades campesinas"),
+          0,
+          "El poder estuvo en manos de una élite económica, la oligarquía.",
+          "Piensa en el significado de la palabra aristocracia.")),
+  U9_ONCENIO_DE_LEGUIA(
+      "oncenio-de-leguia",
+      9,
+      "El Oncenio de Leguía",
+      List.of(
+          "Augusto B. Leguía gobernó once años, de 1919 a 1930. A su proyecto lo llamó la Patria"
+              + " Nueva.",
+          "Construyó carreteras y obras en Lima con préstamos de Estados Unidos. En 1929 Tacna"
+              + " volvió a ser parte del Perú."),
+      20,
+      new Pregunta(
+          "¿Cómo llamó Leguía a su proyecto de gobierno?",
+          List.of("La Reconstrucción Nacional", "La Patria Nueva", "La República Aristocrática"),
+          1,
+          "Leguía llamó Patria Nueva a su proyecto de modernización.",
+          "Busca un nombre que hable de un país renovado.")),
+  U9_VOTO_DE_LA_MUJER(
+      "voto-de-la-mujer",
+      9,
+      "El voto de la mujer",
+      List.of(
+          "Durante mucho tiempo solo los hombres podían votar en el Perú. Muchas mujeres lucharon"
+              + " para cambiar esa situación.",
+          "En 1955 se reconoció el derecho de las mujeres a votar, y en las elecciones de 1956"
+              + " votaron por primera vez."),
+      20,
+      new Pregunta(
+          "¿En qué año se reconoció el derecho al voto de las mujeres en el Perú?",
+          List.of("1821", "1900", "1955"),
+          2,
+          "La ley de 1955 reconoció el voto femenino; se ejerció por primera vez en 1956.",
+          "Fue a mediados del siglo XX.")),
+  U10_REFORMA_AGRARIA(
+      "reforma-agraria",
+      10,
+      "La reforma agraria",
+      List.of(
+          "En 1968 un gobierno militar encabezado por Juan Velasco Alvarado tomó el poder.",
+          "En 1969 inició la reforma agraria: las grandes haciendas pasaron a los campesinos que"
+              + " las trabajaban, con el lema \"la tierra para quien la trabaja\"."),
+      20,
+      new Pregunta(
+          "¿Qué buscaba la reforma agraria de 1969?",
+          List.of(
+              "Entregar las tierras de las haciendas a los campesinos",
+              "Vender las tierras a empresas extranjeras",
+              "Prohibir la agricultura en la costa"),
+          0,
+          "La reforma agraria repartió las tierras de las haciendas entre los campesinos.",
+          "Recuerda el lema de la reforma.")),
+  U10_EPOCA_DE_VIOLENCIA(
+      "epoca-de-violencia",
+      10,
+      "La época de violencia",
+      List.of(
+          "Entre 1980 y 2000 el Perú vivió un conflicto armado iniciado por Sendero Luminoso y"
+              + " luego también por el MRTA.",
+          "La Comisión de la Verdad y Reconciliación investigó esos años y en 2003 presentó su"
+              + " informe final para que el país recuerde a las víctimas y no se repita."),
+      20,
+      new Pregunta(
+          "¿Qué institución investigó la época de violencia de 1980 a 2000?",
+          List.of(
+              "El Congreso de Tucumán",
+              "La Comisión de la Verdad y Reconciliación",
+              "La Real Audiencia de Lima"),
+          1,
+          "La Comisión de la Verdad y Reconciliación presentó su informe final en 2003.",
+          "Su nombre habla de conocer la verdad y reconciliar al país.")),
+  U10_DEMOCRACIA(
+      "retorno-a-la-democracia",
+      10,
+      "El retorno a la democracia",
+      List.of(
+          "La Constitución de 1979 permitió votar a las personas analfabetas, y en 1980 el Perú"
+              + " volvió a elegir a sus gobernantes.",
+          "En el año 2000, tras una crisis política, Valentín Paniagua encabezó un gobierno de"
+              + " transición que organizó elecciones limpias en 2001."),
+      20,
+      new Pregunta(
+          "¿Qué derecho reconoció la Constitución de 1979 a las personas analfabetas?",
+          List.of("El derecho a ser virrey", "El derecho a la esclavitud", "El derecho a votar"),
+          2,
+          "Desde la Constitución de 1979 las personas analfabetas pueden votar.",
+          "Piensa en las elecciones de 1980.")),
   ;
 
   /** Número de lecciones que tiene cada unidad. */
   public static final int LECCIONES_POR_UNIDAD = 3;
+
+  public static final int UNIDADES_POR_GRADO = 2;
 
   public record Pregunta(
       String enunciado,
@@ -367,7 +580,23 @@ public enum Leccion {
 
   /** Lección que debe completarse antes que esta, si existe. */
   public Optional<Leccion> anterior() {
-    return ordinal() == 0 ? Optional.empty() : Optional.of(values()[ordinal() - 1]);
+    if (ordinal() == 0 || values()[ordinal() - 1].getGrado() != getGrado()) {
+      return Optional.empty();
+    }
+    return Optional.of(values()[ordinal() - 1]);
+  }
+
+  public static int gradoDeUnidad(int unidad) {
+    return (unidad - 1) / UNIDADES_POR_GRADO + 1;
+  }
+
+  public static List<Integer> unidadesDelGrado(int grado) {
+    int primera = (grado - 1) * UNIDADES_POR_GRADO + 1;
+    return IntStream.range(primera, primera + UNIDADES_POR_GRADO).boxed().toList();
+  }
+
+  public int getGrado() {
+    return gradoDeUnidad(unidad);
   }
 
   public boolean aceptaRespuesta(Integer respuesta) {

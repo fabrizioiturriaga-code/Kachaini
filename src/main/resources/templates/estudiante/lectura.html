@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title th:text="|${lectura.titulo} · Kaichaini|">Lectura · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/practica.css}">
+    <script defer th:src="@{/js/lectura.js}"></script>
+  </head>
+  <body class="con-barra-inferior">
+    <main>
+      <p><a th:href="@{/estudiante/lecturas}">← Volver a las lecturas</a></p>
+      <h1 th:text="${lectura.titulo}">Lectura</h1>
+      <p class="practica__unidad" th:text="|Unidad ${lectura.unidad}|">Unidad</p>
+      <div class="lectura__contenido">
+        <div class="lectura__columna-texto">
+          <article class="lectura__texto" aria-label="Texto de la lectura" data-texto>
+            <p th:each="parrafo : ${lectura.parrafos}" th:text="${parrafo}"></p>
+          </article>
+          <button type="button" class="lectura__escuchar" data-escuchar hidden>🔊 Escuchar el texto</button>
+        </div>
+
+        <section th:if="${resultado}" class="lectura__resultado" tabindex="-1"
+                 aria-labelledby="titulo-resumen" data-enfocar-resultado>
+          <h2 id="titulo-resumen">Resumen de tus respuestas</h2>
+          <p role="status" th:text="|Acertaste ${resultado.aciertos()} de ${resultado.total()} preguntas.|"></p>
+          <p th:if="${resultado.isPerfecto()}">¡Excelente! Comprendiste todo el texto.</p>
+          <table class="lectura__resumen">
+            <caption>Aciertos y errores por tema</caption>
+            <thead>
+              <tr>
+                <th scope="col">Tema</th>
+                <th scope="col">Aciertos</th>
+                <th scope="col">Errores</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="tema : ${resultado.temas()}">
+                <th scope="row" th:text="${tema.tema()}">Tema</th>
+                <td th:text="${tema.aciertos()}">0</td>
+                <td th:text="${tema.errores()}">0</td>
+              </tr>
+            </tbody>
+          </table>
+          <ol class="lectura__correccion">
+            <li th:each="corregida : ${resultado.preguntas()}"
+                th:classappend="${corregida.correcta()} ? 'respuesta--correcta' : 'respuesta--incorrecta'">
+              <p><strong th:text="${corregida.pregunta().enunciado()}">Pregunta</strong></p>
+              <p>
+                <span th:text="${corregida.correcta()} ? '✅ Correcta' : '❌ Incorrecta'"></span>
+                · Tu respuesta: <span th:text="${corregida.respuestaElegida()}"></span>
+              </p>
+              <p th:text="${corregida.pregunta().explicacion()}">Explicación</p>
+            </li>
+          </ol>
+          <p>
+            <a th:href="@{/estudiante/lecturas/{c}(c=${lectura.codigo})}">Volver a intentarlo</a>
+            · <a th:href="@{/estudiante/lecturas}">Elegir otro texto</a>
+          </p>
+        </section>
+
+        <form th:unless="${resultado}" method="post" class="lectura__preguntas"
+              th:action="@{/estudiante/lecturas/{c}(c=${lectura.codigo})}">
+          <h2>Preguntas</h2>
+          <p role="alert" tabindex="-1" th:if="${error}" th:text="${error}" data-enfocar-resultado></p>
+          <fieldset th:each="pregunta, p : ${lectura.preguntas}">
+            <legend th:text="|${p.count}. ${pregunta.enunciado()}|">Pregunta</legend>
+            <label th:each="opcion, o : ${pregunta.opciones()}">
+              <input type="radio" th:name="|respuestas[${p.index}]|" th:value="${o.index}" required
+                     th:checked="${formulario.respuesta(p.index) == o.index}">
+              <span th:text="${opcion}">Opción</span>
+            </label>
+          </fieldset>
+          <button type="submit">Enviar respuestas</button>
+        </form>
+      </div>
+    </main>
+    <nav th:replace="~{fragments/navegacion :: barra('inicio')}"></nav>
+  </body>
+</html>

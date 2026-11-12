@@ -1,0 +1,217 @@
+.practica__unidad {
+  margin-top: -.5rem;
+  color: #5d6773;
+  font-size: .9rem;
+}
+
+.lectura__texto {
+  margin: 1rem 0;
+  padding: 1rem;
+  border-left: 4px solid #2478ca;
+  border-radius: .25rem;
+  background: #eef5fd;
+  line-height: 1.6;
+}
+
+.lectura__texto p {
+  margin: 0 0 .7rem;
+}
+
+.lectura__texto p:last-child {
+  margin-bottom: 0;
+}
+
+.lectura__escuchar {
+  margin-bottom: 1rem;
+}
+
+.lectura__preguntas fieldset {
+  margin: 0 0 1rem;
+  border: 1px solid #c9d2dc;
+  border-radius: .5rem;
+}
+
+.lectura__preguntas label {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin: .3rem 0;
+  cursor: pointer;
+}
+
+.lectura__preguntas input[type="radio"] {
+  flex: none;
+  width: auto;
+  margin: 0;
+}
+
+.lectura__resumen {
+  width: 100%;
+  margin: 1rem 0;
+  border-collapse: collapse;
+}
+
+.lectura__resumen caption {
+  margin-bottom: .4rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+.lectura__resumen th,
+.lectura__resumen td {
+  padding: .4rem .6rem;
+  border: 1px solid #c9d2dc;
+  text-align: left;
+}
+
+.lectura__correccion {
+  padding-left: 1.2rem;
+}
+
+.lectura__correccion li {
+  margin: .6rem 0;
+  padding: .5rem .8rem;
+  border-radius: .5rem;
+}
+
+.lectura__correccion p {
+  margin: .2rem 0;
+}
+
+.respuesta--correcta {
+  background: #eefaf0;
+}
+
+.respuesta--incorrecta {
+  background: #fdeaea;
+}
+
+.arrastre [hidden] {
+  display: none;
+}
+
+.arrastre__banco {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  min-height: 3rem;
+  margin: 1rem 0;
+  padding: .6rem;
+  border: 2px dashed #c9d2dc;
+  border-radius: .5rem;
+}
+
+.arrastre__ayuda {
+  font-size: .9rem;
+}
+
+.arrastre__destinos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.arrastre__destino {
+  margin: .6rem 0;
+  padding: .8rem;
+  border: 2px solid #c9d2dc;
+  border-radius: .5rem;
+}
+
+.arrastre__destino label {
+  display: block;
+  margin-bottom: .4rem;
+  font-weight: 700;
+}
+
+.arrastre__zona {
+  display: flex;
+  align-items: center;
+  min-height: 2.8rem;
+  padding: .3rem;
+  border: 2px dashed #9aa6b2;
+  border-radius: .5rem;
+  background: #f7f9fb;
+  cursor: pointer;
+}
+
+.arrastre__zona:empty::before {
+  content: "Suelta aquí";
+  color: #5d6773;
+  font-size: .9rem;
+}
+
+.arrastre__ficha {
+  padding: .4rem .8rem;
+  border: 2px solid #2478ca;
+  border-radius: 1rem;
+  background: white;
+  color: #1b4f86;
+  font: inherit;
+  cursor: grab;
+}
+
+.arrastre__ficha[aria-pressed="true"] {
+  background: #2478ca;
+  color: white;
+}
+
+.arrastre__ficha--arrastrando {
+  opacity: .5;
+}
+
+.arrastre--encima {
+  border-color: #2478ca;
+  background: #eef5fd;
+}
+
+.arrastre__destino--correcto {
+  border-color: #2b8a3e;
+  background: #eefaf0;
+}
+
+.arrastre__destino--incorrecto {
+  border-color: #c92a2a;
+  background: #fdeaea;
+}
+
+.arrastre__marca {
+  margin: .4rem 0 0;
+}
+
+.arrastre__aviso:empty {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .lectura__contenido {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 2rem;
+    align-items: start;
+  }
+
+  .lectura__columna-texto {
+    position: sticky;
+    top: 1rem;
+  }
+
+  .lectura__columna-texto .lectura__texto {
+    margin-top: 0;
+  }
+
+  .lectura__contenido .lectura__preguntas h2,
+  .lectura__contenido .lectura__resultado h2 {
+    margin-top: 0;
+  }
+
+  .arrastre__destinos {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .arrastre__destino {
+    margin: 0;
+  }
+}

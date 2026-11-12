@@ -7,10 +7,12 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import kanichi.dto.ResultadoLeccion;
 import kanichi.dto.ResultadoLeccion.Resultado;
+import kanichi.dto.UnidadMapa;
 import kanichi.dto.VistaUnidad;
 import kanichi.exception.MisionNoPermitidaException;
 import kanichi.model.Estudiante;
@@ -21,6 +23,7 @@ import kanichi.service.LeccionService;
 import kanichi.service.MapaMisionesService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.server.ResponseStatusException;
 
 /** HU-12 (energía) y HU-18 (lecciones y desbloqueo de unidades). */
 class LeccionServiceTest {
@@ -166,6 +169,9 @@ class LeccionServiceTest {
     LeccionService servicio = servicioEn(t0);
     ResultadoLeccion ultimo = null;
     for (Leccion leccion : Leccion.values()) {
+      if (leccion.getGrado() != 1) {
+        continue;
+      }
       ultimo =
           servicio.responder(
               1L, leccion, leccion.getPregunta().respuestaCorrecta(), UUID.randomUUID());
@@ -185,5 +191,51 @@ class LeccionServiceTest {
     assertTrue(vista.lecciones().get(1).disponible());
     assertFalse(vista.lecciones().get(2).disponible());
     assertEquals(1, vista.unidad().leccionesCompletadas());
+  }
+
+  @Test
+  void elMapaSoloMuestraLasUnidadesDelGradoDelEstudiante() {
+    Estudiante deCuarto = new Estudiante("Luis", "luis@example.org", "hash", 4, "B");
+    deCuarto.completarOnboarding();
+    when(repository.findById(2L)).thenReturn(Optional.of(deCuarto));
+
+    var unidades = servicioEn(t0).obtenerMapa(2L).unidades();
+
+    assertEquals(List.of(7, 8), unidades.stream().map(UnidadMapa::numero).toList());
+    assertTrue(unidades.get(0).isActiva());
+    assertTrue(unidades.get(1).isBloqueada());
+  }
+
+  @Test
+  void unaUnidadDeOtroGradoNoExisteParaElEstudiante() {
+    LeccionService servicio = servicioEn(t0);
+
+    assertThrows(ResponseStatusException.class, () -> servicio.obtenerUnidad(1L, 3));
+    assertThrows(
+        ResponseStatusException.class,
+        () -> servicio.obtenerLeccion(1L, Leccion.U9_VOTO_DE_LA_MUJER));
+  }
+
+  @Test
+  void noSePuedeResponderUnaLeccionDeOtroGrado() {
+    LeccionService servicio = servicioEn(t0);
+    Leccion ajena = Leccion.U3_ORIGEN_Y_EXPANSION;
+
+    assertThrows(
+        MisionNoPermitidaException.class,
+        () ->
+            servicio.responder(
+                1L, ajena, ajena.getPregunta().respuestaCorrecta(), UUID.randomUUID()));
+    assertFalse(estudiante.haCompletado(ajena));
+  }
+
+  @Test
+  void laPrimeraLeccionDelGradoEstaDisponibleSinLasDeOtrosGrados() {
+    Estudiante deQuinto = new Estudiante("Rosa", "rosa@example.org", "hash", 5, "C");
+    deQuinto.completarOnboarding();
+    when(repository.findById(3L)).thenReturn(Optional.of(deQuinto));
+
+    assertTrue(servicioEn(t0).obtenerLeccion(3L, Leccion.U9_REPUBLICA_ARISTOCRATICA).disponible());
+    assertFalse(servicioEn(t0).obtenerLeccion(3L, Leccion.U9_ONCENIO_DE_LEGUIA).disponible());
   }
 }

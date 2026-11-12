@@ -1,8 +1,8 @@
 package kanichi.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
-import java.util.stream.IntStream;
 import kanichi.dto.UnidadMapa;
 import kanichi.dto.UnidadMapa.Estado;
 import kanichi.model.Leccion;
@@ -17,28 +17,35 @@ public class MapaMisionesService {
           "El Tahuantinsuyo",
           "Conquista del Perú",
           "Virreinato del Perú",
-          "Independencia del Perú");
+          "Independencia del Perú",
+          "Primeros años de la República y la era del guano",
+          "La Guerra del Pacífico y la Reconstrucción",
+          "El Perú en el siglo XX",
+          "El Perú contemporáneo");
 
   /**
    * Las unidades permanecen bloqueadas hasta completar el módulo inicial (HU-06); al completarlo
    * se desbloquea automáticamente la primera.
    */
-  public List<UnidadMapa> obtenerMapa(boolean moduloInicialCompletado) {
-    return obtenerMapa(moduloInicialCompletado, Set.of());
+  public List<UnidadMapa> obtenerMapa(int grado, boolean moduloInicialCompletado) {
+    return obtenerMapa(grado, moduloInicialCompletado, Set.of());
   }
 
   /**
    * HU-18: estado de cada unidad según las lecciones completadas. Una unidad queda completada
    * cuando todas sus lecciones lo están; la siguiente se desbloquea automáticamente.
    */
-  public List<UnidadMapa> obtenerMapa(boolean moduloInicialCompletado, Set<Leccion> completadas) {
-    return IntStream.rangeClosed(1, UNIDADES.size())
-        .mapToObj(
+  public List<UnidadMapa> obtenerMapa(
+      int grado, boolean moduloInicialCompletado, Set<Leccion> completadas) {
+    List<Integer> unidades = Leccion.unidadesDelGrado(grado);
+    return unidades.stream()
+        .map(
             numero -> {
               int hechas = completadasEn(numero, completadas);
-              int total = Leccion.deUnidad(numero).size();
+              int total = total(numero);
               boolean anteriorCompletada =
-                  numero == 1 || completadasEn(numero - 1, completadas) == total(numero - 1);
+                  numero.equals(unidades.get(0))
+                      || completadasEn(numero - 1, completadas) == total(numero - 1);
               Estado estado;
               if (!moduloInicialCompletado || !anteriorCompletada) {
                 estado = Estado.BLOQUEADA;
@@ -52,6 +59,13 @@ public class MapaMisionesService {
         .toList();
   }
 
+  public Optional<UnidadMapa> buscarUnidad(
+      int grado, boolean moduloInicialCompletado, Set<Leccion> completadas, int numero) {
+    return obtenerMapa(grado, moduloInicialCompletado, completadas).stream()
+        .filter(unidad -> unidad.numero() == numero)
+        .findFirst();
+  }
+
   public int totalUnidades() {
     return UNIDADES.size();
   }
@@ -60,8 +74,9 @@ public class MapaMisionesService {
     return UNIDADES.get(numero - 1);
   }
 
-  public String primeraUnidad() {
-    return UNIDADES.get(0);
+  public boolean esUltimaDelGrado(int numero) {
+    List<Integer> unidades = Leccion.unidadesDelGrado(Leccion.gradoDeUnidad(numero));
+    return numero == unidades.get(unidades.size() - 1);
   }
 
   private static int completadasEn(int unidad, Set<Leccion> completadas) {

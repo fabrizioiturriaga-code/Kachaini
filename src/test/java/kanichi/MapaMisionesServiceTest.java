@@ -17,18 +17,18 @@ class MapaMisionesServiceTest {
 
   @Test
   void sinCompletarElModuloInicialTodoEstaBloqueado() {
-    List<UnidadMapa> mapa = service.obtenerMapa(false);
+    List<UnidadMapa> mapa = service.obtenerMapa(1, false);
 
-    assertEquals(6, mapa.size());
+    assertEquals(2, mapa.size());
     assertTrue(mapa.stream().allMatch(UnidadMapa::isBloqueada));
   }
 
   @Test
   void alCompletarElModuloInicialSoloLaPrimeraUnidadEstaActiva() {
-    List<UnidadMapa> mapa = service.obtenerMapa(true);
+    List<UnidadMapa> mapa = service.obtenerMapa(1, true);
 
     assertEquals(Estado.ACTIVA, mapa.get(0).estado());
-    assertTrue(mapa.subList(1, 6).stream().allMatch(UnidadMapa::isBloqueada));
+    assertTrue(mapa.get(1).isBloqueada());
     assertEquals(0, mapa.get(0).porcentaje());
     assertEquals("☆☆☆", mapa.get(0).estrellas());
   }
@@ -37,7 +37,7 @@ class MapaMisionesServiceTest {
   void elAvanceParcialSeMuestraEnElPorcentajeYLasEstrellas() {
     Set<Leccion> hechas = EnumSet.of(Leccion.U1_PRIMEROS_POBLADORES);
 
-    UnidadMapa primera = service.obtenerMapa(true, hechas).get(0);
+    UnidadMapa primera = service.obtenerMapa(1, true, hechas).get(0);
 
     assertEquals(Estado.ACTIVA, primera.estado());
     assertEquals(1, primera.leccionesCompletadas());
@@ -49,20 +49,47 @@ class MapaMisionesServiceTest {
   void completarTodasLasLeccionesDeUnaUnidadDesbloqueaLaSiguiente() {
     Set<Leccion> hechas = EnumSet.copyOf(Leccion.deUnidad(1));
 
-    List<UnidadMapa> mapa = service.obtenerMapa(true, hechas);
+    List<UnidadMapa> mapa = service.obtenerMapa(1, true, hechas);
 
     assertEquals(Estado.COMPLETADA, mapa.get(0).estado());
     assertEquals(100, mapa.get(0).porcentaje());
     assertEquals("★★★", mapa.get(0).estrellas());
     assertEquals(Estado.ACTIVA, mapa.get(1).estado());
-    assertTrue(mapa.subList(2, 6).stream().allMatch(UnidadMapa::isBloqueada));
   }
 
   @Test
   void completarTodoElMapaDejaTodasLasUnidadesCompletadas() {
-    List<UnidadMapa> mapa = service.obtenerMapa(true, EnumSet.allOf(Leccion.class));
+    List<UnidadMapa> mapa = service.obtenerMapa(1, true, EnumSet.allOf(Leccion.class));
 
     assertTrue(mapa.stream().allMatch(UnidadMapa::isCompletada));
+  }
+
+  @Test
+  void cadaGradoVeSusDosUnidadesYLaPrimeraEstaActiva() {
+    for (int grado = 1; grado <= 5; grado++) {
+      List<UnidadMapa> mapa = service.obtenerMapa(grado, true);
+
+      assertEquals(
+          Leccion.unidadesDelGrado(grado), mapa.stream().map(UnidadMapa::numero).toList());
+      assertTrue(mapa.get(0).isActiva(), "grado " + grado);
+      assertTrue(mapa.get(1).isBloqueada(), "grado " + grado);
+    }
+  }
+
+  @Test
+  void lasLeccionesDeOtroGradoNoAvanzanElMapa() {
+    List<UnidadMapa> mapa = service.obtenerMapa(4, true, EnumSet.copyOf(Leccion.deUnidad(6)));
+
+    assertEquals("Primeros años de la República y la era del guano", mapa.get(0).titulo());
+    assertTrue(mapa.get(0).isActiva());
+    assertEquals(0, mapa.get(0).leccionesCompletadas());
+  }
+
+  @Test
+  void laUltimaUnidadDelGradoNoDesbloqueaOtra() {
+    assertFalse(service.esUltimaDelGrado(7));
+    assertTrue(service.esUltimaDelGrado(8));
+    assertTrue(service.esUltimaDelGrado(10));
   }
 
   @Test
