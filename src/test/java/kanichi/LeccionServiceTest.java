@@ -8,12 +8,14 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Optional;
+import java.util.UUID;
 import kanichi.dto.ResultadoLeccion;
 import kanichi.dto.ResultadoLeccion.Resultado;
 import kanichi.dto.VistaUnidad;
 import kanichi.exception.MisionNoPermitidaException;
 import kanichi.model.Estudiante;
 import kanichi.model.Leccion;
+import kanichi.repository.EntregaDesarrolloRepository;
 import kanichi.repository.EstudianteRepository;
 import kanichi.service.LeccionService;
 import kanichi.service.MapaMisionesService;
@@ -36,17 +38,22 @@ class LeccionServiceTest {
     estudiante = new Estudiante("Ana", "ana@example.org", "hash", 1, "A");
     estudiante.completarOnboarding();
     t0 = Instant.now();
+    when(repository.registrarIntento(anyLong(), any(UUID.class))).thenReturn(1);
     when(repository.findById(1L)).thenReturn(Optional.of(estudiante));
     when(repository.bloquearPorId(1L)).thenReturn(Optional.of(estudiante));
   }
 
   private LeccionService servicioEn(Instant instante) {
-    return new LeccionService(repository, mapa, Clock.fixed(instante, ZoneOffset.UTC));
+    return new LeccionService(
+        repository,
+        mock(EntregaDesarrolloRepository.class),
+        mapa,
+        Clock.fixed(instante, ZoneOffset.UTC));
   }
 
   @Test
   void respuestaCorrectaOtorgaXpYCompletaLaLeccion() {
-    ResultadoLeccion resultado = servicioEn(t0).responder(1L, PRIMERA, CORRECTA);
+    ResultadoLeccion resultado = servicioEn(t0).responder(1L, PRIMERA, CORRECTA, UUID.randomUUID());
 
     assertEquals(Resultado.CORRECTA, resultado.resultado());
     assertEquals(PRIMERA.getXp(), resultado.xpGanada());
@@ -58,7 +65,8 @@ class LeccionServiceTest {
 
   @Test
   void respuestaIncorrectaRestaEnergiaYNoOtorgaRecompensa() {
-    ResultadoLeccion resultado = servicioEn(t0).responder(1L, PRIMERA, INCORRECTA);
+    ResultadoLeccion resultado =
+        servicioEn(t0).responder(1L, PRIMERA, INCORRECTA, UUID.randomUUID());
 
     assertEquals(Resultado.INCORRECTA, resultado.resultado());
     assertEquals(4, resultado.energia().actual());
@@ -68,7 +76,7 @@ class LeccionServiceTest {
 
   @Test
   void sinRespuestaTambienCuentaComoError() {
-    ResultadoLeccion resultado = servicioEn(t0).responder(1L, PRIMERA, null);
+    ResultadoLeccion resultado = servicioEn(t0).responder(1L, PRIMERA, null, UUID.randomUUID());
 
     assertEquals(Resultado.INCORRECTA, resultado.resultado());
     assertEquals(4, resultado.energia().actual());
@@ -78,10 +86,10 @@ class LeccionServiceTest {
   void conLaEnergiaAgotadaNoSePuedeAvanzarNiConRespuestaCorrecta() {
     LeccionService servicio = servicioEn(t0);
     for (int i = 0; i < Estudiante.ENERGIA_MAXIMA; i++) {
-      servicio.responder(1L, PRIMERA, INCORRECTA);
+      servicio.responder(1L, PRIMERA, INCORRECTA, UUID.randomUUID());
     }
 
-    ResultadoLeccion bloqueado = servicio.responder(1L, PRIMERA, CORRECTA);
+    ResultadoLeccion bloqueado = servicio.responder(1L, PRIMERA, CORRECTA, UUID.randomUUID());
 
     assertEquals(Resultado.SIN_ENERGIA, bloqueado.resultado());
     assertTrue(bloqueado.energia().isAgotada());
@@ -94,11 +102,12 @@ class LeccionServiceTest {
   void laEnergiaSeRecuperaConElTiempoYPermiteContinuar() {
     LeccionService servicio = servicioEn(t0);
     for (int i = 0; i < Estudiante.ENERGIA_MAXIMA; i++) {
-      servicio.responder(1L, PRIMERA, INCORRECTA);
+      servicio.responder(1L, PRIMERA, INCORRECTA, UUID.randomUUID());
     }
 
     ResultadoLeccion despues =
-        servicioEn(t0.plus(Duration.ofMinutes(11))).responder(1L, PRIMERA, CORRECTA);
+        servicioEn(t0.plus(Duration.ofMinutes(11)))
+            .responder(1L, PRIMERA, CORRECTA, UUID.randomUUID());
 
     assertEquals(Resultado.CORRECTA, despues.resultado());
     assertTrue(estudiante.haCompletado(PRIMERA));
@@ -108,7 +117,7 @@ class LeccionServiceTest {
   void noSePuedeSaltarUnaLeccion() {
     assertThrows(
         MisionNoPermitidaException.class,
-        () -> servicioEn(t0).responder(1L, Leccion.U1_CAZADORES_DEL_PERU, 0));
+        () -> servicioEn(t0).responder(1L, Leccion.U1_CAZADORES_DEL_PERU, 0, UUID.randomUUID()));
     assertEquals(5, estudiante.estadoEnergia(t0).actual());
   }
 
@@ -118,15 +127,16 @@ class LeccionServiceTest {
     when(repository.bloquearPorId(2L)).thenReturn(Optional.of(nuevo));
 
     assertThrows(
-        MisionNoPermitidaException.class, () -> servicioEn(t0).responder(2L, PRIMERA, CORRECTA));
+        MisionNoPermitidaException.class,
+        () -> servicioEn(t0).responder(2L, PRIMERA, CORRECTA, UUID.randomUUID()));
   }
 
   @Test
   void repetirUnaLeccionNoDuplicaLaXpNiRestaEnergia() {
     LeccionService servicio = servicioEn(t0);
-    servicio.responder(1L, PRIMERA, CORRECTA);
+    servicio.responder(1L, PRIMERA, CORRECTA, UUID.randomUUID());
 
-    ResultadoLeccion repetida = servicio.responder(1L, PRIMERA, INCORRECTA);
+    ResultadoLeccion repetida = servicio.responder(1L, PRIMERA, INCORRECTA, UUID.randomUUID());
 
     assertEquals(Resultado.YA_COMPLETADA, repetida.resultado());
     assertEquals(0, repetida.xpGanada());
@@ -139,7 +149,9 @@ class LeccionServiceTest {
     LeccionService servicio = servicioEn(t0);
     ResultadoLeccion ultimo = null;
     for (Leccion leccion : Leccion.deUnidad(1)) {
-      ultimo = servicio.responder(1L, leccion, leccion.getPregunta().respuestaCorrecta());
+      ultimo =
+          servicio.responder(
+              1L, leccion, leccion.getPregunta().respuestaCorrecta(), UUID.randomUUID());
     }
 
     assertTrue(ultimo.unidadCompletada());
@@ -154,7 +166,9 @@ class LeccionServiceTest {
     LeccionService servicio = servicioEn(t0);
     ResultadoLeccion ultimo = null;
     for (Leccion leccion : Leccion.values()) {
-      ultimo = servicio.responder(1L, leccion, leccion.getPregunta().respuestaCorrecta());
+      ultimo =
+          servicio.responder(
+              1L, leccion, leccion.getPregunta().respuestaCorrecta(), UUID.randomUUID());
     }
 
     assertTrue(ultimo.unidadCompletada());
@@ -163,7 +177,7 @@ class LeccionServiceTest {
 
   @Test
   void elDetalleDeUnidadMarcaLasLeccionesDisponiblesYBloqueadas() {
-    servicioEn(t0).responder(1L, PRIMERA, CORRECTA);
+    servicioEn(t0).responder(1L, PRIMERA, CORRECTA, UUID.randomUUID());
 
     VistaUnidad vista = servicioEn(t0).obtenerUnidad(1L, 1);
 

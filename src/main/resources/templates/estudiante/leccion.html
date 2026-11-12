@@ -7,23 +7,37 @@
     <link rel="stylesheet" th:href="@{/css/auth.css}">
     <link rel="stylesheet" th:href="@{/css/navegacion.css}">
     <link rel="stylesheet" th:href="@{/css/mapa.css}">
+    <script defer th:src="@{/js/leccion.js}"></script>
   </head>
   <body class="con-barra-inferior">
     <main>
       <p><a th:href="@{/estudiante/unidades/{n}(n=${leccion.unidad})}">← Volver a la unidad</a></p>
       <div th:replace="~{fragments/energia :: barra(${energia})}"></div>
       <h1 th:text="${leccion.titulo}">Lección</h1>
-      <p role="alert" th:if="${error}" th:text="${error}"></p>
-      <p role="status" th:if="${explicacion}">
-        <strong>Pista:</strong> <span th:text="${explicacion}"></span>
-      </p>
       <p th:each="parrafo : ${leccion.contenido}" th:text="${parrafo}"></p>
       <p>Recompensa: <strong th:text="|${leccion.xp} XP|"></strong></p>
-      <p role="status" th:if="${completada}">✅ Ya completaste esta lección.</p>
+      <section th:if="${acierto != null or error != null}" tabindex="-1" data-enfocar-resultado>
+        <p role="status" th:if="${acierto}" th:text="${acierto}"></p>
+        <p role="alert" th:if="${error}" th:text="${error}"></p>
+        <p th:if="${respuestaElegida}">
+          <strong>Tu respuesta:</strong> <span th:text="${respuestaElegida}"></span>
+        </p>
+        <p th:if="${explicacion}">
+          <strong>Explicación:</strong> <span th:text="${explicacion}"></span>
+        </p>
+        <p th:if="${pista}">
+          <strong>Pista:</strong> <span th:text="${pista}"></span>
+        </p>
+        <a th:if="${acierto != null and unidadCompletada}" th:href="@{/inicio}">Continuar al mapa</a>
+        <a th:if="${acierto != null and !unidadCompletada}"
+           th:href="@{/estudiante/unidades/{n}(n=${leccion.unidad})}">Continuar a la unidad</a>
+      </section>
+      <p role="status" th:if="${completada and acierto == null}">✅ Ya completaste esta lección.</p>
       <p role="alert" th:if="${!completada and energia.isAgotada() and error == null}"
          th:text="|Sin energía. Vuelve en ${energia.minutosParaRecarga()} min o repasa el contenido de la lección.|"></p>
-      <form th:if="${!completada and !energia.isAgotada()}" method="post"
+      <form th:if="${!completada and !energia.isAgotada()}" method="post" data-opcion-multiple
             th:action="@{/estudiante/lecciones/{c}(c=${leccion.codigo})}">
+        <input type="hidden" name="intento" th:value="${intento}">
         <fieldset>
           <legend th:text="${leccion.pregunta.enunciado()}">Pregunta</legend>
           <th:block th:each="opcion, i : ${leccion.pregunta.opciones()}">
@@ -33,8 +47,30 @@
             </label>
           </th:block>
         </fieldset>
-        <button type="submit">Responder</button>
+        <button type="submit" data-responder>Responder</button>
       </form>
+      <section th:if="${leccion.preguntaDesarrollo != null}" aria-labelledby="titulo-desarrollo">
+        <h2 id="titulo-desarrollo">Pregunta de desarrollo</h2>
+        <p id="pregunta-desarrollo" th:text="${leccion.preguntaDesarrollo}"></p>
+        <p role="status" tabindex="-1" data-enfocar-resultado th:if="${mensajeDesarrollo}"
+           th:text="${mensajeDesarrollo}"></p>
+        <div th:if="${entregaDesarrollo}">
+          <p><strong>Tu respuesta enviada</strong></p>
+          <p class="respuesta-desarrollo" th:text="${entregaDesarrollo.texto}"></p>
+        </div>
+        <form th:unless="${entregaDesarrollo}" method="post"
+              th:action="@{/estudiante/lecciones/{c}/desarrollo(c=${leccion.codigo})}">
+          <label for="texto-desarrollo">Tu respuesta</label>
+          <p id="limite-desarrollo" th:text="|Máximo ${maximoDesarrollo} caracteres.|"></p>
+          <p id="error-desarrollo" role="alert" th:if="${errorDesarrollo}"
+             th:text="${errorDesarrollo}"></p>
+          <textarea id="texto-desarrollo" name="texto" rows="5" required
+                    th:maxlength="${maximoDesarrollo}" th:text="${textoDesarrollo}"
+                    th:attr="aria-invalid=${errorDesarrollo != null},
+                             aria-describedby=${errorDesarrollo != null ? 'pregunta-desarrollo limite-desarrollo error-desarrollo' : 'pregunta-desarrollo limite-desarrollo'}"></textarea>
+          <button type="submit">Enviar respuesta</button>
+        </form>
+      </section>
     </main>
     <nav th:replace="~{fragments/navegacion :: barra('inicio')}"></nav>
   </body>

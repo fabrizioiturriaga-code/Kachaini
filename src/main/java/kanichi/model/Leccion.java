@@ -28,7 +28,10 @@ public enum Leccion {
               "Como nómadas que cazaban y recolectaban",
               "Cultivando campos en terrazas"),
           1,
-          "Todavía no conocían la agricultura: se desplazaban para encontrar alimento.")),
+          "Todavía no conocían la agricultura: se desplazaban para encontrar alimento.",
+          "Fíjate en cómo conseguían alimento y si podían quedarse siempre en el mismo lugar."),
+      "Explica con tus propias palabras por qué los primeros pobladores se desplazaban de un lugar"
+          + " a otro."),
   U1_CAZADORES_DEL_PERU(
       "cazadores-del-peru",
       1,
@@ -46,7 +49,8 @@ public enum Leccion {
               "Cultivos de maíz en terrazas",
               "Escenas de caza de camélidos"),
           2,
-          "Las pinturas rupestres son un testimonio de la caza en esa época.")),
+          "Las pinturas rupestres son un testimonio de la caza en esa época.",
+          "Busca qué actividad representaban los dibujos y qué animales aparecen.")),
   U1_AGRICULTURA(
       "agricultura-y-aldeas",
       1,
@@ -64,8 +68,8 @@ public enum Leccion {
               "Las personas dejaron de usar herramientas",
               "Desaparecieron los animales domésticos"),
           0,
-          "Con la agricultura el alimento se producía en un lugar fijo y nacieron las aldeas.")),
-
+          "Con la agricultura el alimento se producía en un lugar fijo y nacieron las aldeas.",
+          "Piensa qué pasó cuando las familias pudieron conseguir alimento cerca de sus campos.")),
   U2_CARAL(
       "caral",
       2,
@@ -83,7 +87,8 @@ public enum Leccion {
               "En el Cusco, cerca de Machu Picchu",
               "A orillas del lago Titicaca"),
           0,
-          "Caral está en el valle de Supe, a unos 180 km al norte de Lima.")),
+          "Caral está en el valle de Supe, a unos 180 km al norte de Lima.",
+          "Busca en el primer párrafo el nombre del valle donde se levantó la ciudad.")),
   U2_CHAVIN_PARACAS(
       "chavin-paracas",
       2,
@@ -101,7 +106,8 @@ public enum Leccion {
               "Por sus mantos funerarios bordados",
               "Por la ciudad de adobe de Chan Chan"),
           1,
-          "Los mantos de Paracas son una de las mejores muestras textiles del mundo antiguo.")),
+          "Los mantos de Paracas son una de las mejores muestras textiles del mundo antiguo.",
+          "Revisa qué objetos dejaron en sus entierros y cómo estaban decorados.")),
   U2_NAZCA_MOCHE_CHIMU(
       "nazca-moche-chimu",
       2,
@@ -117,8 +123,9 @@ public enum Leccion {
           "¿Qué cultura construyó la ciudad de Chan Chan?",
           List.of("Los nazca", "Los moche", "Los chimú"),
           2,
-          "Chan Chan fue la capital del reino chimú.")),
-
+          "Chan Chan fue la capital del reino chimú.",
+          "Distingue a quienes trazaron figuras en la pampa de quienes levantaron la ciudad de"
+              + " adobe.")),
   U3_ORIGEN_Y_EXPANSION(
       "origen-tahuantinsuyo",
       3,
@@ -133,7 +140,8 @@ public enum Leccion {
           "¿Qué significa Tahuantinsuyo?",
           List.of("La tierra del sol", "El camino largo", "Las cuatro regiones unidas"),
           2,
-          "El imperio estaba dividido en cuatro suyos que se unían en el Cusco.")),
+          "El imperio estaba dividido en cuatro suyos que se unían en el Cusco.",
+          "Observa cuántos territorios se nombran y cómo se organizaban alrededor del Cusco.")),
   U3_AYNI_MINKA_MITA(
       "ayni-minka-mita",
       3,
@@ -147,7 +155,8 @@ public enum Leccion {
           "¿Cómo se llamaba la ayuda mutua entre familias?",
           List.of("Ayni", "Mita", "Quipu"),
           0,
-          "El ayni se basa en la reciprocidad: ayudar para ser ayudado después.")),
+          "El ayni se basa en la reciprocidad: ayudar para ser ayudado después.",
+          "Busca la práctica en la que una familia devuelve la ayuda que recibió.")),
   U3_CAMINOS_Y_QUIPUS(
       "caminos-y-quipus",
       3,
@@ -165,8 +174,8 @@ public enum Leccion {
               "Para registrar información con cuerdas y nudos",
               "Para cruzar los ríos"),
           1,
-          "Los quipus eran un sistema de registro hecho con cuerdas y nudos.")),
-
+          "Los quipus eran un sistema de registro hecho con cuerdas y nudos.",
+          "Distingue la red de caminos del objeto que usaba nudos para llevar cuentas.")),
   U4_LLEGADA_ESPANOLES(
       "llegada-de-los-espanoles",
       4,
@@ -181,7 +190,8 @@ public enum Leccion {
           "¿Quién dirigió la expedición española que llegó en 1532?",
           List.of("Francisco Pizarro", "Simón Bolívar", "José de San Martín"),
           0,
-          "Pizarro lideró la conquista del Tahuantinsuyo.")),
+          "Pizarro lideró la conquista del Tahuantinsuyo.",
+          "Busca a la persona que llegó con la expedición y distínguela de los hermanos incas.")),
   U4_ATAHUALPA_EN_CAJAMARCA(
       "atahualpa-en-cajamarca",
       4,
@@ -195,7 +205,8 @@ public enum Leccion {
           "¿En qué ciudad fue capturado Atahualpa?",
           List.of("Cusco", "Cajamarca", "Lima"),
           1,
-          "La captura ocurrió en Cajamarca, en 1532.")),
+          "La captura ocurrió en Cajamarca, en 1532.",
+          "Revisa en qué lugar se produjo el encuentro que terminó con la captura del inca.")),
   U4_RESISTENCIA_INCA(
       "resistencia-inca",
       4,
@@ -209,8 +220,8 @@ public enum Leccion {
           "¿Qué inca lideró la gran rebelión de 1536?",
           List.of("Pachacútec", "Huáscar", "Manco Inca"),
           2,
-          "Manco Inca organizó el sitio del Cusco y la resistencia en Vilcabamba.")),
-
+          "Manco Inca organizó el sitio del Cusco y la resistencia en Vilcabamba.",
+          "Busca quién organizó el sitio del Cusco antes de retirarse a Vilcabamba.")),
   U5_VIRREINATO(
       "el-virreinato",
       5,
@@ -224,7 +235,8 @@ public enum Leccion {
           "¿Quién gobernaba el virreinato en nombre del rey de España?",
           List.of("El virrey", "El curaca", "El chasqui"),
           0,
-          "El virrey era el representante del rey en el territorio.")),
+          "El virrey era el representante del rey en el territorio.",
+          "Piensa en quién representaba al rey directamente en el territorio.")),
   U5_ECONOMIA_COLONIAL(
       "economia-colonial",
       5,
@@ -239,7 +251,8 @@ public enum Leccion {
           "¿Qué metal fue la base de la riqueza del virreinato?",
           List.of("El hierro", "La plata", "El aluminio"),
           1,
-          "La plata de Potosí fue el principal producto de exportación.")),
+          "La plata de Potosí fue el principal producto de exportación.",
+          "Revisa el producto extraído en Potosí que se enviaba a España.")),
   U5_SOCIEDAD_COLONIAL(
       "sociedad-colonial",
       5,
@@ -253,8 +266,9 @@ public enum Leccion {
           "¿Cómo se llamaba a los hijos de españoles nacidos en América?",
           List.of("Mestizos", "Criollos", "Curacas"),
           1,
-          "Los criollos eran descendientes de españoles nacidos en América.")),
-
+          "Los criollos eran descendientes de españoles nacidos en América.",
+          "Busca el nombre del grupo que compartía ascendencia española, pero había nacido en"
+              + " América.")),
   U6_REBELIONES(
       "tupac-amaru-ii",
       6,
@@ -268,7 +282,8 @@ public enum Leccion {
           "¿Quién lideró la gran rebelión de 1780?",
           List.of("Túpac Amaru II", "Atahualpa", "Francisco Pizarro"),
           0,
-          "Túpac Amaru II encabezó la rebelión más importante antes de la independencia.")),
+          "Túpac Amaru II encabezó la rebelión más importante antes de la independencia.",
+          "Busca el nombre con el que se conocía a José Gabriel Condorcanqui.")),
   U6_EXPEDICION_LIBERTADORA(
       "expedicion-libertadora",
       6,
@@ -282,7 +297,8 @@ public enum Leccion {
           "¿Quién proclamó la independencia del Perú el 28 de julio de 1821?",
           List.of("Simón Bolívar", "Túpac Amaru II", "José de San Martín"),
           2,
-          "San Martín proclamó la independencia en Lima.")),
+          "San Martín proclamó la independencia en Lima.",
+          "Distingue quién proclamó la independencia en Lima de quienes continuaron la campaña.")),
   U6_AYACUCHO(
       "ayacucho",
       6,
@@ -297,14 +313,19 @@ public enum Leccion {
           "¿Qué batalla consolidó la independencia del Perú en 1824?",
           List.of("La batalla de Ayacucho", "La batalla de Cajamarca", "La batalla de Lima"),
           0,
-          "Ayacucho fue la batalla decisiva que selló la independencia.")),
+          "Ayacucho fue la batalla decisiva que selló la independencia.",
+          "Busca el enfrentamiento de diciembre de 1824 que puso fin a la resistencia realista.")),
   ;
 
   /** Número de lecciones que tiene cada unidad. */
   public static final int LECCIONES_POR_UNIDAD = 3;
 
   public record Pregunta(
-      String enunciado, List<String> opciones, int respuestaCorrecta, String explicacion) {}
+      String enunciado,
+      List<String> opciones,
+      int respuestaCorrecta,
+      String explicacion,
+      String pista) {}
 
   private final String codigo;
   private final int unidad;
@@ -312,6 +333,12 @@ public enum Leccion {
   private final List<String> contenido;
   private final int xp;
   private final Pregunta pregunta;
+  private final String preguntaDesarrollo;
+
+  Leccion(
+      String codigo, int unidad, String titulo, List<String> contenido, int xp, Pregunta pregunta) {
+    this(codigo, unidad, titulo, contenido, xp, pregunta, null);
+  }
 
   Leccion(
       String codigo,
@@ -319,13 +346,15 @@ public enum Leccion {
       String titulo,
       List<String> contenido,
       int xp,
-      Pregunta pregunta) {
+      Pregunta pregunta,
+      String preguntaDesarrollo) {
     this.codigo = codigo;
     this.unidad = unidad;
     this.titulo = titulo;
     this.contenido = contenido;
     this.xp = xp;
     this.pregunta = pregunta;
+    this.preguntaDesarrollo = preguntaDesarrollo;
   }
 
   public static Optional<Leccion> porCodigo(String codigo) {
@@ -363,6 +392,10 @@ public enum Leccion {
 
   public int getXp() {
     return xp;
+  }
+
+  public String getPreguntaDesarrollo() {
+    return preguntaDesarrollo;
   }
 
   public Pregunta getPregunta() {

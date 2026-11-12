@@ -3,6 +3,8 @@ package kanichi.service;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import kanichi.dto.MapaAprendizaje;
 import kanichi.dto.ResultadoLeccion;
 import kanichi.dto.ResultadoLeccion.Resultado;
@@ -11,34 +13,41 @@ import kanichi.dto.VistaLeccion;
 import kanichi.dto.VistaUnidad;
 import kanichi.dto.VistaUnidad.EstadoLeccion;
 import kanichi.exception.MisionNoPermitidaException;
+import kanichi.model.EntregaDesarrollo;
 import kanichi.model.Estudiante;
 import kanichi.model.Leccion;
+import kanichi.repository.EntregaDesarrolloRepository;
 import kanichi.repository.EstudianteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * HU-18: mapa de aprendizaje con lecciones por unidad. HU-12: energía que baja con cada error y
- * se recupera con el tiempo.
+ * HU-18: mapa de aprendizaje con lecciones por unidad. HU-12: energía que baja con cada error y se
+ * recupera con el tiempo.
  */
 @Service
 public class LeccionService {
   private final EstudianteRepository estudianteRepository;
+  private final EntregaDesarrolloRepository entregaRepository;
   private final MapaMisionesService mapaMisionesService;
   private final Clock reloj;
 
   @Autowired
   public LeccionService(
-      EstudianteRepository estudianteRepository, MapaMisionesService mapaMisionesService) {
-    this(estudianteRepository, mapaMisionesService, Clock.systemUTC());
+      EstudianteRepository estudianteRepository,
+      EntregaDesarrolloRepository entregaRepository,
+      MapaMisionesService mapaMisionesService) {
+    this(estudianteRepository, entregaRepository, mapaMisionesService, Clock.systemUTC());
   }
 
   public LeccionService(
       EstudianteRepository estudianteRepository,
+      EntregaDesarrolloRepository entregaRepository,
       MapaMisionesService mapaMisionesService,
       Clock reloj) {
     this.estudianteRepository = estudianteRepository;
+    this.entregaRepository = entregaRepository;
     this.mapaMisionesService = mapaMisionesService;
     this.reloj = reloj;
   }
@@ -64,8 +73,7 @@ public class LeccionService {
         Leccion.deUnidad(numero).stream()
             .map(
                 l ->
-                    new EstadoLeccion(
-                        l, estudiante.haCompletado(l), estaDisponible(estudiante, l)))
+                    new EstadoLeccion(l, estudiante.haCompletado(l), estaDisponible(estudiante, l)))
             .toList();
     return new VistaUnidad(unidad, lecciones, estudiante.estadoEnergia(reloj.instant()));
   }
@@ -80,13 +88,43 @@ public class LeccionService {
         estudiante.estadoEnergia(reloj.instant()));
   }
 
+  @Transactional(readOnly = true)
+  public Optional<EntregaDesarrollo> obtenerEntrega(Long estudianteId, Leccion leccion) {
+    if (leccion.getPreguntaDesarrollo() == null) {
+      return Optional.empty();
+    }
+    return entregaRepository.findByEstudianteIdAndLeccion(estudianteId, leccion.getCodigo());
+  }
+
+  @Transactional
+  public boolean entregarRespuesta(Long estudianteId, Leccion leccion, String texto) {
+    if (leccion.getPreguntaDesarrollo() == null
+        || texto == null
+        || texto.isBlank()
+        || texto.length() > EntregaDesarrollo.MAXIMO_TEXTO) {
+      throw new IllegalArgumentException("Respuesta de desarrollo inválida.");
+    }
+    Estudiante estudiante =
+        estudianteRepository.bloquearPorId(estudianteId).orElseThrow(LeccionService::noEncontrado);
+    if (!estaDisponible(estudiante, leccion)) {
+      throw new MisionNoPermitidaException("Completa primero la lección anterior.");
+    }
+    if (obtenerEntrega(estudianteId, leccion).isPresent()) {
+      return false;
+    }
+    entregaRepository.save(
+        new EntregaDesarrollo(estudianteId, leccion.getCodigo(), texto, reloj.instant()));
+    return true;
+  }
+
   /**
    * Evalúa la respuesta del estudiante. Una respuesta incorrecta resta una unidad de energía; con
-   * la energía agotada no se puede responder hasta que se recupere. La respuesta correcta otorga
-   * la XP de la lección y, si completa la unidad, desbloquea la siguiente.
+   * la energía agotada no se puede responder hasta que se recupere. La respuesta correcta otorga la
+   * XP de la lección y, si completa la unidad, desbloquea la siguiente.
    */
   @Transactional
-  public ResultadoLeccion responder(Long estudianteId, Leccion leccion, Integer respuesta) {
+  public ResultadoLeccion responder(
+      Long estudianteId, Leccion leccion, Integer respuesta, UUID intento) {
     Estudiante estudiante =
         estudianteRepository.bloquearPorId(estudianteId).orElseThrow(LeccionService::noEncontrado);
     Instant ahora = reloj.instant();
@@ -105,6 +143,10 @@ public class LeccionService {
     if (estudiante.estadoEnergia(ahora).isAgotada()) {
       return new ResultadoLeccion(
           Resultado.SIN_ENERGIA, 0, estudiante.estadoEnergia(ahora), false, null);
+    }
+    if (estudianteRepository.registrarIntento(estudianteId, intento) == 0) {
+      return new ResultadoLeccion(
+          Resultado.INTENTO_REPETIDO, 0, estudiante.estadoEnergia(ahora), false, null);
     }
     if (!leccion.aceptaRespuesta(respuesta)) {
       estudiante.perderEnergia(ahora);

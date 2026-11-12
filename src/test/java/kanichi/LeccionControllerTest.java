@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import kanichi.config.SecurityConfig;
 import kanichi.controller.LeccionController;
 import kanichi.dto.EstadoEnergia;
@@ -52,6 +53,8 @@ class LeccionControllerTest {
   private static final Leccion LECCION = Leccion.U1_PRIMEROS_POBLADORES;
   private static final String RUTA = "/estudiante/lecciones/" + LECCION.getCodigo();
 
+  private static final UUID INTENTO = UUID.fromString("a49faf67-726b-48f9-8d33-ae3b0c02fa5d");
+
   @Autowired MockMvc mvc;
 
   @MockBean UsuarioRepository usuarios;
@@ -91,7 +94,8 @@ class LeccionControllerTest {
         .andExpect(status().isOk())
         .andExpect(view().name("estudiante/unidad"))
         .andExpect(content().string(containsString("Unidad 1: Poblamiento")))
-        .andExpect(content().string(containsString("href=\"/estudiante/lecciones/cazadores-del-peru\"")))
+        .andExpect(
+            content().string(containsString("href=\"/estudiante/lecciones/cazadores-del-peru\"")))
         .andExpect(content().string(containsString("✅ Completada")))
         .andExpect(content().string(containsString("🔒 Bloqueada")))
         .andExpect(content().string(containsString("5/5")));
@@ -140,7 +144,8 @@ class LeccionControllerTest {
     mvc.perform(get(RUTA).with(user(estudiante())))
         .andExpect(status().isOk())
         .andExpect(content().string(containsString("Sin energía. Vuelve en 9 min")))
-        .andExpect(content().string(org.hamcrest.Matchers.not(containsString("<form"))));
+        .andExpect(
+            content().string(org.hamcrest.Matchers.not(containsString("data-opcion-multiple"))));
   }
 
   @Test
@@ -162,68 +167,93 @@ class LeccionControllerTest {
 
   @Test
   void unErrorMuestraLaPistaYLaEnergiaRestante() throws Exception {
-    when(leccionService.responder(1L, LECCION, 0))
+    when(leccionService.responder(1L, LECCION, 0, INTENTO))
         .thenReturn(
-            new ResultadoLeccion(Resultado.INCORRECTA, 0, new EstadoEnergia(4, 5, 600), false, null));
+            new ResultadoLeccion(
+                Resultado.INCORRECTA, 0, new EstadoEnergia(4, 5, 600), false, null));
 
-    mvc.perform(post(RUTA).param("respuesta", "0").with(csrf()).with(user(estudiante())))
+    mvc.perform(
+            post(RUTA)
+                .param("respuesta", "0")
+                .param("intento", INTENTO.toString())
+                .with(csrf())
+                .with(user(estudiante())))
         .andExpect(status().isOk())
         .andExpect(view().name("estudiante/leccion"))
         .andExpect(content().string(containsString("Respuesta incorrecta. Perdiste 1 de energía")))
         .andExpect(content().string(containsString("te quedan 4 de 5")))
-        .andExpect(content().string(containsString("Pista:")))
+        .andExpect(content().string(containsString(LECCION.getPregunta().pista())))
         .andExpect(content().string(containsString("4/5")));
   }
 
   @Test
   void elUltimoErrorAvisaQueSeAgotoLaEnergia() throws Exception {
-    when(leccionService.responder(1L, LECCION, 0))
+    when(leccionService.responder(1L, LECCION, 0, INTENTO))
         .thenReturn(
-            new ResultadoLeccion(Resultado.INCORRECTA, 0, new EstadoEnergia(0, 5, 600), false, null));
+            new ResultadoLeccion(
+                Resultado.INCORRECTA, 0, new EstadoEnergia(0, 5, 600), false, null));
 
-    mvc.perform(post(RUTA).param("respuesta", "0").with(csrf()).with(user(estudiante())))
+    mvc.perform(
+            post(RUTA)
+                .param("respuesta", "0")
+                .param("intento", INTENTO.toString())
+                .with(csrf())
+                .with(user(estudiante())))
         .andExpect(status().isOk())
         .andExpect(content().string(containsString("Te quedaste sin energía. Espera 10 min")))
-        .andExpect(content().string(org.hamcrest.Matchers.not(containsString("<form"))));
+        .andExpect(
+            content().string(org.hamcrest.Matchers.not(containsString("data-opcion-multiple"))));
   }
 
   @Test
-  void respuestaCorrectaVuelveALaUnidadConLaRecompensa() throws Exception {
-    when(leccionService.responder(1L, LECCION, 1))
+  void respuestaCorrectaExplicaAntesDeContinuarALaUnidad() throws Exception {
+    when(leccionService.responder(1L, LECCION, 1, INTENTO))
         .thenReturn(
             new ResultadoLeccion(Resultado.CORRECTA, 20, new EstadoEnergia(5, 5, 0), false, null));
 
-    mvc.perform(post(RUTA).param("respuesta", "1").with(csrf()).with(user(estudiante())))
-        .andExpect(redirectedUrl("/estudiante/unidades/1"))
-        .andExpect(flash().attribute("mensaje", "¡Correcto! Ganaste 20 XP."));
+    mvc.perform(
+            post(RUTA)
+                .param("respuesta", "1")
+                .param("intento", INTENTO.toString())
+                .with(csrf())
+                .with(user(estudiante())))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("¡Correcto! Ganaste 20 XP.")))
+        .andExpect(content().string(containsString(LECCION.getPregunta().explicacion())))
+        .andExpect(content().string(containsString("Continuar a la unidad")));
   }
 
   @Test
-  void completarUnaUnidadAvisaDelNuevoNivelYVuelveAlMapa() throws Exception {
-    when(leccionService.responder(1L, Leccion.U1_AGRICULTURA, 0))
+  void completarUnaUnidadAvisaDelNuevoNivelYPermiteVolverAlMapa() throws Exception {
+    when(leccionService.responder(1L, Leccion.U1_AGRICULTURA, 0, INTENTO))
         .thenReturn(
             new ResultadoLeccion(Resultado.CORRECTA, 20, new EstadoEnergia(5, 5, 0), true, 2));
 
     mvc.perform(
             post("/estudiante/lecciones/agricultura-y-aldeas")
                 .param("respuesta", "0")
+                .param("intento", INTENTO.toString())
                 .with(csrf())
                 .with(user(estudiante())))
-        .andExpect(redirectedUrl("/inicio"))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("¡Completaste la unidad 1!")))
         .andExpect(
-            flash()
-                .attribute(
-                    "mensaje",
-                    "¡Correcto! Ganaste 20 XP. ¡Completaste la unidad 1! "
-                        + "¡Nuevo nivel disponible! Unidad 2: Culturas preíncas."));
+            content()
+                .string(containsString("¡Nuevo nivel disponible! Unidad 2: Culturas preíncas.")))
+        .andExpect(content().string(containsString("Continuar al mapa")));
   }
 
   @Test
   void unaLeccionFueraDeOrdenVuelveAlMapaConUnMensaje() throws Exception {
-    when(leccionService.responder(any(), any(), any()))
+    when(leccionService.responder(any(), any(), any(), any()))
         .thenThrow(new MisionNoPermitidaException("Completa primero la lección anterior."));
 
-    mvc.perform(post(RUTA).param("respuesta", "0").with(csrf()).with(user(estudiante())))
+    mvc.perform(
+            post(RUTA)
+                .param("respuesta", "0")
+                .param("intento", INTENTO.toString())
+                .with(csrf())
+                .with(user(estudiante())))
         .andExpect(redirectedUrl("/inicio"))
         .andExpect(flash().attribute("error", "Completa primero la lección anterior."));
   }

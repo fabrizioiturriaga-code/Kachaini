@@ -18,6 +18,7 @@ public record ResultadoLeccion(
   public enum Resultado {
     CORRECTA,
     INCORRECTA,
+    INTENTO_REPETIDO,
     SIN_ENERGIA,
     YA_COMPLETADA
   }

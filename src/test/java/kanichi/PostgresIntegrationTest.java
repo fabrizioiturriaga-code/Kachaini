@@ -1,14 +1,20 @@
 package kanichi;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.UUID;
 import java.util.concurrent.*;
 import kanichi.dto.RegistroForm;
+import kanichi.model.Leccion;
 import kanichi.model.Rol;
 import kanichi.repository.UsuarioRepository;
 import kanichi.service.AuthService;
@@ -30,6 +36,7 @@ import org.testcontainers.junit.jupiter.*;
 @AutoConfigureMockMvc
 @EnabledIfEnvironmentVariable(named = "RUN_POSTGRES_TESTS", matches = "true")
 class PostgresIntegrationTest {
+  private static final String RUTA_LECCION = "/estudiante/lecciones/primeros-pobladores";
   static PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16-alpine");
 
   @DynamicPropertySource
@@ -204,7 +211,8 @@ class PostgresIntegrationTest {
     assertEquals(
         Boolean.TRUE,
         jdbc.queryForObject("SELECT onboarding_completado FROM estudiantes", Boolean.class));
-    assertEquals(4, jdbc.queryForObject("SELECT count(*) FROM misiones_completadas", Integer.class));
+    assertEquals(
+        4, jdbc.queryForObject("SELECT count(*) FROM misiones_completadas", Integer.class));
     assertEquals(3, jdbc.queryForObject("SELECT count(*) FROM logros_estudiante", Integer.class));
   }
 
@@ -282,5 +290,107 @@ class PostgresIntegrationTest {
     auth.registrar(form("ana@example.org"));
     mvc.perform(get("/onboarding").session(sesion)).andExpect(redirectedUrl("/login?revocada"));
     assertTrue(sesion.isInvalid());
+  }
+
+  @Test
+  void feedbackEnLaLeccionYReenvioSinDobleDescuentoNiXp() throws Exception {
+    var sesion = ingresarConOnboarding("ana@example.org");
+    String intento = UUID.randomUUID().toString();
+    var pregunta = Leccion.U1_PRIMEROS_POBLADORES.getPregunta();
+
+    mvc.perform(
+            post(RUTA_LECCION)
+                .session(sesion)
+                .with(csrf())
+                .param("respuesta", "0")
+                .param("intento", intento))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString(pregunta.pista())))
+        .andExpect(content().string(not(containsString(pregunta.explicacion()))));
+    mvc.perform(
+            post(RUTA_LECCION)
+                .session(sesion)
+                .with(csrf())
+                .param("respuesta", "0")
+                .param("intento", intento))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("Esta respuesta ya fue evaluada.")));
+    assertEquals(4, jdbc.queryForObject("SELECT energia FROM estudiantes", Integer.class));
+
+    String acierto = UUID.randomUUID().toString();
+    mvc.perform(
+            post(RUTA_LECCION)
+                .session(sesion)
+                .with(csrf())
+                .param("respuesta", "1")
+                .param("intento", acierto))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString(pregunta.explicacion())))
+        .andExpect(content().string(containsString("Continuar a la unidad")));
+    mvc.perform(
+            post(RUTA_LECCION)
+                .session(sesion)
+                .with(csrf())
+                .param("respuesta", "1")
+                .param("intento", acierto))
+        .andExpect(redirectedUrl("/estudiante/unidades/1"));
+    assertEquals(20, jdbc.queryForObject("SELECT xp FROM estudiantes", Integer.class));
+    assertEquals(2, jdbc.queryForObject("SELECT count(*) FROM intentos_leccion", Integer.class));
+  }
+
+  @Test
+  void guardaTextoUnaVezYLoMuestraSoloAQuienLoEnvio() throws Exception {
+    var sesion = ingresarConOnboarding("ana@example.org");
+    String rutaEntrega = RUTA_LECCION + "/desarrollo";
+    String respuesta = "Buscaban alimentos.\nTambién cazaban y recolectaban.";
+
+    mvc.perform(post(rutaEntrega).session(sesion).with(csrf()).param("texto", " ".repeat(5)))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("Escribe una respuesta")));
+    assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM entregas_desarrollo", Integer.class));
+    var envio =
+        mvc.perform(post(rutaEntrega).session(sesion).with(csrf()).param("texto", respuesta))
+            .andExpect(redirectedUrl(RUTA_LECCION))
+            .andExpect(flash().attribute("mensajeDesarrollo", "Respuesta enviada correctamente."))
+            .andReturn();
+    mvc.perform(get(RUTA_LECCION).session(sesion).flashAttrs(envio.getFlashMap()))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("Respuesta enviada correctamente.")))
+        .andExpect(content().string(containsString(respuesta)));
+    mvc.perform(post(rutaEntrega).session(sesion).with(csrf()).param("texto", "Otro texto"))
+        .andExpect(redirectedUrl(RUTA_LECCION))
+        .andExpect(
+            flash()
+                .attribute("mensajeDesarrollo", "Ya enviaste una respuesta para esta actividad."));
+    assertEquals(
+        respuesta, jdbc.queryForObject("SELECT texto FROM entregas_desarrollo", String.class));
+    assertEquals(0, jdbc.queryForObject("SELECT xp FROM estudiantes", Integer.class));
+    assertEquals(5, jdbc.queryForObject("SELECT energia FROM estudiantes", Integer.class));
+    assertEquals(
+        0, jdbc.queryForObject("SELECT count(*) FROM lecciones_completadas", Integer.class));
+
+    var otraSesion = ingresarConOnboarding("beto@example.org");
+    mvc.perform(get(RUTA_LECCION).session(otraSesion))
+        .andExpect(status().isOk())
+        .andExpect(content().string(not(containsString(respuesta))))
+        .andExpect(content().string(containsString("Enviar respuesta")));
+  }
+
+  private MockHttpSession ingresarConOnboarding(String correo) throws Exception {
+    auth.registrar(form(correo));
+    jdbc.update(
+        "UPDATE estudiantes SET onboarding_completado=true "
+            + "WHERE id=(SELECT id FROM usuarios WHERE correo=?)",
+        correo);
+    return (MockHttpSession)
+        mvc.perform(
+                post("/login")
+                    .with(csrf())
+                    .param("correo", correo)
+                    .param("contrasena", "Historia123"))
+            .andExpect(redirectedUrl("/inicio"))
+            .andReturn()
+            .getRequest()
+            .getSession(false);
   }
 }

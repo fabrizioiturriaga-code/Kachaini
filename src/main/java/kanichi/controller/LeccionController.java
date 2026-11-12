@@ -1,11 +1,13 @@
 package kanichi.controller;
 
+import java.util.UUID;
 import kanichi.dto.EstadoEnergia;
 import kanichi.dto.ResultadoLeccion;
 import kanichi.dto.UsuarioSesion;
 import kanichi.dto.VistaLeccion;
 import kanichi.dto.VistaUnidad;
 import kanichi.exception.MisionNoPermitidaException;
+import kanichi.model.EntregaDesarrollo;
 import kanichi.model.Leccion;
 import kanichi.service.LeccionService;
 import kanichi.service.MapaMisionesService;
@@ -29,8 +31,7 @@ public class LeccionController {
   private final LeccionService leccionService;
   private final MapaMisionesService mapaMisionesService;
 
-  public LeccionController(
-      LeccionService leccionService, MapaMisionesService mapaMisionesService) {
+  public LeccionController(LeccionService leccionService, MapaMisionesService mapaMisionesService) {
     this.leccionService = leccionService;
     this.mapaMisionesService = mapaMisionesService;
   }
@@ -72,7 +73,7 @@ public class LeccionController {
       mensajes.addFlashAttribute("error", "Completa primero la lección anterior.");
       return AL_MAPA;
     }
-    return mostrar(model, vista.leccion(), vista.completada(), vista.energia());
+    return mostrar(model, usuario.getId(), vista.leccion(), vista.completada(), vista.energia());
   }
 
   @PostMapping("/estudiante/lecciones/{codigo}")
@@ -80,6 +81,7 @@ public class LeccionController {
       @AuthenticationPrincipal UsuarioSesion usuario,
       @PathVariable String codigo,
       @RequestParam(required = false) Integer respuesta,
+      @RequestParam UUID intento,
       Model model,
       RedirectAttributes mensajes) {
     if (!usuario.isOnboardingCompletado()) {
@@ -88,7 +90,7 @@ public class LeccionController {
     Leccion leccion = buscar(codigo);
     ResultadoLeccion resultado;
     try {
-      resultado = leccionService.responder(usuario.getId(), leccion, respuesta);
+      resultado = leccionService.responder(usuario.getId(), leccion, respuesta, intento);
     } catch (MisionNoPermitidaException exception) {
       mensajes.addFlashAttribute("error", exception.getMessage());
       return AL_MAPA;
@@ -96,29 +98,92 @@ public class LeccionController {
 
     switch (resultado.resultado()) {
       case CORRECTA:
-        mensajes.addFlashAttribute("mensaje", mensajeDeAcierto(leccion, resultado));
-        return resultado.unidadCompletada()
-            ? AL_MAPA
-            : "redirect:/estudiante/unidades/" + leccion.getUnidad();
+        model.addAttribute("acierto", mensajeDeAcierto(leccion, resultado));
+        model.addAttribute("explicacion", leccion.getPregunta().explicacion());
+        model.addAttribute("unidadCompletada", resultado.unidadCompletada());
+        agregarRespuestaElegida(model, leccion, respuesta);
+        break;
       case YA_COMPLETADA:
         mensajes.addFlashAttribute("mensaje", "Ya habías completado esta lección.");
         return "redirect:/estudiante/unidades/" + leccion.getUnidad();
       case SIN_ENERGIA:
         model.addAttribute("error", mensajeSinEnergia(resultado));
-        return mostrar(model, leccion, false, resultado.energia());
-      default:
+        break;
+      case INTENTO_REPETIDO:
+        model.addAttribute(
+            "error", "Esta respuesta ya fue evaluada. Puedes realizar un nuevo intento.");
+        break;
+      case INCORRECTA:
         model.addAttribute("error", mensajeDeError(resultado));
-        model.addAttribute("explicacion", leccion.getPregunta().explicacion());
-        return mostrar(model, leccion, false, resultado.energia());
+        model.addAttribute("pista", leccion.getPregunta().pista());
+        agregarRespuestaElegida(model, leccion, respuesta);
+        break;
+    }
+    return mostrar(
+        model,
+        usuario.getId(),
+        leccion,
+        resultado.resultado() == ResultadoLeccion.Resultado.CORRECTA,
+        resultado.energia());
+  }
+
+  @PostMapping("/estudiante/lecciones/{codigo}/desarrollo")
+  public String entregarRespuesta(
+      @AuthenticationPrincipal UsuarioSesion usuario,
+      @PathVariable String codigo,
+      @RequestParam(required = false) String texto,
+      Model model,
+      RedirectAttributes mensajes) {
+    if (!usuario.isOnboardingCompletado()) {
+      return AL_MODULO_INICIAL;
+    }
+    Leccion leccion = buscar(codigo);
+    if (leccion.getPreguntaDesarrollo() == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+    if (texto == null || texto.isBlank() || texto.length() > EntregaDesarrollo.MAXIMO_TEXTO) {
+      model.addAttribute("textoDesarrollo", texto);
+      model.addAttribute(
+          "errorDesarrollo",
+          "Escribe una respuesta de hasta " + EntregaDesarrollo.MAXIMO_TEXTO + " caracteres.");
+      return leccion(usuario, codigo, model, mensajes);
+    }
+    try {
+      boolean guardada = leccionService.entregarRespuesta(usuario.getId(), leccion, texto);
+      mensajes.addFlashAttribute(
+          "mensajeDesarrollo",
+          guardada
+              ? "Respuesta enviada correctamente."
+              : "Ya enviaste una respuesta para esta actividad.");
+      return "redirect:/estudiante/lecciones/" + leccion.getCodigo();
+    } catch (MisionNoPermitidaException exception) {
+      mensajes.addFlashAttribute("error", exception.getMessage());
+      return AL_MAPA;
     }
   }
 
-  private static String mostrar(
-      Model model, Leccion leccion, boolean completada, EstadoEnergia energia) {
+  private String mostrar(
+      Model model, Long estudianteId, Leccion leccion, boolean completada, EstadoEnergia energia) {
     model.addAttribute("leccion", leccion);
     model.addAttribute("completada", completada);
     model.addAttribute("energia", energia);
+    if (!completada && !energia.isAgotada()) {
+      model.addAttribute("intento", UUID.randomUUID());
+    }
+    if (leccion.getPreguntaDesarrollo() != null) {
+      model.addAttribute("maximoDesarrollo", EntregaDesarrollo.MAXIMO_TEXTO);
+      leccionService
+          .obtenerEntrega(estudianteId, leccion)
+          .ifPresent(entrega -> model.addAttribute("entregaDesarrollo", entrega));
+    }
     return "estudiante/leccion";
+  }
+
+  private static void agregarRespuestaElegida(Model model, Leccion leccion, Integer respuesta) {
+    var opciones = leccion.getPregunta().opciones();
+    if (respuesta != null && respuesta >= 0 && respuesta < opciones.size()) {
+      model.addAttribute("respuestaElegida", opciones.get(respuesta));
+    }
   }
 
   private String mensajeDeAcierto(Leccion leccion, ResultadoLeccion resultado) {

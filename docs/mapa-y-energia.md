@@ -15,7 +15,12 @@ Todas requieren rol `ESTUDIANTE` (ya cubierto por `/estudiante/**`) y haber comp
 | GET | `/inicio` | Mapa de unidades y barra de energía. |
 | GET | `/estudiante/unidades/{numero}` | Lecciones de la unidad con su estado. Unidad inexistente: HTTP 404. Bloqueada: redirige a `/inicio`. |
 | GET | `/estudiante/lecciones/{codigo}` | Contenido y pregunta. Bloqueada: redirige a `/inicio`. Sin energía: no se muestra el formulario. Código inexistente: HTTP 404. |
-| POST | `/estudiante/lecciones/{codigo}` | `_csrf` y `respuesta` (índice de la opción). Correcta: XP y vuelta a la unidad (o a `/inicio` si completó la unidad). Incorrecta: muestra la pista y resta energía. |
+| POST | `/estudiante/lecciones/{codigo}` | `_csrf`, `intento` (UUID del formulario) y `respuesta` (índice de la opción). Al seleccionar, la lección muestra explicación y XP si acierta o una pista y la energía restante si falla. Tras un acierto, **Continuar** lleva a la unidad o al mapa. |
+| POST | `/estudiante/lecciones/{codigo}/desarrollo` | `_csrf` y `texto` (hasta 2000 caracteres). Guarda la entrega y redirige a la lección con confirmación. Un reenvío conserva el texto original. |
+
+**HU-22.** La selección envía la respuesta con JavaScript. El formulario conserva el botón **Responder** para navegadores sin JavaScript. La respuesta se evalúa en el servidor con las mismas reglas de energía, XP y orden de las lecciones.
+
+**HU-23.** La primera lección incluye una pregunta complementaria de desarrollo. Cada estudiante puede enviar una respuesta y consultarla al volver a la lección. La entrega se confirma tras guardar el texto y no se califica automáticamente ni modifica energía, XP o progreso.
 
 ## Componentes
 
@@ -30,5 +35,7 @@ Todas requieren rol `ESTUDIANTE` (ya cubierto por `/estudiante/**`) y haber comp
 ## Persistencia
 
 `V10__lecciones_y_energia.sql` añade `estudiantes.energia` y `estudiantes.energia_actualizada` (la energía se calcula al consultarla a partir de estos dos valores, sin tareas programadas) y la tabla `lecciones_completadas` con clave primaria `(estudiante_id, leccion)`.
+
+`V11__intentos_y_respuestas_de_leccion.sql` registra cada intento evaluado una sola vez por estudiante y guarda una entrega de desarrollo por estudiante y lección.
 
 La versión es `V10` para no chocar con migraciones `V5` a `V9` de otras ramas. Si al integrar ya existe una `V10`, renumerar esta migración.

@@ -126,3 +126,14 @@
     transition: none;
   }
 }
+
+#texto-desarrollo {
+  box-sizing: border-box;
+  width: 100%;
+  font: inherit;
+}
+
+.respuesta-desarrollo {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
