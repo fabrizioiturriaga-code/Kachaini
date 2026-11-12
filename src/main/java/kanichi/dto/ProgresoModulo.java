@@ -4,7 +4,6 @@ import java.util.List;
 import kanichi.model.Logro;
 import kanichi.model.MisionInicial;
 
-/** Estado del módulo inicial y recompensas acumuladas por un estudiante. */
 public record ProgresoModulo(
     List<EstadoMision> misiones, int xp, List<Logro> logros, boolean completado) {
 

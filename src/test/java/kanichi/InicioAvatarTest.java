@@ -50,6 +50,7 @@ class InicioAvatarTest {
   @MockBean ModuloInicialService moduloInicialService;
   @MockBean RankingService rankingService;
   @MockBean LeccionService leccionService;
+  @MockBean kanichi.service.LigaService ligaService;
 
   @BeforeEach
   void setup() {

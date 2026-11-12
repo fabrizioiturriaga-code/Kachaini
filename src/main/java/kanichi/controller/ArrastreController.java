@@ -1,9 +1,12 @@
 package kanichi.controller;
 
 import kanichi.dto.RespuestasForm;
+import kanichi.dto.ResultadoArrastre;
 import kanichi.dto.UsuarioSesion;
 import kanichi.model.ActividadArrastre;
+import kanichi.model.TipoPractica;
 import kanichi.service.ArrastreService;
+import kanichi.service.RecompensaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -22,9 +25,12 @@ public class ArrastreController {
   private static final String A_ACTIVIDADES = "redirect:/estudiante/arrastre";
 
   private final ArrastreService arrastreService;
+  private final RecompensaService recompensaService;
 
-  public ArrastreController(ArrastreService arrastreService) {
+  public ArrastreController(
+      ArrastreService arrastreService, RecompensaService recompensaService) {
     this.arrastreService = arrastreService;
+    this.recompensaService = recompensaService;
   }
 
   @GetMapping("/estudiante/arrastre")
@@ -77,8 +83,17 @@ public class ArrastreController {
       model.addAttribute("error", "Ubica todos los elementos antes de verificar.");
       return mostrar(model, actividad, formulario);
     }
+    ResultadoArrastre resultado = arrastreService.corregir(actividad, formulario.getRespuestas());
+    model.addAttribute("resultado", resultado);
     model.addAttribute(
-        "resultado", arrastreService.corregir(actividad, formulario.getRespuestas()));
+        "recompensa",
+        recompensaService.registrarPractica(
+            usuario.getId(),
+            TipoPractica.ARRASTRE,
+            actividad.getCodigo(),
+            actividad.getUnidad(),
+            resultado.aciertos(),
+            resultado.total()));
     return mostrar(model, actividad, formulario);
   }
 

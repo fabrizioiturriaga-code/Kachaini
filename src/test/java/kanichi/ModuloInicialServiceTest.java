@@ -15,7 +15,6 @@ import kanichi.service.ModuloInicialService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-/** HU-06: misiones introductorias, recompensas y desbloqueo. */
 class ModuloInicialServiceTest {
   private static final int RESPUESTA_CORRECTA =
       MisionInicial.RETO_DE_BIENVENIDA.getPregunta().respuestaCorrecta();

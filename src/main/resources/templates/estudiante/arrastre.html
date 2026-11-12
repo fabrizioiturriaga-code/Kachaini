@@ -7,6 +7,7 @@
     <link rel="stylesheet" th:href="@{/css/auth.css}">
     <link rel="stylesheet" th:href="@{/css/navegacion.css}">
     <link rel="stylesheet" th:href="@{/css/practica.css}">
+    <link rel="stylesheet" th:href="@{/css/logros.css}">
     <script defer th:src="@{/js/arrastre.js}"></script>
   </head>
   <body class="con-barra-inferior">
@@ -23,6 +24,7 @@
              th:text="|Emparejamientos correctos: ${resultado.aciertos()} de ${resultado.total()}.|"></p>
           <p th:if="${resultado.isPerfecto()}">¡Excelente! Todos los elementos están en su lugar.</p>
           <p th:unless="${resultado.isPerfecto()}">Mueve los elementos marcados con ❌ e inténtalo de nuevo.</p>
+          <th:block th:replace="~{fragments/recompensa :: bloque(${recompensa})}"></th:block>
         </th:block>
       </section>
 

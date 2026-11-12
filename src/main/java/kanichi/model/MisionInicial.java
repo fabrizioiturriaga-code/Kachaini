@@ -4,10 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Misiones introductorias del módulo inicial, en el orden en que deben completarse. Completar
- * todas desbloquea la primera unidad del mapa de misiones.
- */
 public enum MisionInicial {
   BIENVENIDA(
       "bienvenida",
@@ -117,7 +113,6 @@ public enum MisionInicial {
     return Arrays.stream(values()).mapToInt(MisionInicial::getXp).sum();
   }
 
-  /** Misión que debe completarse antes que esta, si existe. */
   public Optional<MisionInicial> anterior() {
     return ordinal() == 0 ? Optional.empty() : Optional.of(values()[ordinal() - 1]);
   }

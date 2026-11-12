@@ -41,6 +41,7 @@ class CuentaControllerTest {
   @MockBean PerfilEstudianteService perfilEstudianteService;
   @MockBean CambioContrasenaService cambioContrasenaService;
   @MockBean ProgresoEstudianteService progresoEstudianteService;
+  @MockBean kanichi.service.RecompensaService recompensaService;
   @MockBean LimiteIntentosLogin limiteIntentosLogin;
 
   @BeforeEach
@@ -58,6 +59,35 @@ class CuentaControllerTest {
     when(docente.getRol()).thenReturn(Rol.DOCENTE);
     when(docente.isAutorizado()).thenReturn(true);
     when(usuarios.findByCorreo("docente@example.org")).thenReturn(Optional.of(docente));
+  }
+
+  @Test
+  void hu16PerfilMuestraNivelColeccionablesEHistorialDeRecompensas() throws Exception {
+    when(perfilEstudianteService.obtener(1L))
+        .thenReturn(new Estudiante("Ana", "ana@example.org", "hash", 1, "A"));
+    when(recompensaService.resumen(1L))
+        .thenReturn(
+            new kanichi.dto.ResumenRecompensas(
+                kanichi.dto.NivelEstudiante.de(130),
+                java.util.List.of(kanichi.model.Coleccionable.QUIPU),
+                java.util.List.of(
+                    new kanichi.dto.ResumenRecompensas.Entrada(
+                        java.time.Instant.parse("2026-11-12T15:00:00Z"),
+                        "⭐",
+                        "Lectura aprobada: Los chasquis",
+                        15))));
+
+    mvc.perform(get("/estudiante/perfil").with(user(estudianteSesion())))
+        .andExpect(status().isOk())
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Mis recompensas")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Nivel 2")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Te faltan 70 XP")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Quipu")))
+        .andExpect(
+            content()
+                .string(org.hamcrest.Matchers.containsString("Lectura aprobada: Los chasquis")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("+15 XP")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("12/11/2026")));
   }
 
   @Test

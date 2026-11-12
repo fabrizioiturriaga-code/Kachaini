@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Desafíos entre estudiantes · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/logros.css}">
+  </head>
+  <body class="con-barra-inferior">
+    <main>
+      <p><a th:href="@{/estudiante/retos}">← Volver a Retos</a></p>
+      <h1><span aria-hidden="true">🤝</span> Desafíos entre estudiantes</h1>
+      <p>Invita a un compañero y cumplan juntos una meta para ganar recompensas en conjunto.</p>
+      <p role="status" th:if="${mensaje}" th:text="${mensaje}"></p>
+      <p role="alert" th:if="${error}" th:text="${error}"></p>
+      <p role="status" th:each="aviso : ${panel.notificaciones()}" th:text="${aviso}"></p>
+
+      <section aria-labelledby="titulo-invitaciones" th:unless="${panel.invitaciones().isEmpty()}">
+        <h2 id="titulo-invitaciones">Invitaciones recibidas</h2>
+        <article th:each="desafio : ${panel.invitaciones()}" th:class="${desafio.claseEstado()}">
+          <h3 th:text="|${desafio.tipo().icono} ${desafio.tipo().nombre}|">Desafío</h3>
+          <p th:text="|${desafio.participantes()[0].nombre()} te invitó: ${desafio.tipo().descripcion}|"></p>
+          <form method="post" th:action="@{/estudiante/desafios/{id}/aceptar(id=${desafio.id()})}">
+            <button type="submit">Aceptar</button>
+          </form>
+          <form method="post" th:action="@{/estudiante/desafios/{id}/rechazar(id=${desafio.id()})}">
+            <button type="submit">Rechazar</button>
+          </form>
+        </article>
+      </section>
+
+      <section aria-labelledby="titulo-nuevo">
+        <h2 id="titulo-nuevo">Nuevo desafío</h2>
+        <p th:unless="${panel.puedeDesafiar()}">
+          Completa al menos una lección o práctica para poder invitar a un compañero.
+        </p>
+        <form th:if="${panel.puedeDesafiar()}" method="post" th:action="@{/estudiante/desafios}">
+          <label for="companeroId">Compañero de tu salón</label>
+          <select id="companeroId" name="companeroId">
+            <option value="">— Elige un compañero —</option>
+            <option th:each="companero : ${panel.companeros()}" th:value="${companero.id()}"
+                    th:text="|${companero.avatar()} ${companero.nombre()}|">Compañero</option>
+          </select>
+          <label for="correo">O el correo de otro estudiante de Kaichaini</label>
+          <input id="correo" name="correo" type="email" maxlength="254" autocomplete="off">
+          <fieldset>
+            <legend>Meta del desafío</legend>
+            <label th:each="tipo, i : ${panel.tipos()}">
+              <input type="radio" name="tipo" th:value="${tipo.name()}" th:checked="${i.first}" required>
+              <strong th:text="|${tipo.icono} ${tipo.nombre}|">Tipo</strong>:
+              <span th:text="${tipo.descripcion}"></span>
+            </label>
+          </fieldset>
+          <button type="submit">Enviar invitación</button>
+        </form>
+      </section>
+
+      <section aria-labelledby="titulo-mis-desafios">
+        <h2 id="titulo-mis-desafios">Mis desafíos</h2>
+        <p th:if="${panel.desafios().isEmpty()}">Todavía no tienes desafíos.</p>
+        <article th:each="desafio : ${panel.desafios()}" th:class="${desafio.claseEstado()}">
+          <h3>
+            <span th:text="|${desafio.tipo().icono} ${desafio.tipo().nombre}|">Desafío</span>
+            <span class="insignia__estado" th:text="${desafio.estado().etiqueta}">Activo</span>
+          </h3>
+          <p th:text="${desafio.tipo().descripcion}"></p>
+          <p th:if="${desafio.estado().name() == 'PENDIENTE'}">
+            Esperando que tu compañero acepte la invitación.
+          </p>
+          <th:block th:unless="${desafio.estado().name() == 'PENDIENTE'}">
+            <progress th:max="${desafio.tipo().metaTareas}" th:value="${desafio.tareasEnBarra()}"
+                      th:attr="aria-label=|Progreso del desafío ${desafio.tipo().nombre}|"></progress>
+            <p>
+              <strong th:text="|${desafio.tareasEnBarra()} de ${desafio.tipo().metaTareas} tareas|">0 de 8 tareas</strong>
+              · <span th:text="|${desafio.porcentaje()} % de aciertos (meta: ${desafio.tipo().precisionMinima} %)|"></span>
+              <span th:text="${desafio.precisionAlcanzada()} ? '✅' : ''"></span>
+            </p>
+          </th:block>
+          <ul>
+            <li th:each="participante : ${desafio.participantes()}">
+              <span aria-hidden="true" th:text="${participante.avatar()}">✨</span>
+              <strong th:text="${participante.nombre()}">Estudiante</strong>
+              <span th:if="${participante.esYo()}">(Tú)</span>
+              <span th:unless="${desafio.estado().name() == 'PENDIENTE'}"
+                    th:text="|· ${participante.tareas()} tareas · ${participante.porcentaje()} % de aciertos|"></span>
+            </li>
+          </ul>
+        </article>
+      </section>
+    </main>
+    <nav th:replace="~{fragments/navegacion :: barra('retos')}"></nav>
+  </body>
+</html>

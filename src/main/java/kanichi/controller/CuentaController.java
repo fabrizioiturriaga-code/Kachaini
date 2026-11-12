@@ -12,6 +12,7 @@ import kanichi.model.Rol;
 import kanichi.service.CambioContrasenaService;
 import kanichi.service.PerfilEstudianteService;
 import kanichi.service.ProgresoEstudianteService;
+import kanichi.service.RecompensaService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,14 +27,17 @@ public class CuentaController {
   private final PerfilEstudianteService perfilEstudianteService;
   private final CambioContrasenaService cambioContrasenaService;
   private final ProgresoEstudianteService progresoEstudianteService;
+  private final RecompensaService recompensaService;
 
   public CuentaController(
       PerfilEstudianteService perfilEstudianteService,
       CambioContrasenaService cambioContrasenaService,
-      ProgresoEstudianteService progresoEstudianteService) {
+      ProgresoEstudianteService progresoEstudianteService,
+      RecompensaService recompensaService) {
     this.perfilEstudianteService = perfilEstudianteService;
     this.cambioContrasenaService = cambioContrasenaService;
     this.progresoEstudianteService = progresoEstudianteService;
+    this.recompensaService = recompensaService;
   }
 
   @GetMapping("/estudiante/perfil/progreso")
@@ -75,6 +79,7 @@ public class CuentaController {
   private void agregarDatosPerfil(UsuarioSesion usuario, Estudiante estudiante, Model model) {
     model.addAttribute("grado", estudiante.getGrado());
     model.addAttribute("seccion", estudiante.getSeccion());
+    model.addAttribute("recompensas", recompensaService.resumen(usuario.getId()));
     agregarNavegacion(usuario, model);
     model.addAttribute("avatares", Arrays.asList(AvatarEstudiante.values()));
   }

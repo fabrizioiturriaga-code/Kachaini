@@ -1,9 +1,12 @@
 package kanichi.controller;
 
 import kanichi.dto.RespuestasForm;
+import kanichi.dto.ResultadoLectura;
 import kanichi.dto.UsuarioSesion;
 import kanichi.model.Lectura;
+import kanichi.model.TipoPractica;
 import kanichi.service.LecturaService;
+import kanichi.service.RecompensaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -22,9 +25,11 @@ public class LecturaController {
   private static final String A_LECTURAS = "redirect:/estudiante/lecturas";
 
   private final LecturaService lecturaService;
+  private final RecompensaService recompensaService;
 
-  public LecturaController(LecturaService lecturaService) {
+  public LecturaController(LecturaService lecturaService, RecompensaService recompensaService) {
     this.lecturaService = lecturaService;
+    this.recompensaService = recompensaService;
   }
 
   @GetMapping("/estudiante/lecturas")
@@ -80,7 +85,17 @@ public class LecturaController {
       model.addAttribute("error", "Responde todas las preguntas antes de enviar.");
       return "estudiante/lectura";
     }
-    model.addAttribute("resultado", lecturaService.corregir(lectura, formulario.getRespuestas()));
+    ResultadoLectura resultado = lecturaService.corregir(lectura, formulario.getRespuestas());
+    model.addAttribute("resultado", resultado);
+    model.addAttribute(
+        "recompensa",
+        recompensaService.registrarPractica(
+            usuario.getId(),
+            TipoPractica.LECTURA,
+            lectura.getCodigo(),
+            lectura.getUnidad(),
+            resultado.aciertos(),
+            resultado.total()));
     return "estudiante/lectura";
   }
 

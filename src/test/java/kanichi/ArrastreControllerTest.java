@@ -48,6 +48,7 @@ class ArrastreControllerTest {
   @MockBean UsuarioRepository usuarios;
   @MockBean LimiteIntentosLogin limiteIntentosLogin;
   @MockBean ArrastreService arrastreService;
+  @MockBean kanichi.service.RecompensaService recompensaService;
 
   @BeforeEach
   void setup() {

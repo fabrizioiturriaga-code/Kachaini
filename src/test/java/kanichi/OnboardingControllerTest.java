@@ -39,7 +39,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
-/** HU-06: acceso al módulo inicial con contenido mínimo. */
 @WebMvcTest(OnboardingController.class)
 @Import({
   SecurityConfig.class,
