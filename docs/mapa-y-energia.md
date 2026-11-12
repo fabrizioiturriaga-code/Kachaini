@@ -2,7 +2,7 @@
 
 ## Alcance
 
-- **HU-18.** El mapa de Inicio muestra las 6 unidades con su estado: *completada*, *activa* o *bloqueada*, una barra de avance y estrellas (una por lección completada). Cada unidad tiene 3 lecciones que se completan en orden; al terminar la última, la unidad pasa a *completada*, la siguiente se desbloquea automáticamente y se muestra «¡Nuevo nivel disponible!». Todo el mapa permanece bloqueado hasta completar el módulo inicial (HU-06).
+- **HU-18.** El mapa de Inicio muestra las dos unidades del grado del estudiante con su estado: *completada*, *activa* o *bloqueada*, una barra de avance y estrellas (una por lección completada). Cada unidad tiene 3 lecciones que se completan en orden; al terminar la última, la unidad pasa a *completada*, la siguiente del mismo grado se desbloquea automáticamente y se muestra «¡Nuevo nivel disponible!». Todo el mapa permanece bloqueado hasta completar el módulo inicial (HU-06).
 - **HU-12.** Cada estudiante tiene una barra de energía de 5 unidades. Una respuesta incorrecta resta 1 y la barra baja visualmente. Con la energía en cero no se puede avanzar: se muestra un mensaje con el tiempo de espera o la opción de repasar la lección. Se recupera 1 unidad cada 10 minutos hasta el máximo. Una lección ya completada no consume energía.
 - Cada lección completada suma su XP (20) y por tanto cuenta para el ranking del salón.
 
@@ -22,6 +22,14 @@ Todas requieren rol `ESTUDIANTE` (ya cubierto por `/estudiante/**`) y haber comp
 
 **HU-23.** La primera lección incluye una pregunta complementaria de desarrollo. Cada estudiante puede enviar una respuesta y consultarla al volver a la lección. La entrega se confirma tras guardar el texto y no se califica automáticamente ni modifica energía, XP o progreso.
 
+## Racha y progreso en el perfil
+
+**HU-11.** Inicio y el resultado de un acierto muestran la racha actual. Completar la primera lección del mapa en un día de Lima suma un día y activa el efecto visual. Las lecciones adicionales del mismo día mantienen la racha y dan su XP habitual. Si se completó una lección ayer, la racha sigue activa durante hoy. Al pasar un día entero sin completar una lección, vuelve a cero.
+
+**HU-04.** Desde **Mi perfil → Mi progreso** (`GET /estudiante/perfil/progreso`), cada estudiante consulta su XP acumulada, misiones iniciales y lecciones completadas, avance de su grado, racha y balance de aciertos. La ruta usa el ID de la sesión y está disponible desde el registro, incluso antes de completar el módulo inicial.
+
+El balance divide los aciertos entre los intentos evaluados con resultado conocido. Las entregas de texto y las prácticas de lectura o arrastre no cuentan en ese balance ni en la racha.
+
 ## Componentes
 
 | Componente | Uso |
@@ -37,5 +45,7 @@ Todas requieren rol `ESTUDIANTE` (ya cubierto por `/estudiante/**`) y haber comp
 `V10__lecciones_y_energia.sql` añade `estudiantes.energia` y `estudiantes.energia_actualizada` (la energía se calcula al consultarla a partir de estos dos valores, sin tareas programadas) y la tabla `lecciones_completadas` con clave primaria `(estudiante_id, leccion)`.
 
 `V11__intentos_y_respuestas_de_leccion.sql` registra cada intento evaluado una sola vez por estudiante y guarda una entrega de desarrollo por estudiante y lección.
+
+`V12__resultado_intentos_leccion.sql` añade el resultado de los intentos. Los anteriores conservan el UUID y quedan con resultado desconocido. Cada intento nuevo se registra en la misma transacción que aplica energía y XP. La racha se reconstruye a partir de `lecciones_completadas.fecha`, incluidas las lecciones históricas.
 
 La versión es `V10` para no chocar con migraciones `V5` a `V9` de otras ramas. Si al integrar ya existe una `V10`, renumerar esta migración.

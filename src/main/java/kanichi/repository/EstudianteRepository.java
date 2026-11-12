@@ -21,12 +21,32 @@ public interface EstudianteRepository extends JpaRepository<Estudiante, Long> {
   @Query(
       value =
           """
-          INSERT INTO intentos_leccion (estudiante_id, intento)
-          VALUES (:estudianteId, :intento)
+          INSERT INTO intentos_leccion (estudiante_id, intento, correcto)
+          VALUES (:estudianteId, :intento, :correcto)
           ON CONFLICT (estudiante_id, intento) DO NOTHING
           """,
       nativeQuery = true)
-  int registrarIntento(@Param("estudianteId") Long estudianteId, @Param("intento") UUID intento);
+  int registrarIntento(
+      @Param("estudianteId") Long estudianteId,
+      @Param("intento") UUID intento,
+      @Param("correcto") boolean correcto);
+
+  @Query(
+      value =
+          """
+          SELECT COUNT(*) FILTER (WHERE correcto IS TRUE) AS aciertos,
+                 COUNT(*) FILTER (WHERE correcto IS FALSE) AS errores
+          FROM intentos_leccion
+          WHERE estudiante_id = :estudianteId
+          """,
+      nativeQuery = true)
+  BalanceIntentos contarIntentosEvaluados(@Param("estudianteId") Long estudianteId);
+
+  interface BalanceIntentos {
+    long getAciertos();
+
+    long getErrores();
+  }
 
   List<Estudiante> findTop10ByGradoAndSeccionOrderByXpDescNombreAsc(Integer grado, String seccion);
 

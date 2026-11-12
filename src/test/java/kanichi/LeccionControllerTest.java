@@ -170,7 +170,7 @@ class LeccionControllerTest {
     when(leccionService.responder(1L, LECCION, 0, INTENTO))
         .thenReturn(
             new ResultadoLeccion(
-                Resultado.INCORRECTA, 0, new EstadoEnergia(4, 5, 600), false, null));
+                Resultado.INCORRECTA, 0, new EstadoEnergia(4, 5, 600), false, null, 0, false));
 
     mvc.perform(
             post(RUTA)
@@ -191,7 +191,7 @@ class LeccionControllerTest {
     when(leccionService.responder(1L, LECCION, 0, INTENTO))
         .thenReturn(
             new ResultadoLeccion(
-                Resultado.INCORRECTA, 0, new EstadoEnergia(0, 5, 600), false, null));
+                Resultado.INCORRECTA, 0, new EstadoEnergia(0, 5, 600), false, null, 0, false));
 
     mvc.perform(
             post(RUTA)
@@ -209,7 +209,8 @@ class LeccionControllerTest {
   void respuestaCorrectaExplicaAntesDeContinuarALaUnidad() throws Exception {
     when(leccionService.responder(1L, LECCION, 1, INTENTO))
         .thenReturn(
-            new ResultadoLeccion(Resultado.CORRECTA, 20, new EstadoEnergia(5, 5, 0), false, null));
+            new ResultadoLeccion(
+                Resultado.CORRECTA, 20, new EstadoEnergia(5, 5, 0), false, null, 1, true));
 
     mvc.perform(
             post(RUTA)
@@ -227,7 +228,8 @@ class LeccionControllerTest {
   void completarUnaUnidadAvisaDelNuevoNivelYPermiteVolverAlMapa() throws Exception {
     when(leccionService.responder(1L, Leccion.U1_AGRICULTURA, 0, INTENTO))
         .thenReturn(
-            new ResultadoLeccion(Resultado.CORRECTA, 20, new EstadoEnergia(5, 5, 0), true, 2));
+            new ResultadoLeccion(
+                Resultado.CORRECTA, 20, new EstadoEnergia(5, 5, 0), true, 2, 1, false));
 
     mvc.perform(
             post("/estudiante/lecciones/agricultura-y-aldeas")

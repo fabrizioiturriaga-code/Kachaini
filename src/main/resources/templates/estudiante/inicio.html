@@ -16,6 +16,7 @@
       <p role="status" th:if="${mensaje}" th:text="${mensaje}"></p>
       <p role="alert" th:if="${error}" th:text="${error}"></p>
       <div th:replace="~{fragments/energia :: barra(${energia})}"></div>
+      <div th:replace="~{fragments/racha :: contador(${diasRacha}, false)}"></div>
       <section aria-labelledby="titulo-mapa">
         <h2 id="titulo-mapa">Mapa de misiones</h2>
         <p th:if="${unidadActiva}">

@@ -22,9 +22,10 @@ import kanichi.repository.UsuarioRepository;
 import kanichi.security.LimiteIntentosLogin;
 import kanichi.service.CambioContrasenaService;
 import kanichi.service.PerfilEstudianteService;
+import kanichi.service.ProgresoEstudianteService;
 import kanichi.service.UsuarioDetailsService;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -39,6 +40,7 @@ class CuentaControllerTest {
   @MockBean UsuarioRepository usuarios;
   @MockBean PerfilEstudianteService perfilEstudianteService;
   @MockBean CambioContrasenaService cambioContrasenaService;
+  @MockBean ProgresoEstudianteService progresoEstudianteService;
   @MockBean LimiteIntentosLogin limiteIntentosLogin;
 
   @BeforeEach

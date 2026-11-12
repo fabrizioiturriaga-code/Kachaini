@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Mi progreso · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/mapa.css}">
+  </head>
+  <body class="con-barra-inferior">
+    <main>
+      <p><a th:href="@{/estudiante/perfil}">← Volver a mi perfil</a></p>
+      <h1>Mi progreso</h1>
+      <div th:replace="~{fragments/racha :: contador(${progreso.diasRacha()}, false)}"></div>
+      <dl class="estadisticas">
+        <div><dt>XP acumulada</dt><dd th:text="${progreso.xp()}">0</dd></div>
+        <div><dt>Misiones iniciales completadas</dt><dd th:text="${progreso.misionesCompletadas()}">0</dd></div>
+        <div><dt>Lecciones completadas</dt><dd th:text="${progreso.leccionesCompletadas()}">0</dd></div>
+      </dl>
+
+      <section aria-labelledby="titulo-aciertos">
+        <h2 id="titulo-aciertos">Balance de aciertos</h2>
+        <p th:unless="${progreso.tieneIntentosEvaluados()}">Todavía no hay intentos con resultado registrado.</p>
+        <div th:if="${progreso.tieneIntentosEvaluados()}">
+          <p th:text="|${progreso.porcentajeAciertos()} % de aciertos|"></p>
+          <p th:text="|${progreso.aciertos()} ${progreso.aciertos() == 1 ? 'acierto' : 'aciertos'} · ${progreso.errores()} ${progreso.errores() == 1 ? 'error' : 'errores'}|"></p>
+          <p>El balance incluye los intentos de lecciones cuyo resultado quedó registrado.</p>
+        </div>
+      </section>
+
+      <section aria-labelledby="titulo-avance">
+        <h2 id="titulo-avance">Avance en mi grado</h2>
+        <ol class="mapa-misiones">
+          <li class="unidad" th:each="unidad : ${progreso.unidades()}">
+            <div class="unidad__cuerpo">
+              <strong th:text="${unidad.titulo()}">Unidad</strong>
+              <p th:text="|${unidad.leccionesCompletadas()} de ${unidad.leccionesTotal()} lecciones|"></p>
+              <progress class="unidad__progreso" th:max="${unidad.leccionesTotal()}"
+                        th:value="${unidad.leccionesCompletadas()}"
+                        th:attr="aria-label=|Avance de la unidad ${unidad.numero()}|"></progress>
+            </div>
+          </li>
+        </ol>
+      </section>
+    </main>
+    <nav th:replace="~{fragments/navegacion :: barra('perfil')}"></nav>
+  </body>
+</html>

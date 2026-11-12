@@ -7,10 +7,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapKeyColumn;
+import jakarta.persistence.MapKeyEnumerated;
 import jakarta.persistence.Table;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import kanichi.dto.EstadoEnergia;
 
@@ -52,10 +56,13 @@ public class Estudiante extends Usuario {
   private Set<Logro> logros = new HashSet<>();
 
   @ElementCollection
-  @CollectionTable(name = "lecciones_completadas", joinColumns = @JoinColumn(name = "estudiante_id"))
-  @Enumerated(EnumType.STRING)
-  @Column(name = "leccion", nullable = false, length = 40)
-  private Set<Leccion> leccionesCompletadas = new HashSet<>();
+  @CollectionTable(
+      name = "lecciones_completadas",
+      joinColumns = @JoinColumn(name = "estudiante_id"))
+  @MapKeyEnumerated(EnumType.STRING)
+  @MapKeyColumn(name = "leccion", nullable = false, length = 40)
+  @Column(name = "fecha", nullable = false)
+  private Map<Leccion, Instant> leccionesCompletadas = new HashMap<>();
 
   @Column(nullable = false)
   private int energia = ENERGIA_MAXIMA;
@@ -104,6 +111,10 @@ public class Estudiante extends Usuario {
     return misionesCompletadas.contains(mision);
   }
 
+  public int cantidadMisionesCompletadas() {
+    return misionesCompletadas.size();
+  }
+
   /** Registra la misión y suma su XP. Devuelve false si ya estaba completada. */
   public boolean registrarMision(MisionInicial mision) {
     if (!misionesCompletadas.add(mision)) {
@@ -123,20 +134,24 @@ public class Estudiante extends Usuario {
   }
 
   public boolean haCompletado(Leccion leccion) {
-    return leccionesCompletadas.contains(leccion);
+    return leccionesCompletadas.containsKey(leccion);
   }
 
   public Set<Leccion> getLeccionesCompletadas() {
-    return Set.copyOf(leccionesCompletadas);
+    return Set.copyOf(leccionesCompletadas.keySet());
   }
 
   /** Registra la lección y suma su XP. Devuelve false si ya estaba completada. */
-  public boolean registrarLeccion(Leccion leccion) {
-    if (!leccionesCompletadas.add(leccion)) {
+  public boolean registrarLeccion(Leccion leccion, Instant fecha) {
+    if (leccionesCompletadas.putIfAbsent(leccion, fecha) != null) {
       return false;
     }
     xp += leccion.getXp();
     return true;
+  }
+
+  public RachaDiaria rachaEn(Instant ahora) {
+    return RachaDiaria.calcular(leccionesCompletadas.values(), ahora);
   }
 
   /** Energía que tendría el estudiante en {@code ahora}, sin modificar su estado. */
@@ -147,7 +162,8 @@ public class Estudiante extends Usuario {
     }
     Duration transcurrido = transcurridoDesdeActualizacion(ahora);
     Duration enCiclo =
-        transcurrido.minus(RECARGA_POR_UNIDAD.multipliedBy(transcurrido.dividedBy(RECARGA_POR_UNIDAD)));
+        transcurrido.minus(
+            RECARGA_POR_UNIDAD.multipliedBy(transcurrido.dividedBy(RECARGA_POR_UNIDAD)));
     return new EstadoEnergia(
         actual, ENERGIA_MAXIMA, RECARGA_POR_UNIDAD.minus(enCiclo).getSeconds());
   }
@@ -164,7 +180,9 @@ public class Estudiante extends Usuario {
     }
     energia = (int) Math.min(ENERGIA_MAXIMA, (long) energia + ciclos);
     energiaActualizada =
-        energia >= ENERGIA_MAXIMA ? ahora : energiaActualizada.plus(RECARGA_POR_UNIDAD.multipliedBy(ciclos));
+        energia >= ENERGIA_MAXIMA
+            ? ahora
+            : energiaActualizada.plus(RECARGA_POR_UNIDAD.multipliedBy(ciclos));
   }
 
   /** Resta una unidad de energía por una respuesta errónea. Devuelve false si ya no tenía. */

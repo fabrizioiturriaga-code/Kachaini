@@ -339,6 +339,71 @@ class PostgresIntegrationTest {
   }
 
   @Test
+  void progresoPersonalCombinaHistorialYRachaSinContarIntentosDesconocidos() throws Exception {
+    var sesion = ingresarConOnboarding("ana@example.org");
+    long id = usuarios.findByCorreo("ana@example.org").orElseThrow().getId();
+    jdbc.update(
+        "INSERT INTO intentos_leccion (estudiante_id, intento) VALUES (?, ?)",
+        id,
+        UUID.randomUUID());
+    jdbc.update(
+        "INSERT INTO lecciones_completadas (estudiante_id, leccion, fecha)"
+            + " VALUES (?, ?, now() - interval '24 hours')",
+        id,
+        Leccion.U1_PRIMEROS_POBLADORES.name());
+    jdbc.update(
+        "INSERT INTO misiones_completadas (estudiante_id, mision) VALUES (?, ?)", id, "BIENVENIDA");
+    jdbc.update("UPDATE estudiantes SET xp=30 WHERE id=?", id);
+    String ruta = "/estudiante/lecciones/" + Leccion.U1_CAZADORES_DEL_PERU.getCodigo();
+    int correcta = Leccion.U1_CAZADORES_DEL_PERU.getPregunta().respuestaCorrecta();
+
+    mvc.perform(get("/estudiante/perfil/progreso").session(sesion))
+        .andExpect(status().isOk())
+        .andExpect(
+            content().string(containsString("Todavía no hay intentos con resultado registrado.")));
+    String fallo = UUID.randomUUID().toString();
+    for (int envio = 0; envio < 2; envio++) {
+      mvc.perform(
+              post(ruta)
+                  .session(sesion)
+                  .with(csrf())
+                  .param("respuesta", Integer.toString((correcta + 1) % 3))
+                  .param("intento", fallo))
+          .andExpect(status().isOk());
+    }
+    mvc.perform(
+            post(ruta)
+                .session(sesion)
+                .with(csrf())
+                .param("respuesta", Integer.toString(correcta))
+                .param("intento", UUID.randomUUID().toString()))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("2 días")))
+        .andExpect(content().string(containsString("¡Sumaste un día!")));
+    mvc.perform(get("/inicio").session(sesion))
+        .andExpect(content().string(containsString("2 días")));
+    mvc.perform(get("/estudiante/perfil/progreso").session(sesion))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("<dd>50</dd>")))
+        .andExpect(content().string(containsString("2 de 3 lecciones")))
+        .andExpect(content().string(containsString("50 % de aciertos")))
+        .andExpect(content().string(containsString("1 acierto · 1 error")));
+    assertEquals(3, jdbc.queryForObject("SELECT count(*) FROM intentos_leccion", Integer.class));
+    assertEquals(
+        4, jdbc.queryForObject("SELECT energia FROM estudiantes WHERE id=?", Integer.class, id));
+
+    var otraSesion = ingresarConOnboarding("beto@example.org");
+    mvc.perform(
+            get("/estudiante/perfil/progreso")
+                .session(otraSesion)
+                .param("estudianteId", Long.toString(id)))
+        .andExpect(status().isOk())
+        .andExpect(
+            content().string(containsString("Todavía no hay intentos con resultado registrado.")))
+        .andExpect(content().string(not(containsString("<dd>50</dd>"))));
+  }
+
+  @Test
   void guardaTextoUnaVezYLoMuestraSoloAQuienLoEnvio() throws Exception {
     var sesion = ingresarConOnboarding("ana@example.org");
     String rutaEntrega = RUTA_LECCION + "/desarrollo";

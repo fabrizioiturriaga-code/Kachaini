@@ -3,6 +3,7 @@ package kanichi;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -104,7 +105,7 @@ class LecturaServiceTest {
     assertTrue(servicio.estaDisponible(1L, Lectura.HOMBRE_DE_LAURICOCHA));
     assertFalse(servicio.estaDisponible(1L, Lectura.CARAL_CIUDAD_SAGRADA));
 
-    Leccion.deUnidad(1).forEach(estudiante::registrarLeccion);
+    Leccion.deUnidad(1).forEach(leccion -> estudiante.registrarLeccion(leccion, Instant.EPOCH));
 
     assertTrue(servicio.estaDisponible(1L, Lectura.CARAL_CIUDAD_SAGRADA));
     ActividadPractica caral = servicio.listar(1L).get(1);

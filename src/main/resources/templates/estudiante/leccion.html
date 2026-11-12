@@ -18,6 +18,9 @@
       <p>Recompensa: <strong th:text="|${leccion.xp} XP|"></strong></p>
       <section th:if="${acierto != null or error != null}" tabindex="-1" data-enfocar-resultado>
         <p role="status" th:if="${acierto}" th:text="${acierto}"></p>
+        <th:block th:if="${acierto}">
+          <div th:replace="~{fragments/racha :: contador(${diasRacha}, ${rachaAumentada})}"></div>
+        </th:block>
         <p role="alert" th:if="${error}" th:text="${error}"></p>
         <p th:if="${respuestaElegida}">
           <strong>Tu respuesta:</strong> <span th:text="${respuestaElegida}"></span>

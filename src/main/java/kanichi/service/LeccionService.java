@@ -57,12 +57,14 @@ public class LeccionService {
   @Transactional(readOnly = true)
   public MapaAprendizaje obtenerMapa(Long estudianteId) {
     Estudiante estudiante = buscar(estudianteId);
+    Instant ahora = reloj.instant();
     return new MapaAprendizaje(
         mapaMisionesService.obtenerMapa(
             estudiante.getGrado(),
             estudiante.isOnboardingCompletado(),
             estudiante.getLeccionesCompletadas()),
-        estudiante.estadoEnergia(reloj.instant()));
+        estudiante.estadoEnergia(ahora),
+        estudiante.rachaEn(ahora).dias());
   }
 
   /** Detalle de la unidad {@code numero} (de 1 a {@link MapaMisionesService#totalUnidades()}). */
@@ -149,26 +151,28 @@ public class LeccionService {
     }
     if (estudiante.haCompletado(leccion)) {
       return new ResultadoLeccion(
-          Resultado.YA_COMPLETADA, 0, estudiante.estadoEnergia(ahora), false, null);
+          Resultado.YA_COMPLETADA, 0, estudiante.estadoEnergia(ahora), false, null, 0, false);
     }
     if (!estaDisponible(estudiante, leccion)) {
       throw new MisionNoPermitidaException("Completa primero la lección anterior.");
     }
     if (estudiante.estadoEnergia(ahora).isAgotada()) {
       return new ResultadoLeccion(
-          Resultado.SIN_ENERGIA, 0, estudiante.estadoEnergia(ahora), false, null);
+          Resultado.SIN_ENERGIA, 0, estudiante.estadoEnergia(ahora), false, null, 0, false);
     }
-    if (estudianteRepository.registrarIntento(estudianteId, intento) == 0) {
+    boolean correcta = leccion.aceptaRespuesta(respuesta);
+    if (estudianteRepository.registrarIntento(estudianteId, intento, correcta) == 0) {
       return new ResultadoLeccion(
-          Resultado.INTENTO_REPETIDO, 0, estudiante.estadoEnergia(ahora), false, null);
+          Resultado.INTENTO_REPETIDO, 0, estudiante.estadoEnergia(ahora), false, null, 0, false);
     }
-    if (!leccion.aceptaRespuesta(respuesta)) {
+    if (!correcta) {
       estudiante.perderEnergia(ahora);
       return new ResultadoLeccion(
-          Resultado.INCORRECTA, 0, estudiante.estadoEnergia(ahora), false, null);
+          Resultado.INCORRECTA, 0, estudiante.estadoEnergia(ahora), false, null, 0, false);
     }
 
-    estudiante.registrarLeccion(leccion);
+    boolean rachaAumentada = !estudiante.rachaEn(ahora).completadaHoy();
+    estudiante.registrarLeccion(leccion, ahora);
     boolean unidadCompletada =
         Leccion.deUnidad(leccion.getUnidad()).stream().allMatch(estudiante::haCompletado);
     Integer desbloqueada =
@@ -180,7 +184,9 @@ public class LeccionService {
         leccion.getXp(),
         estudiante.estadoEnergia(ahora),
         unidadCompletada,
-        desbloqueada);
+        desbloqueada,
+        estudiante.rachaEn(ahora).dias(),
+        rachaAumentada);
   }
 
   /** Las lecciones se completan en orden y solo después del módulo inicial. */

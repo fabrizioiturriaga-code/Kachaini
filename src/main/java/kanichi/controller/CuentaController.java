@@ -11,6 +11,7 @@ import kanichi.model.Estudiante;
 import kanichi.model.Rol;
 import kanichi.service.CambioContrasenaService;
 import kanichi.service.PerfilEstudianteService;
+import kanichi.service.ProgresoEstudianteService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,12 +25,21 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class CuentaController {
   private final PerfilEstudianteService perfilEstudianteService;
   private final CambioContrasenaService cambioContrasenaService;
+  private final ProgresoEstudianteService progresoEstudianteService;
 
   public CuentaController(
       PerfilEstudianteService perfilEstudianteService,
-      CambioContrasenaService cambioContrasenaService) {
+      CambioContrasenaService cambioContrasenaService,
+      ProgresoEstudianteService progresoEstudianteService) {
     this.perfilEstudianteService = perfilEstudianteService;
     this.cambioContrasenaService = cambioContrasenaService;
+    this.progresoEstudianteService = progresoEstudianteService;
+  }
+
+  @GetMapping("/estudiante/perfil/progreso")
+  public String progreso(@AuthenticationPrincipal UsuarioSesion usuario, Model model) {
+    model.addAttribute("progreso", progresoEstudianteService.obtener(usuario.getId()));
+    return "estudiante/progreso";
   }
 
   @GetMapping("/estudiante/perfil")
@@ -62,8 +72,7 @@ public class CuentaController {
     return "redirect:/estudiante/perfil";
   }
 
-  private void agregarDatosPerfil(
-      UsuarioSesion usuario, Estudiante estudiante, Model model) {
+  private void agregarDatosPerfil(UsuarioSesion usuario, Estudiante estudiante, Model model) {
     model.addAttribute("grado", estudiante.getGrado());
     model.addAttribute("seccion", estudiante.getSeccion());
     agregarNavegacion(usuario, model);
@@ -71,8 +80,7 @@ public class CuentaController {
   }
 
   @GetMapping("/cuenta/contrasena")
-  public String formularioContrasena(
-      @AuthenticationPrincipal UsuarioSesion usuario, Model model) {
+  public String formularioContrasena(@AuthenticationPrincipal UsuarioSesion usuario, Model model) {
     model.addAttribute("cambioContrasenaForm", new CambioContrasenaForm());
     agregarNavegacion(usuario, model);
     return "cuenta/contrasena";

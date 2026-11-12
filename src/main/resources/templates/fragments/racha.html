@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <p class="racha" th:fragment="contador(dias, aumentada)"
+       th:classappend="${aumentada} ? 'racha--aumentada'" role="status">
+      <span aria-hidden="true">🔥</span>
+      <strong>Racha actual:</strong>
+      <span th:text="|${dias} ${dias == 1 ? 'día' : 'días'}|">0 días</span>
+      <span th:if="${aumentada}">· ¡Sumaste un día!</span>
+    </p>
+  </body>
+</html>

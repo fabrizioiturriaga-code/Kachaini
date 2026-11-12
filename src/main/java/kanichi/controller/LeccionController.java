@@ -101,6 +101,8 @@ public class LeccionController {
         model.addAttribute("acierto", mensajeDeAcierto(leccion, resultado));
         model.addAttribute("explicacion", leccion.getPregunta().explicacion());
         model.addAttribute("unidadCompletada", resultado.unidadCompletada());
+        model.addAttribute("diasRacha", resultado.diasRacha());
+        model.addAttribute("rachaAumentada", resultado.rachaAumentada());
         agregarRespuestaElegida(model, leccion, respuesta);
         break;
       case YA_COMPLETADA:

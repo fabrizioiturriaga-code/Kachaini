@@ -41,7 +41,7 @@ class LeccionServiceTest {
     estudiante = new Estudiante("Ana", "ana@example.org", "hash", 1, "A");
     estudiante.completarOnboarding();
     t0 = Instant.now();
-    when(repository.registrarIntento(anyLong(), any(UUID.class))).thenReturn(1);
+    when(repository.registrarIntento(anyLong(), any(UUID.class), anyBoolean())).thenReturn(1);
     when(repository.findById(1L)).thenReturn(Optional.of(estudiante));
     when(repository.bloquearPorId(1L)).thenReturn(Optional.of(estudiante));
   }
@@ -64,6 +64,40 @@ class LeccionServiceTest {
     assertEquals(PRIMERA.getXp(), estudiante.getXp());
     assertTrue(estudiante.haCompletado(PRIMERA));
     assertEquals(5, resultado.energia().actual());
+  }
+
+  @Test
+  void rachaSumaUnaVezPorDiaDeLimaYReiniciaTrasUnDiaPerdido() {
+    Instant antesDeMedianoche = Instant.parse("2026-11-11T04:59:00Z");
+    Instant medianoche = Instant.parse("2026-11-11T05:00:00Z");
+    Leccion segunda = Leccion.U1_CAZADORES_DEL_PERU;
+    Leccion tercera = Leccion.U1_AGRICULTURA;
+    Leccion cuarta = Leccion.deUnidad(2).get(0);
+
+    var primera = servicioEn(antesDeMedianoche).responder(1L, PRIMERA, CORRECTA, UUID.randomUUID());
+    assertEquals(1, primera.diasRacha());
+    assertTrue(primera.rachaAumentada());
+    assertEquals(1, servicioEn(medianoche).obtenerMapa(1L).diasRacha());
+
+    var consecutiva =
+        servicioEn(medianoche)
+            .responder(1L, segunda, segunda.getPregunta().respuestaCorrecta(), UUID.randomUUID());
+    assertEquals(2, consecutiva.diasRacha());
+    assertTrue(consecutiva.rachaAumentada());
+    var mismoDia =
+        servicioEn(medianoche.plus(Duration.ofHours(3)))
+            .responder(1L, tercera, tercera.getPregunta().respuestaCorrecta(), UUID.randomUUID());
+    assertEquals(2, mismoDia.diasRacha());
+    assertFalse(mismoDia.rachaAumentada());
+    assertEquals(20, mismoDia.xpGanada());
+
+    Instant trasUnDiaPerdido = medianoche.plus(Duration.ofDays(2));
+    assertEquals(0, servicioEn(trasUnDiaPerdido).obtenerMapa(1L).diasRacha());
+    var reinicio =
+        servicioEn(trasUnDiaPerdido)
+            .responder(1L, cuarta, cuarta.getPregunta().respuestaCorrecta(), UUID.randomUUID());
+    assertEquals(1, reinicio.diasRacha());
+    assertTrue(reinicio.rachaAumentada());
   }
 
   @Test

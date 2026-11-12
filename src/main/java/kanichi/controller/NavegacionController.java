@@ -41,6 +41,7 @@ public class NavegacionController {
         "unidadActiva",
         mapa.unidades().stream().filter(UnidadMapa::isActiva).findFirst().orElse(null));
     model.addAttribute("energia", mapa.energia());
+    model.addAttribute("diasRacha", mapa.diasRacha());
     return "estudiante/inicio";
   }
 

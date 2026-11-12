@@ -13,7 +13,9 @@ public record ResultadoLeccion(
     int xpGanada,
     EstadoEnergia energia,
     boolean unidadCompletada,
-    Integer unidadDesbloqueada) {
+    Integer unidadDesbloqueada,
+    int diasRacha,
+    boolean rachaAumentada) {
 
   public enum Resultado {
     CORRECTA,

@@ -3,6 +3,7 @@ package kanichi;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -79,7 +80,7 @@ class ArrastreServiceTest {
     assertTrue(servicio.estaDisponible(1L, ActividadArrastre.LUGARES_DEL_POBLAMIENTO));
     assertFalse(servicio.estaDisponible(1L, ACTIVIDAD));
 
-    Leccion.deUnidad(1).forEach(estudiante::registrarLeccion);
+    Leccion.deUnidad(1).forEach(leccion -> estudiante.registrarLeccion(leccion, Instant.EPOCH));
 
     assertTrue(servicio.estaDisponible(1L, ACTIVIDAD));
     assertEquals(

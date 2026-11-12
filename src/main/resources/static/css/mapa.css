@@ -138,6 +138,44 @@
   overflow-wrap: anywhere;
 }
 
+.racha {
+  margin: 1rem 0;
+  padding: .65rem .85rem;
+  border-radius: .5rem;
+  color: #65330a;
+  background: #fff1d6;
+}
+
+.racha--aumentada {
+  animation: racha-aumento 450ms ease-out;
+}
+
+@keyframes racha-aumento {
+  40% { transform: scale(1.03); background: #ffdd8d; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .racha--aumentada { animation: none; }
+}
+
+.estadisticas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: .75rem;
+}
+
+.estadisticas div {
+  padding: .75rem;
+  border: 1px solid #d7dce5;
+  border-radius: .5rem;
+}
+
+.estadisticas dd {
+  margin: .25rem 0 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
 .accesos {
   display: flex;
   flex-wrap: wrap;

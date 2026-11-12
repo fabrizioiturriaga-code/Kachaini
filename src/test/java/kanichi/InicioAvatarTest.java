@@ -56,7 +56,7 @@ class InicioAvatarTest {
     when(leccionService.obtenerMapa(1L))
         .thenReturn(
             new MapaAprendizaje(
-                new MapaMisionesService().obtenerMapa(1, true), new EstadoEnergia(4, 5, 300)));
+                new MapaMisionesService().obtenerMapa(1, true), new EstadoEnergia(4, 5, 300), 0));
     when(moduloInicialService.obtenerProgreso(1L))
         .thenReturn(new ProgresoModulo(List.of(), 10, List.of(Logro.PRIMEROS_PASOS), false));
     when(rankingService.obtenerRankingDelSalon(1L))

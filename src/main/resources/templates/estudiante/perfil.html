@@ -13,6 +13,7 @@
       <h1>Mi perfil</h1>
       <p>Grado: <span th:text="${grado}"></span></p>
       <p>Sección: <span th:text="${seccion}"></span></p>
+      <p><a th:href="@{/estudiante/perfil/progreso}">Mi progreso</a></p>
       <p role="status" th:if="${mensaje}" th:text="${mensaje}"></p>
       <form method="post" th:action="@{/estudiante/perfil}" th:object="${perfilForm}" data-autoguardado>
         <div role="alert" tabindex="-1" th:if="${#fields.hasAnyErrors()}">
