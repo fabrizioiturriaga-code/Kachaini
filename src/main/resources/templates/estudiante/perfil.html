@@ -6,6 +6,7 @@
     <title>Perfil estudiantil · Kaichaini</title>
     <link rel="stylesheet" th:href="@{/css/auth.css}">
     <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/logros.css}">
     <script defer th:src="@{/js/perfil.js}"></script>
   </head>
   <body class="con-barra-inferior">
@@ -30,6 +31,38 @@
         <p role="alert" th:errors="*{avatar}"></p>
         <button type="submit">Guardar perfil</button>
       </form>
+      <section aria-labelledby="titulo-recompensas" th:if="${recompensas}">
+        <h2 id="titulo-recompensas">Mis recompensas</h2>
+        <p>
+          <strong th:text="|Nivel ${recompensas.nivel().numero()}|">Nivel 1</strong>
+          · <span th:text="|${recompensas.nivel().xpTotal()} XP en total|">0 XP</span>
+        </p>
+        <progress th:max="${recompensas.nivel().xpPorNivel()}" th:value="${recompensas.nivel().xpEnNivel()}"
+                  aria-label="Avance hacia el siguiente nivel"></progress>
+        <p th:text="|Te faltan ${recompensas.nivel().xpParaSiguiente()} XP para el nivel ${recompensas.nivel().numero() + 1}.|"></p>
+
+        <h3 th:text="|Coleccionables (${recompensas.coleccionables().size()} de ${recompensas.totalColeccionables()})|">Coleccionables</h3>
+        <p th:if="${recompensas.coleccionables().isEmpty()}">
+          Obtén 80 % o más en una lectura o actividad de arrastre para ganar tu primer coleccionable.
+        </p>
+        <ul class="coleccion" th:unless="${recompensas.coleccionables().isEmpty()}">
+          <li class="insignia insignia--obtenida" th:each="item : ${recompensas.coleccionables()}">
+            <span class="insignia__icono" aria-hidden="true" th:text="${item.icono}">🏺</span>
+            <strong th:text="${item.nombre}">Coleccionable</strong>
+          </li>
+        </ul>
+
+        <h3>Historial de recompensas</h3>
+        <p th:if="${recompensas.historial().isEmpty()}">Todavía no tienes recompensas.</p>
+        <ol th:unless="${recompensas.historial().isEmpty()}">
+          <li th:each="entrada : ${recompensas.historial()}">
+            <span aria-hidden="true" th:text="${entrada.icono()}">⭐</span>
+            <span th:text="${entrada.descripcion()}">Recompensa</span>
+            <strong th:if="${entrada.xp() != null}" th:text="|+${entrada.xp()} XP|"></strong>
+            <small th:text="${entrada.fechaTexto()}">01/01/2026</small>
+          </li>
+        </ol>
+      </section>
       <a th:href="@{/cuenta/contrasena}">Cambiar contraseña</a>
       <a th:href="${destino}">Volver</a>
       <form method="post" th:action="@{/logout}" class="cerrar-sesion">

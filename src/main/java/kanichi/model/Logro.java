@@ -39,7 +39,17 @@ public enum Logro {
       "Maestro del grado",
       "🏆",
       "Completaste todas las lecciones de tu grado.",
-      "Completa todas las unidades del mapa de tu grado.");
+      "Completa todas las unidades del mapa de tu grado."),
+  PRACTICA_DESTACADA(
+      "Estudiante destacado",
+      "🌟",
+      "Obtuviste 80 % o más en una práctica.",
+      "Obtén 80 % o más de aciertos en una lectura o actividad de arrastre."),
+  TRABAJO_EN_EQUIPO(
+      "Trabajo en equipo",
+      "🤝",
+      "Completaste un desafío con un compañero.",
+      "Completa un desafío entre estudiantes.");
 
   /** XP necesaria para {@link #CIEN_XP}. */
   public static final int XP_PARA_CIEN_XP = 100;

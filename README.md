@@ -46,3 +46,5 @@ La aplicación queda disponible en [localhost:8080](http://localhost:8080). Las 
 [Lecturas y arrastrar y soltar: HU-24 y HU-25](docs/lecturas-y-arrastre.md).
 
 [Contenido de Historia por grado](docs/contenido-por-grado.md).
+
+[Recompensas, desafíos y ligas: HU-16, HU-17 y HU-21](docs/recompensas-desafios-y-ligas.md).

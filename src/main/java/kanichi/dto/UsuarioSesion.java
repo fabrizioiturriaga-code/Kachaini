@@ -62,7 +62,6 @@ public class UsuarioSesion extends User {
     return onboardingCompletado;
   }
 
-  /** Actualiza la identidad de la sesión cuando el estudiante termina el módulo inicial. */
   public void marcarOnboardingCompletado() {
     this.onboardingCompletado = true;
   }

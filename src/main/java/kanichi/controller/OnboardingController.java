@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-/** HU-06: módulo inicial con tutorial, lecciones básicas y misiones introductorias. */
 @Controller
 public class OnboardingController {
   private final ModuloInicialService moduloInicialService;

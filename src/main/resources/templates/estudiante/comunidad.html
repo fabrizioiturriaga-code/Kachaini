@@ -11,6 +11,8 @@
   <body class="con-barra-inferior">
     <main>
       <h1><span aria-hidden="true">❤️</span> Comunidad</h1>
+      <p role="status" th:each="aviso : ${notificaciones}" th:text="${aviso}"></p>
+      <p><a th:href="@{/estudiante/desafios}">🤝 Desafíos entre estudiantes</a></p>
       <section aria-labelledby="titulo-ranking">
         <h2 id="titulo-ranking">Ranking semanal de tu salón</h2>
         <p th:text="|${ranking.grado()}.° grado · Sección ${ranking.seccion()}|"></p>
@@ -31,6 +33,8 @@
                         aria-label="Avance hacia la siguiente liga"></progress>
             </th:block>
             <p th:if="${ranking.siguienteLiga() == null}">¡Estás en la liga más alta!</p>
+            <p th:if="${ranking.xpParaMantenerLiga() > 0}"
+               th:text="|Gana ${ranking.xpParaMantenerLiga()} XP más esta semana para mantenerte en ${ranking.miLiga().nombre}.|"></p>
           </div>
         </div>
 

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <th:block th:fragment="bloque(recompensa)">
+      <th:block th:if="${recompensa != null}">
+        <p th:text="|Calificación: ${recompensa.porcentaje()} %|">Calificación</p>
+        <div class="logro-desbloqueado" role="status" th:if="${recompensa.otorgada()}">
+          <p class="logro-desbloqueado__titulo">🎉 ¡Recompensa obtenida!</p>
+          <p><strong th:text="|+${recompensa.xp()} XP|">+15 XP</strong></p>
+          <div class="insignia insignia--obtenida" th:if="${recompensa.coleccionable() != null}">
+            <span class="insignia__icono" aria-hidden="true"
+                  th:text="${recompensa.coleccionable().icono}">🏺</span>
+            <strong th:text="${recompensa.coleccionable().nombre}">Coleccionable</strong>
+            <p class="insignia__descripcion">Nuevo elemento para tu colección.</p>
+          </div>
+          <div class="insignia insignia--obtenida" th:each="logro : ${recompensa.logros()}">
+            <span class="insignia__icono" aria-hidden="true" th:text="${logro.icono}">🏅</span>
+            <strong th:text="${logro.nombre}">Logro</strong>
+            <p class="insignia__descripcion" th:text="${logro.descripcion}"></p>
+          </div>
+          <a th:href="@{/estudiante/perfil}">Ver mis recompensas</a>
+        </div>
+        <p th:if="${recompensa.yaRecompensada()}">
+          Ya recibiste la recompensa de esta práctica. ¡Sigue practicando!
+        </p>
+        <p th:unless="${recompensa.aprobada()}">Obtén 80 % o más de aciertos para ganar recompensas.</p>
+        <p role="status" th:each="aviso : ${recompensa.notificaciones()}" th:text="${aviso}"></p>
+      </th:block>
+    </th:block>
+  </body>
+</html>

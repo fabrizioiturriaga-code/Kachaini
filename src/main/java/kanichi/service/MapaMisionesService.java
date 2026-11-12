@@ -23,10 +23,6 @@ public class MapaMisionesService {
           "El Perú en el siglo XX",
           "El Perú contemporáneo");
 
-  /**
-   * Las unidades permanecen bloqueadas hasta completar el módulo inicial (HU-06); al completarlo
-   * se desbloquea automáticamente la primera.
-   */
   public List<UnidadMapa> obtenerMapa(int grado, boolean moduloInicialCompletado) {
     return obtenerMapa(grado, moduloInicialCompletado, Set.of());
   }

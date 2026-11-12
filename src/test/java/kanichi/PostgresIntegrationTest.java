@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.*;
 import kanichi.dto.RegistroForm;
@@ -66,6 +67,86 @@ class PostgresIntegrationTest {
   @Autowired AuthService auth;
   @Autowired UsuarioRepository usuarios;
   @Autowired JdbcTemplate jdbc;
+  @Autowired kanichi.service.RecompensaService recompensas;
+  @Autowired kanichi.service.DesafioService desafios;
+  @Autowired kanichi.service.LigaService ligas;
+
+  @Test
+  void recompensasDesafioYLigaConPostgres() throws Exception {
+    auth.registrar(form("ana@example.org"));
+    auth.registrar(form("luis@example.org"));
+    Long ana = usuarios.findByCorreo("ana@example.org").orElseThrow().getId();
+    Long luis = usuarios.findByCorreo("luis@example.org").orElseThrow().getId();
+    var lectura = kanichi.model.Lectura.HOMBRE_DE_LAURICOCHA.getCodigo();
+    var arrastre = kanichi.model.ActividadArrastre.LUGARES_DEL_POBLAMIENTO.getCodigo();
+    var LECTURA = kanichi.model.TipoPractica.LECTURA;
+    var ARRASTRE = kanichi.model.TipoPractica.ARRASTRE;
+
+    var primera = recompensas.registrarPractica(ana, LECTURA, lectura, 1, 4, 4);
+    assertTrue(primera.otorgada());
+    assertEquals(kanichi.model.Coleccionable.PUNTA_DE_PROYECTIL, primera.coleccionable());
+    assertFalse(recompensas.registrarPractica(ana, LECTURA, lectura, 1, 4, 4).otorgada());
+    assertFalse(recompensas.registrarPractica(ana, LECTURA, lectura, 1, 3, 4).aprobada());
+    var resumen = recompensas.resumen(ana);
+    assertTrue(
+        resumen.historial().stream().anyMatch(e -> e.descripcion().startsWith("Lectura aprobada")));
+    assertTrue(
+        resumen.historial().stream()
+            .anyMatch(e -> e.descripcion().equals("Insignia obtenida: Estudiante destacado")));
+
+    assertThrows(
+        kanichi.exception.DesafioInvalidoException.class,
+        () -> desafios.crear(luis, ana, null, kanichi.model.TipoDesafio.DUO_EN_MARCHA));
+    desafios.crear(ana, null, "LUIS@example.org", kanichi.model.TipoDesafio.DUO_EN_MARCHA);
+    Long desafio = jdbc.queryForObject("SELECT id FROM desafios", Long.class);
+    assertEquals(1, desafios.panel(luis).invitaciones().size());
+    desafios.aceptar(luis, desafio);
+
+    recompensas.registrarPractica(ana, ARRASTRE, arrastre, 1, 4, 4);
+    recompensas.registrarPractica(ana, ARRASTRE, arrastre, 1, 4, 4);
+    recompensas.registrarPractica(luis, LECTURA, lectura, 1, 4, 4);
+    recompensas.registrarPractica(luis, LECTURA, lectura, 1, 4, 4);
+
+    var panel = desafios.panel(ana);
+    assertEquals(kanichi.model.Desafio.Estado.COMPLETADO, panel.desafios().get(0).estado());
+    assertEquals(4, panel.desafios().get(0).tareas());
+    assertEquals(1, panel.notificaciones().size());
+    int duo = kanichi.model.TipoDesafio.DUO_EN_MARCHA.getXpRecompensa();
+    assertEquals(15 + 15 + duo, xp(ana));
+    assertEquals(15 + duo, xp(luis));
+
+    List<String> avisos = ligas.actualizarYNotificar(ana);
+    assertEquals(1, avisos.size());
+    assertTrue(avisos.get(0).contains("Liga Panaca"));
+    assertTrue(ligas.actualizarYNotificar(ana).isEmpty());
+    assertEquals(
+        "PANACA", jdbc.queryForObject("SELECT liga FROM estudiantes WHERE id = ?", String.class, ana));
+
+    var sesion =
+        (MockHttpSession)
+            mvc.perform(
+                    post("/login")
+                        .with(csrf())
+                        .param("correo", "luis@example.org")
+                        .param("contrasena", "Historia123"))
+                .andReturn()
+                .getRequest()
+                .getSession(false);
+    mvc.perform(get("/estudiante/comunidad").session(sesion))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("¡Ascendiste a Liga Panaca")));
+    mvc.perform(get("/estudiante/perfil").session(sesion))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("Desafío completado: Dúo en marcha")));
+    mvc.perform(get("/estudiante/desafios").session(sesion))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("Completado")));
+  }
+
+  private int xp(Long estudianteId) {
+    return jdbc.queryForObject(
+        "SELECT xp FROM estudiantes WHERE id = ?", Integer.class, estudianteId);
+  }
 
   @BeforeEach
   void clean() {

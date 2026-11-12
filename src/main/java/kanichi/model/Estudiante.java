@@ -12,6 +12,7 @@ import jakarta.persistence.MapKeyEnumerated;
 import jakarta.persistence.Table;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -70,6 +71,13 @@ public class Estudiante extends Usuario {
   @Column(name = "energia_actualizada", nullable = false)
   private Instant energiaActualizada = Instant.now();
 
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, length = 20)
+  private Liga liga = Liga.AMAUTA;
+
+  @Column(name = "liga_semana")
+  private LocalDate ligaSemana;
+
   protected Estudiante() {}
 
   public Estudiante(
@@ -115,7 +123,6 @@ public class Estudiante extends Usuario {
     return misionesCompletadas.size();
   }
 
-  /** Registra la misión y suma su XP. Devuelve false si ya estaba completada. */
   public boolean registrarMision(MisionInicial mision) {
     if (!misionesCompletadas.add(mision)) {
       return false;
@@ -128,9 +135,31 @@ public class Estudiante extends Usuario {
     return logros.contains(logro);
   }
 
-  /** Otorga el logro. Devuelve false si ya lo tenía. */
   public boolean otorgarLogro(Logro logro) {
     return logros.add(logro);
+  }
+
+  public void sumarXp(int cantidad) {
+    if (cantidad < 0) {
+      throw new IllegalArgumentException("La XP no puede ser negativa.");
+    }
+    xp += cantidad;
+  }
+
+  public Liga getLiga() {
+    return liga;
+  }
+
+  public LocalDate getLigaSemana() {
+    return ligaSemana;
+  }
+
+  public void cambiarLiga(Liga liga) {
+    this.liga = liga;
+  }
+
+  public void evaluarLigaEnSemana(LocalDate lunes) {
+    this.ligaSemana = lunes;
   }
 
   public boolean haCompletado(Leccion leccion) {

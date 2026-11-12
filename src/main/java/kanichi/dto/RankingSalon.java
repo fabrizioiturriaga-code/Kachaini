@@ -14,16 +14,38 @@ public record RankingSalon(
     int xpSemanaPasada,
     int xpTotal,
     LocalDate inicioSemana,
-    LocalDate finSemana) {
+    LocalDate finSemana,
+    Liga ligaGuardada) {
 
   private static final DateTimeFormatter FORMATO_DIA = DateTimeFormatter.ofPattern("dd/MM");
 
-  
   public RankingSalon(
       int grado, String seccion, List<Posicion> posiciones, long miPosicion, int miXp) {
-    this(grado, seccion, posiciones, miPosicion, miXp, 0, miXp, null, null);
+    this(grado, seccion, posiciones, miPosicion, miXp, 0, miXp, null, null, null);
   }
 
+  public RankingSalon(
+      int grado,
+      String seccion,
+      List<Posicion> posiciones,
+      long miPosicion,
+      int miXp,
+      int xpSemanaPasada,
+      int xpTotal,
+      LocalDate inicioSemana,
+      LocalDate finSemana) {
+    this(
+        grado,
+        seccion,
+        posiciones,
+        miPosicion,
+        miXp,
+        xpSemanaPasada,
+        xpTotal,
+        inicioSemana,
+        finSemana,
+        null);
+  }
 
   public String rangoSemana() {
     if (inicioSemana == null || finSemana == null) {
@@ -33,7 +55,7 @@ public record RankingSalon(
   }
 
   public Liga miLiga() {
-    return Liga.para(miXp);
+    return ligaGuardada != null ? ligaGuardada : Liga.para(miXp);
   }
 
   public Liga siguienteLiga() {
@@ -42,12 +64,21 @@ public record RankingSalon(
 
   public int xpParaSiguienteLiga() {
     Liga siguiente = siguienteLiga();
-    return siguiente == null ? 0 : siguiente.getXpMinima() - miXp;
+    return siguiente == null ? 0 : Math.max(0, siguiente.getXpMinima() - miXp);
   }
 
-  public record Posicion(int puesto, String nombre, String avatar, int xp, boolean esActual) {
+  public int xpParaMantenerLiga() {
+    return Math.max(0, miLiga().getXpMinima() - miXp);
+  }
+
+  public record Posicion(
+      int puesto, String nombre, String avatar, int xp, boolean esActual, Liga ligaGuardada) {
+    public Posicion(int puesto, String nombre, String avatar, int xp, boolean esActual) {
+      this(puesto, nombre, avatar, xp, esActual, null);
+    }
+
     public Liga liga() {
-      return Liga.para(xp);
+      return ligaGuardada != null ? ligaGuardada : Liga.para(xp);
     }
   }
 }

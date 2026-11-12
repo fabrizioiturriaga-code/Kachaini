@@ -10,6 +10,7 @@ import kanichi.dto.UsuarioSesion;
 import kanichi.model.Liga;
 import kanichi.model.Logro;
 import kanichi.service.LeccionService;
+import kanichi.service.LigaService;
 import kanichi.service.ModuloInicialService;
 import kanichi.service.RankingService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,14 +23,17 @@ public class NavegacionController {
   private final LeccionService leccionService;
   private final ModuloInicialService moduloInicialService;
   private final RankingService rankingService;
+  private final LigaService ligaService;
 
   public NavegacionController(
       LeccionService leccionService,
       ModuloInicialService moduloInicialService,
-      RankingService rankingService) {
+      RankingService rankingService,
+      LigaService ligaService) {
     this.leccionService = leccionService;
     this.moduloInicialService = moduloInicialService;
     this.rankingService = rankingService;
+    this.ligaService = ligaService;
   }
 
   @GetMapping("/inicio")
@@ -37,6 +41,7 @@ public class NavegacionController {
     if (!usuario.isOnboardingCompletado()) {
       return "redirect:/onboarding";
     }
+    model.addAttribute("notificaciones", ligaService.actualizarYNotificar(usuario.getId()));
     MapaAprendizaje mapa = leccionService.obtenerMapa(usuario.getId());
     model.addAttribute("nombre", usuario.getNombre());
     model.addAttribute("unidades", mapa.unidades());
@@ -57,6 +62,8 @@ public class NavegacionController {
 
   @GetMapping("/estudiante/comunidad")
   public String comunidad(@AuthenticationPrincipal UsuarioSesion usuario, Model model) {
+    model.addAttribute(
+        "notificaciones", ligaService.actualizarSalonYNotificar(usuario.getId()));
     model.addAttribute("ranking", rankingService.obtenerRankingDelSalon(usuario.getId()));
     List<Liga> ligas = new ArrayList<>(Arrays.asList(Liga.values()));
     Collections.reverse(ligas);

@@ -29,6 +29,10 @@ public enum Liga {
     return liga;
   }
 
+  public Optional<Liga> anterior() {
+    return ordinal() == 0 ? Optional.empty() : Optional.of(values()[ordinal() - 1]);
+  }
+
   public Optional<Liga> siguiente() {
     return Arrays.stream(values()).filter(l -> l.ordinal() == ordinal() + 1).findFirst();
   }

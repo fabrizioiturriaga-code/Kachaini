@@ -48,6 +48,7 @@ class LecturaControllerTest {
   @MockBean UsuarioRepository usuarios;
   @MockBean LimiteIntentosLogin limiteIntentosLogin;
   @MockBean LecturaService lecturaService;
+  @MockBean kanichi.service.RecompensaService recompensaService;
 
   @BeforeEach
   void setup() {
@@ -99,6 +100,41 @@ class LecturaControllerTest {
         .andExpect(content().string(containsString("name=\"respuestas[3]\"")))
         .andExpect(content().string(containsString("Escuchar el texto")))
         .andExpect(content().string(containsString("Enviar respuestas")));
+  }
+
+  @Test
+  void hu16AlAprobarSeMuestraLaRecompensa() throws Exception {
+    when(recompensaService.registrarPractica(
+            eq(1L),
+            eq(kanichi.model.TipoPractica.LECTURA),
+            eq(LECTURA.getCodigo()),
+            eq(LECTURA.getUnidad()),
+            org.mockito.ArgumentMatchers.anyInt(),
+            eq(LECTURA.getPreguntas().size())))
+        .thenReturn(
+            new kanichi.dto.RecompensaObtenida(
+                100,
+                true,
+                false,
+                15,
+                kanichi.model.Coleccionable.PUNTA_DE_PROYECTIL,
+                List.of(kanichi.model.Logro.PRACTICA_DESTACADA),
+                List.of("🎉 ¡Ascendiste a Liga Panaca 🥈! Alcanzaste 40 XP esta semana.")));
+
+    mvc.perform(
+            post(RUTA)
+                .param("respuestas[0]", "1")
+                .param("respuestas[1]", "0")
+                .param("respuestas[2]", "0")
+                .param("respuestas[3]", "0")
+                .with(csrf())
+                .with(user(estudiante())))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("¡Recompensa obtenida!")))
+        .andExpect(content().string(containsString("+15 XP")))
+        .andExpect(content().string(containsString("Punta de proyectil")))
+        .andExpect(content().string(containsString("Estudiante destacado")))
+        .andExpect(content().string(containsString("Ascendiste a Liga Panaca")));
   }
 
   @Test

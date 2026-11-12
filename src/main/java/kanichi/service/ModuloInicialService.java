@@ -14,7 +14,6 @@ import kanichi.repository.EstudianteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** HU-06: módulo inicial con misiones introductorias, recompensas y desbloqueo del mapa. */
 @Service
 public class ModuloInicialService {
   private final EstudianteRepository estudianteRepository;

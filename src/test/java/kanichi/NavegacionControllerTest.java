@@ -53,6 +53,7 @@ class NavegacionControllerTest {
   @MockBean ModuloInicialService moduloInicialService;
   @MockBean RankingService rankingService;
   @MockBean LeccionService leccionService;
+  @MockBean kanichi.service.LigaService ligaService;
 
   @BeforeEach
   void setup() {
@@ -186,6 +187,48 @@ class NavegacionControllerTest {
         .andExpect(content().string(containsString("Semana del 09/11 al 15/11")))
         .andExpect(content().string(containsString("¡Estás en la liga más alta!")))
         .andExpect(content().string(containsString("60 XP la semana pasada · 250 XP en total")));
+  }
+
+  @Test
+  void hu21ComunidadUsaLaLigaGuardadaYMuestraLaNotificacion() throws Exception {
+    when(ligaService.actualizarSalonYNotificar(1L))
+        .thenReturn(List.of("🎉 ¡Ascendiste a Liga Auqui 🥇! Alcanzaste 80 XP esta semana."));
+    when(rankingService.obtenerRankingDelSalon(1L))
+        .thenReturn(
+            new RankingSalon(
+                1,
+                "A",
+                List.of(
+                    new RankingSalon.Posicion(
+                        1, "Ana", "✨", 20, true, kanichi.model.Liga.AUQUI)),
+                1,
+                20,
+                0,
+                200,
+                null,
+                null,
+                kanichi.model.Liga.AUQUI));
+
+    mvc.perform(get("/estudiante/comunidad").with(user(estudianteSesion())))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("¡Ascendiste a Liga Auqui")))
+        .andExpect(content().string(containsString("<strong>Liga Auqui</strong>")))
+        .andExpect(content().string(containsString("Te faltan 100 XP para subir a Liga Inca")))
+        .andExpect(
+            content()
+                .string(
+                    containsString("Gana 60 XP más esta semana para mantenerte en Liga Auqui")))
+        .andExpect(content().string(containsString("href=\"/estudiante/desafios\"")));
+  }
+
+  @Test
+  void hu21InicioMuestraLaNotificacionDeLiga() throws Exception {
+    when(ligaService.actualizarYNotificar(1L))
+        .thenReturn(List.of("🎉 ¡Ascendiste a Liga Panaca 🥈! Alcanzaste 40 XP esta semana."));
+
+    mvc.perform(get("/inicio").with(user(estudianteSesion())))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("¡Ascendiste a Liga Panaca")));
   }
 
   @Test

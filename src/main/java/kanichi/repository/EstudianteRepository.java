@@ -95,6 +95,24 @@ public interface EstudianteRepository extends JpaRepository<Estudiante, Long> {
       @Param("desde") Instant desde,
       @Param("hasta") Instant hasta);
 
+  List<Estudiante> findByGradoAndSeccionOrderByNombreAsc(Integer grado, String seccion);
+
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("select e from Estudiante e where e.grado = :grado and e.seccion = :seccion order by e.id")
+  List<Estudiante> bloquearSalon(@Param("grado") Integer grado, @Param("seccion") String seccion);
+
+  @Query(
+      "select e.id as id, e.liga as liga from Estudiante e"
+          + " where e.grado = :grado and e.seccion = :seccion")
+  List<LigaDeEstudiante> ligasDelSalon(
+      @Param("grado") Integer grado, @Param("seccion") String seccion);
+
+  interface LigaDeEstudiante {
+    Long getId();
+
+    kanichi.model.Liga getLiga();
+  }
+
   interface XpDelPeriodo {
     Long getId();
 

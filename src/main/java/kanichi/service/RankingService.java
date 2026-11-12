@@ -7,11 +7,14 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import kanichi.dto.RankingSalon;
 import kanichi.dto.RankingSalon.Posicion;
 import kanichi.model.AvatarEstudiante;
 import kanichi.model.Estudiante;
+import kanichi.model.Liga;
 import kanichi.repository.EstudianteRepository;
 import kanichi.repository.EstudianteRepository.XpDelPeriodo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +56,11 @@ public class RankingService {
     List<XpDelPeriodo> salon =
         estudianteRepository.xpDelSalonEntre(actual.getGrado(), actual.getSeccion(), inicio, fin);
 
+    Map<Long, Liga> ligas = new HashMap<>();
+    estudianteRepository
+        .ligasDelSalon(actual.getGrado(), actual.getSeccion())
+        .forEach(fila -> ligas.put(fila.getId(), fila.getLiga()));
+
     List<Posicion> posiciones = new ArrayList<>();
     int miXp = 0;
     long miPosicion = 1;
@@ -67,7 +75,13 @@ public class RankingService {
         miPosicion = puesto;
       }
       posiciones.add(
-          new Posicion(puesto, fila.getNombre(), iconoDe(fila.getAvatar()), xp, esActual));
+          new Posicion(
+              puesto,
+              fila.getNombre(),
+              iconoDe(fila.getAvatar()),
+              xp,
+              esActual,
+              ligas.get(fila.getId())));
     }
 
     return new RankingSalon(
@@ -79,7 +93,8 @@ public class RankingService {
         estudianteRepository.sumarXpEntre(estudianteId, inicioSemanaPasada, inicio),
         actual.getXp(),
         lunes,
-        lunes.plusDays(6));
+        lunes.plusDays(6),
+        ligas.get(actual.getId()));
   }
 
   private static String iconoDe(String avatar) {

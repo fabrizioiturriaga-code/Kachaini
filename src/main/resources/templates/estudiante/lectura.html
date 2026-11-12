@@ -7,6 +7,7 @@
     <link rel="stylesheet" th:href="@{/css/auth.css}">
     <link rel="stylesheet" th:href="@{/css/navegacion.css}">
     <link rel="stylesheet" th:href="@{/css/practica.css}">
+    <link rel="stylesheet" th:href="@{/css/logros.css}">
     <script defer th:src="@{/js/lectura.js}"></script>
   </head>
   <body class="con-barra-inferior">
@@ -27,6 +28,7 @@
           <h2 id="titulo-resumen">Resumen de tus respuestas</h2>
           <p role="status" th:text="|Acertaste ${resultado.aciertos()} de ${resultado.total()} preguntas.|"></p>
           <p th:if="${resultado.isPerfecto()}">¡Excelente! Comprendiste todo el texto.</p>
+          <th:block th:replace="~{fragments/recompensa :: bloque(${recompensa})}"></th:block>
           <table class="lectura__resumen">
             <caption>Aciertos y errores por tema</caption>
             <thead>
