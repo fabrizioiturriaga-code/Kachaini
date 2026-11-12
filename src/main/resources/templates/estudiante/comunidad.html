@@ -6,27 +6,54 @@
     <title>Comunidad · Kaichaini</title>
     <link rel="stylesheet" th:href="@{/css/auth.css}">
     <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/logros.css}">
   </head>
   <body class="con-barra-inferior">
     <main>
       <h1><span aria-hidden="true">❤️</span> Comunidad</h1>
       <section aria-labelledby="titulo-ranking">
-        <h2 id="titulo-ranking">Ranking de tu salón</h2>
+        <h2 id="titulo-ranking">Ranking semanal de tu salón</h2>
         <p th:text="|${ranking.grado()}.° grado · Sección ${ranking.seccion()}|"></p>
-        <p>
-          Tu puesto: <strong th:text="${ranking.miPosicion()}">1</strong>
-          · XP: <strong th:text="${ranking.miXp()}">0</strong>
-        </p>
-        <ol>
+        <p th:if="${ranking.inicioSemana() != null}"
+           th:text="|Semana del ${ranking.rangoSemana()}. El ranking se reinicia cada lunes.|"></p>
+
+        <div class="liga-actual" role="status">
+          <span class="liga-actual__icono" aria-hidden="true" th:text="${ranking.miLiga().icono}">🥉</span>
+          <div>
+            <p><strong th:text="${ranking.miLiga().nombre}">Liga Amauta</strong></p>
+            <p>
+              Tu puesto: <strong th:text="${ranking.miPosicion()}">1</strong>
+              · XP esta semana: <strong th:text="${ranking.miXp()}">0</strong>
+            </p>
+            <th:block th:if="${ranking.siguienteLiga() != null}">
+              <p th:text="|Te faltan ${ranking.xpParaSiguienteLiga()} XP para subir a ${ranking.siguienteLiga().nombre} ${ranking.siguienteLiga().icono}|"></p>
+              <progress th:max="${ranking.siguienteLiga().xpMinima}" th:value="${ranking.miXp()}"
+                        aria-label="Avance hacia la siguiente liga"></progress>
+            </th:block>
+            <p th:if="${ranking.siguienteLiga() == null}">¡Estás en la liga más alta!</p>
+          </div>
+        </div>
+
+        <ol class="ligas" aria-label="Ligas, de la más alta a la más baja">
+          <li th:each="liga : ${ligas}"
+              th:attr="aria-current=${liga == ranking.miLiga()} ? 'true'"
+              th:text="|${liga.icono} ${liga.nombre} (${liga.xpMinima}+ XP)|">Liga</li>
+        </ol>
+
+        <ol class="ranking">
           <li th:each="posicion : ${ranking.posiciones()}"
               th:attr="aria-current=${posicion.esActual()} ? 'true'">
-            <span th:text="|#${posicion.puesto()}|"></span>
+            <span class="ranking__puesto" th:text="|#${posicion.puesto()}|"></span>
             <span aria-hidden="true" th:text="${posicion.avatar()}"></span>
             <strong th:text="${posicion.nombre()}">Estudiante</strong>
-            <span th:text="|${posicion.xp()} XP|"></span>
             <span th:if="${posicion.esActual()}">(Tú)</span>
+            <span th:title="${posicion.liga().nombre}" th:text="${posicion.liga().icono}"></span>
+            <span class="ranking__xp" th:text="|${posicion.xp()} XP|"></span>
           </li>
         </ol>
+
+        <p class="historial"
+           th:text="|Historial: ${ranking.xpSemanaPasada()} XP la semana pasada · ${ranking.xpTotal()} XP en total.|"></p>
       </section>
     </main>
     <nav th:replace="~{fragments/navegacion :: barra('comunidad')}"></nav>

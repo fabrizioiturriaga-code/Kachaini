@@ -1,6 +1,7 @@
 package kanichi.repository;
 
 import jakarta.persistence.LockModeType;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -12,7 +13,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface EstudianteRepository extends JpaRepository<Estudiante, Long> {
-  /** Bloquea la fila para que dos envíos simultáneos no otorguen la misma recompensa. */
+  
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("select e from Estudiante e where e.id = :id")
   Optional<Estudiante> bloquearPorId(@Param("id") Long id);
@@ -48,7 +49,59 @@ public interface EstudianteRepository extends JpaRepository<Estudiante, Long> {
     long getErrores();
   }
 
-  List<Estudiante> findTop10ByGradoAndSeccionOrderByXpDescNombreAsc(Integer grado, String seccion);
+  @Modifying
+  @Query(
+      value =
+          """
+          INSERT INTO xp_ganada (estudiante_id, cantidad, fecha)
+          VALUES (:estudianteId, :cantidad, :fecha)
+          """,
+      nativeQuery = true)
+  int registrarXp(
+      @Param("estudianteId") Long estudianteId,
+      @Param("cantidad") int cantidad,
+      @Param("fecha") Instant fecha);
 
-  long countByGradoAndSeccionAndXpGreaterThan(Integer grado, String seccion, int xp);
+  @Query(
+      value =
+          """
+          SELECT e.id AS id, u.nombre AS nombre, e.avatar AS avatar,
+                 CAST(COALESCE(SUM(x.cantidad), 0) AS INTEGER) AS puntos
+          FROM estudiantes e
+          JOIN usuarios u ON u.id = e.id
+          LEFT JOIN xp_ganada x
+                 ON x.estudiante_id = e.id AND x.fecha >= :desde AND x.fecha < :hasta
+          WHERE e.grado = :grado AND e.seccion = :seccion
+          GROUP BY e.id, u.nombre, e.avatar
+          ORDER BY puntos DESC, u.nombre ASC
+          """,
+      nativeQuery = true)
+  List<XpDelPeriodo> xpDelSalonEntre(
+      @Param("grado") Integer grado,
+      @Param("seccion") String seccion,
+      @Param("desde") Instant desde,
+      @Param("hasta") Instant hasta);
+
+  @Query(
+      value =
+          """
+          SELECT CAST(COALESCE(SUM(cantidad), 0) AS INTEGER)
+          FROM xp_ganada
+          WHERE estudiante_id = :estudianteId AND fecha >= :desde AND fecha < :hasta
+          """,
+      nativeQuery = true)
+  int sumarXpEntre(
+      @Param("estudianteId") Long estudianteId,
+      @Param("desde") Instant desde,
+      @Param("hasta") Instant hasta);
+
+  interface XpDelPeriodo {
+    Long getId();
+
+    String getNombre();
+
+    String getAvatar();
+
+    Integer getPuntos();
+  }
 }

@@ -38,7 +38,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
-/** HU-08: barra inferior de navegación y mapa de misiones en Inicio. */
 @WebMvcTest(NavegacionController.class)
 @Import({
   SecurityConfig.class,
@@ -147,19 +146,46 @@ class NavegacionControllerTest {
   void retosMuestraLosLogrosYLaXp() throws Exception {
     mvc.perform(get("/estudiante/retos").with(user(estudianteSesion())))
         .andExpect(status().isOk())
-        .andExpect(content().string(containsString("Mis logros")))
+        .andExpect(content().string(containsString("Mi colección")))
         .andExpect(content().string(containsString("Primeros pasos")))
-        .andExpect(content().string(containsString("(Obtenido)")))
-        .andExpect(content().string(containsString("(Por desbloquear)")));
+        .andExpect(content().string(containsString("insignia--obtenida")))
+        .andExpect(content().string(containsString("insignia--bloqueada")))
+        .andExpect(content().string(containsString("Cómo conseguirlo:")))
+        .andExpect(content().string(containsString(Logro.UNIDAD_DOMINADA.getComoConseguirlo())));
   }
 
   @Test
   void comunidadMuestraElRankingDelSalon() throws Exception {
     mvc.perform(get("/estudiante/comunidad").with(user(estudianteSesion())))
         .andExpect(status().isOk())
-        .andExpect(content().string(containsString("Ranking de tu salón")))
+        .andExpect(content().string(containsString("Ranking semanal de tu salón")))
         .andExpect(content().string(containsString("10 XP")))
-        .andExpect(content().string(containsString("(Tú)")));
+        .andExpect(content().string(containsString("(Tú)")))
+        .andExpect(content().string(containsString("Liga Amauta")))
+        .andExpect(content().string(containsString("Te faltan 30 XP para subir a Liga Panaca")))
+        .andExpect(content().string(containsString("Liga Inca")));
+  }
+
+  @Test
+  void comunidadMuestraLaSemanaYElHistorial() throws Exception {
+    when(rankingService.obtenerRankingDelSalon(1L))
+        .thenReturn(
+            new RankingSalon(
+                1,
+                "A",
+                List.of(new RankingSalon.Posicion(1, "Ana", "✨", 130, true)),
+                1,
+                130,
+                60,
+                250,
+                java.time.LocalDate.of(2026, 11, 9),
+                java.time.LocalDate.of(2026, 11, 15)));
+
+    mvc.perform(get("/estudiante/comunidad").with(user(estudianteSesion())))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("Semana del 09/11 al 15/11")))
+        .andExpect(content().string(containsString("¡Estás en la liga más alta!")))
+        .andExpect(content().string(containsString("60 XP la semana pasada · 250 XP en total")));
   }
 
   @Test
@@ -184,4 +210,4 @@ class NavegacionControllerTest {
     return new UsuarioSesion(
         2L, "Docente", "docente@example.org", "hash", Rol.DOCENTE, true, false);
   }
-}
+}
