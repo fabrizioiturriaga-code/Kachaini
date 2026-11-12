@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title th:text="|Unidad ${unidad.numero()} · Kaichaini|">Unidad · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/mapa.css}">
+  </head>
+  <body class="con-barra-inferior">
+    <main>
+      <p><a th:href="@{/inicio}">← Volver al mapa</a></p>
+      <h1 th:text="|Unidad ${unidad.numero()}: ${unidad.titulo()}|">Unidad</h1>
+      <p role="status" th:if="${mensaje}" th:text="${mensaje}"></p>
+      <div th:replace="~{fragments/energia :: barra(${energia})}"></div>
+      <progress class="unidad__progreso" max="100" th:value="${unidad.porcentaje()}"
+                th:attr="aria-label=|Progreso de la unidad ${unidad.numero()}|"
+                th:text="|${unidad.porcentaje()}%|">0%</progress>
+      <p class="unidad__estrellas" th:text="${unidad.estrellas()}">☆☆☆</p>
+      <ol class="mapa-misiones">
+        <li th:each="estado : ${lecciones}" class="unidad" th:classappend="${estado.claseCss()}">
+          <span class="unidad__numero" th:text="${estadoStat.count}">1</span>
+          <div class="unidad__cuerpo">
+            <p class="unidad__titulo">
+              <a th:if="${estado.disponible()}"
+                 th:href="@{/estudiante/lecciones/{c}(c=${estado.leccion().codigo})}"
+                 th:text="${estado.leccion().titulo}">Lección</a>
+              <span th:unless="${estado.disponible()}" th:text="${estado.leccion().titulo}">Lección</span>
+            </p>
+            <p class="unidad__estado"
+               th:text="${estado.completada()} ? '✅ Completada' : (${estado.disponible()} ? 'Disponible' : '🔒 Bloqueada')">
+            </p>
+          </div>
+        </li>
+      </ol>
+    </main>
+    <nav th:replace="~{fragments/navegacion :: barra('inicio')}"></nav>
+  </body>
+</html>
