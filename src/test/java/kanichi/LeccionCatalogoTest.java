@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import kanichi.model.Leccion;
 import org.junit.jupiter.api.Test;
@@ -12,10 +13,10 @@ import org.junit.jupiter.api.Test;
 class LeccionCatalogoTest {
   @Test
   void cadaUnidadTieneElMismoNumeroDeLecciones() {
-    for (int unidad = 1; unidad <= 6; unidad++) {
+    for (int unidad = 1; unidad <= 10; unidad++) {
       assertEquals(Leccion.LECCIONES_POR_UNIDAD, Leccion.deUnidad(unidad).size(), "unidad " + unidad);
     }
-    assertEquals(6 * Leccion.LECCIONES_POR_UNIDAD, Leccion.values().length);
+    assertEquals(10 * Leccion.LECCIONES_POR_UNIDAD, Leccion.values().length);
   }
 
   @Test
@@ -59,5 +60,23 @@ class LeccionCatalogoTest {
   void laPrimeraLeccionNoTieneAnteriorYLasDemasSi() {
     assertTrue(Leccion.values()[0].anterior().isEmpty());
     assertEquals(Leccion.values()[0], Leccion.values()[1].anterior().orElseThrow());
+  }
+
+  @Test
+  void cadaGradoTieneDosUnidades() {
+    assertEquals(List.of(1, 2), Leccion.unidadesDelGrado(1));
+    assertEquals(List.of(7, 8), Leccion.unidadesDelGrado(4));
+    assertEquals(List.of(9, 10), Leccion.unidadesDelGrado(5));
+    assertEquals(3, Leccion.gradoDeUnidad(6));
+    assertEquals(5, Leccion.U10_DEMOCRACIA.getGrado());
+  }
+
+  @Test
+  void laPrimeraLeccionDeCadaGradoNoTieneAnterior() {
+    for (int grado = 1; grado <= 5; grado++) {
+      int unidad = Leccion.unidadesDelGrado(grado).get(0);
+      assertTrue(Leccion.deUnidad(unidad).get(0).anterior().isEmpty(), "grado " + grado);
+    }
+    assertEquals(Leccion.U7_RAMON_CASTILLA, Leccion.U8_CAUSAS_DE_LA_GUERRA.anterior().orElseThrow());
   }
 }

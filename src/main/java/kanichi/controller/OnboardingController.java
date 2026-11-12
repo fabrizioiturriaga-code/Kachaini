@@ -7,7 +7,6 @@ import kanichi.dto.ResultadoMision;
 import kanichi.dto.UsuarioSesion;
 import kanichi.exception.MisionNoPermitidaException;
 import kanichi.model.MisionInicial;
-import kanichi.service.MapaMisionesService;
 import kanichi.service.ModuloInicialService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,12 +23,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class OnboardingController {
   private final ModuloInicialService moduloInicialService;
-  private final MapaMisionesService mapaMisionesService;
 
-  public OnboardingController(
-      ModuloInicialService moduloInicialService, MapaMisionesService mapaMisionesService) {
+  public OnboardingController(ModuloInicialService moduloInicialService) {
     this.moduloInicialService = moduloInicialService;
-    this.mapaMisionesService = mapaMisionesService;
   }
 
   @GetMapping("/onboarding")
@@ -98,10 +94,7 @@ public class OnboardingController {
     }
     mensaje.append('.');
     if (resultado.moduloCompletado()) {
-      mensaje
-          .append(" Completaste el módulo inicial y se desbloqueó la unidad 1: ")
-          .append(mapaMisionesService.primeraUnidad())
-          .append('.');
+      mensaje.append(" Completaste el módulo inicial y se desbloqueó la primera unidad de tu grado.");
     }
     return mensaje.toString();
   }

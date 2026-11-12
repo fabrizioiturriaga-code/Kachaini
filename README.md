@@ -42,3 +42,7 @@ La aplicación queda disponible en [localhost:8080](http://localhost:8080). Las 
 [Módulo inicial: HU-06](docs/modulo-inicial.md).
 
 [Mapa de aprendizaje y energía: HU-18 y HU-12](docs/mapa-y-energia.md).
+
+[Lecturas y arrastrar y soltar: HU-24 y HU-25](docs/lecturas-y-arrastre.md).
+
+[Contenido de Historia por grado](docs/contenido-por-grado.md).

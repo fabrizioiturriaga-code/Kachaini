@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title th:text="|${actividad.titulo} · Kaichaini|">Arrastrar y soltar · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/practica.css}">
+    <script defer th:src="@{/js/arrastre.js}"></script>
+  </head>
+  <body class="con-barra-inferior">
+    <main>
+      <p><a th:href="@{/estudiante/arrastre}">← Volver a las actividades</a></p>
+      <h1 th:text="${actividad.titulo}">Actividad</h1>
+      <p class="practica__unidad" th:text="|Unidad ${actividad.unidad}|">Unidad</p>
+      <p th:text="${actividad.instruccion}">Instrucción</p>
+
+      <section th:if="${resultado != null or error != null}" tabindex="-1" data-enfocar-resultado>
+        <p role="alert" th:if="${error}" th:text="${error}"></p>
+        <th:block th:if="${resultado}">
+          <p role="status"
+             th:text="|Emparejamientos correctos: ${resultado.aciertos()} de ${resultado.total()}.|"></p>
+          <p th:if="${resultado.isPerfecto()}">¡Excelente! Todos los elementos están en su lugar.</p>
+          <p th:unless="${resultado.isPerfecto()}">Mueve los elementos marcados con ❌ e inténtalo de nuevo.</p>
+        </th:block>
+      </section>
+
+      <form method="post" class="arrastre" data-arrastre
+            th:action="@{/estudiante/arrastre/{c}(c=${actividad.codigo})}">
+        <div class="arrastre__banco" aria-label="Elementos por ubicar" data-banco hidden></div>
+        <p class="arrastre__ayuda" data-ayuda hidden>
+          Arrastra un elemento hasta su lugar, o tócalo y luego toca el lugar donde va.
+        </p>
+        <ol class="arrastre__destinos">
+          <li th:each="pareja, p : ${actividad.parejas}" class="arrastre__destino" data-destino
+              th:classappend="${resultado} ? ${resultado.claseDestino(p.index)}">
+            <label th:for="|destino-${p.index}|" th:text="${pareja.destino()}">Destino</label>
+            <select th:id="|destino-${p.index}|" th:name="|respuestas[${p.index}]|" required>
+              <option value="">Elige un elemento</option>
+              <option th:each="elemento : ${elementos}" th:value="${elemento.indice()}"
+                      th:text="${elemento.texto()}"
+                      th:selected="${formulario.respuesta(p.index) == elemento.indice()}">Elemento</option>
+            </select>
+            <div class="arrastre__zona" role="button" tabindex="0" data-zona hidden
+                 th:attr="aria-label=|Colocar en: ${pareja.destino()}|"></div>
+            <p class="arrastre__marca" th:if="${resultado}"
+               th:text="${resultado.esCorrecto(p.index)} ? '✅ Correcto' : '❌ Incorrecto'"></p>
+          </li>
+        </ol>
+        <p class="arrastre__aviso" role="alert" data-aviso></p>
+        <button type="submit" th:unless="${resultado != null and resultado.isPerfecto()}">Verificar</button>
+      </form>
+
+      <p th:if="${resultado != null and resultado.isPerfecto()}">
+        <a th:href="@{/estudiante/arrastre}">Elegir otra actividad</a>
+      </p>
+    </main>
+    <nav th:replace="~{fragments/navegacion :: barra('inicio')}"></nav>
+  </body>
+</html>

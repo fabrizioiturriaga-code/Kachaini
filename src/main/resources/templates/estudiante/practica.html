@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title th:text="|${titulo} · Kaichaini|">Práctica · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/mapa.css}">
+  </head>
+  <body class="con-barra-inferior">
+    <main>
+      <p><a th:href="@{/inicio}">← Volver al mapa</a></p>
+      <h1 th:text="${titulo}">Práctica</h1>
+      <p th:text="${descripcion}"></p>
+      <p role="alert" th:if="${error}" th:text="${error}"></p>
+      <ol class="mapa-misiones">
+        <li th:each="actividad : ${actividades}" class="unidad"
+            th:classappend="${actividad.disponible()} ? 'unidad--activa' : 'unidad--bloqueada'">
+          <span class="unidad__numero" th:text="${actividad.unidad()}">1</span>
+          <div class="unidad__cuerpo">
+            <p class="unidad__titulo">
+              <a th:if="${actividad.disponible()}"
+                 th:href="@{|${rutaBase}/${actividad.codigo()}|}"
+                 th:text="${actividad.titulo()}">Actividad</a>
+              <span th:unless="${actividad.disponible()}" th:text="${actividad.titulo()}">Actividad</span>
+            </p>
+            <p class="unidad__estado"
+               th:text="|Unidad ${actividad.unidad()}: ${actividad.tituloUnidad()}|">Unidad</p>
+            <p class="unidad__estado" th:unless="${actividad.disponible()}">🔒 Bloqueada</p>
+          </div>
+        </li>
+      </ol>
+    </main>
+    <nav th:replace="~{fragments/navegacion :: barra('inicio')}"></nav>
+  </body>
+</html>
