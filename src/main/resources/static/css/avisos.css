@@ -1,0 +1,81 @@
+
+.alerta-avisos {
+  padding: .8rem 1rem;
+  border: 2px solid #e0a800;
+  border-radius: .75rem;
+  background: #fff4d6;
+}
+
+.avisos {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  margin: 1rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.aviso {
+  padding: .9rem 1rem;
+  border: 2px solid #d7dde4;
+  border-radius: .75rem;
+  background: white;
+}
+
+.aviso--nuevo {
+  border-color: #154f9a;
+  background: #f2f7fe;
+}
+
+.aviso__titulo {
+  margin: 0 0 .3rem;
+  font-weight: 700;
+}
+
+.aviso__datos {
+  margin: 0;
+  color: #3d4756;
+  font-size: .9rem;
+}
+
+.etiqueta {
+  display: inline-block;
+  padding: .1rem .5rem;
+  border-radius: 1rem;
+  font-size: .75rem;
+  font-weight: 700;
+}
+
+.etiqueta--nuevo {
+  background: #154f9a;
+  color: white;
+}
+
+.etiqueta--por-vencer {
+  background: #fff1c2;
+  color: #8a5a00;
+}
+
+.etiqueta--vencido {
+  background: #e6e9ee;
+  color: #5d6773;
+}
+
+.reto-detalle dt {
+  margin-top: .8rem;
+  font-weight: 700;
+}
+
+.reto-detalle dd {
+  margin: .2rem 0 0;
+}
+
+.formulario-reto {
+  display: grid;
+  gap: .4rem;
+  max-width: 40rem;
+}
+
+.formulario-reto textarea {
+  min-height: 5rem;
+}

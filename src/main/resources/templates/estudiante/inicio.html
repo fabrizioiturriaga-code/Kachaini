@@ -7,6 +7,7 @@
     <link rel="stylesheet" th:href="@{/css/auth.css}">
     <link rel="stylesheet" th:href="@{/css/navegacion.css}">
     <link rel="stylesheet" th:href="@{/css/mapa.css}">
+    <link rel="stylesheet" th:href="@{/css/avisos.css}">
   </head>
   <body class="con-barra-inferior">
     <main>
@@ -16,6 +17,12 @@
       <p role="status" th:if="${mensaje}" th:text="${mensaje}"></p>
       <p role="alert" th:if="${error}" th:text="${error}"></p>
       <p role="status" th:each="aviso : ${notificaciones}" th:text="${aviso}"></p>
+        <p class="alerta-avisos" role="status"
+         th:if="${resumenAvisos != null and resumenAvisos.hayPendientes()}">
+        <span aria-hidden="true">🔔</span>
+        <span th:text="${resumenAvisos.texto()}">Tienes 1 reto nuevo.</span>
+        <a th:href="@{/estudiante/avisos}">Ver avisos</a>
+      </p>
       <div th:replace="~{fragments/energia :: barra(${energia})}"></div>
       <div th:replace="~{fragments/racha :: contador(${diasRacha}, false)}"></div>
       <section aria-labelledby="titulo-mapa">

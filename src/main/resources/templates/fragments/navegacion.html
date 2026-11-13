@@ -20,6 +20,16 @@
         <span class="barra-inferior__icono" aria-hidden="true">❤️</span>
         <span class="barra-inferior__texto">Comunidad</span>
       </a>
+        <a th:href="@{/estudiante/avisos}" class="barra-inferior__enlace"
+         th:classappend="${activo == 'avisos'} ? 'barra-inferior__enlace--activo'"
+         th:attr="aria-current=${activo == 'avisos'} ? 'page'">
+        <span class="barra-inferior__icono" aria-hidden="true">🔔</span>
+        <span class="barra-inferior__texto">Avisos</span>
+        <span class="barra-inferior__contador"
+          th:if="${resumenAvisos != null and resumenAvisos.nuevos() > 0}"
+          th:text="${resumenAvisos.nuevos()}"
+          th:attr="aria-label=|${resumenAvisos.nuevos()} sin leer|">1</span>
+      </a>
       <a th:href="@{/estudiante/perfil}" class="barra-inferior__enlace"
          th:classappend="${activo == 'perfil'} ? 'barra-inferior__enlace--activo'"
          th:attr="aria-current=${activo == 'perfil'} ? 'page'">

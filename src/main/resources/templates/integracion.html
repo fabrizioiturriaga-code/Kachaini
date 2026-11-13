@@ -19,6 +19,7 @@
         <ul>
           <li><a th:href="@{/docente/progreso}">📊 Progreso de estudiantes</a></li>
           <li><a th:href="@{/docente/multiplicadores}">✨ Multiplicadores de XP</a></li>
+          <li><a th:href="@{/docente/retos}">📣 Publicar retos</a></li>
         </ul>
       </section>
       <a th:if="${usuario.rol.name() == 'ESTUDIANTE'}" th:href="@{/estudiante/perfil}">Mi perfil</a>

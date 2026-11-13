@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Avisos · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/avisos.css}">
+  </head>
+  <body class="con-barra-inferior">
+    <main>
+      <h1><span aria-hidden="true">🔔</span> Avisos</h1>
+      <p>Retos y misiones que publicó tu docente.</p>
+      <p th:if="${avisos.isEmpty()}">No tienes avisos por ahora.</p>
+      <ul class="avisos" th:unless="${avisos.isEmpty()}">
+        <li class="aviso" th:each="aviso : ${avisos}"
+            th:classappend="${!aviso.leida()} ? 'aviso--nuevo'">
+          <p class="aviso__titulo">
+            <a th:href="@{/estudiante/avisos/{id}(id=${aviso.reto().id})}"
+               th:text="${aviso.reto().titulo}">Reto</a>
+            <span class="etiqueta etiqueta--nuevo" th:if="${!aviso.leida()}">Nuevo</span>
+            <span class="etiqueta etiqueta--por-vencer" th:if="${aviso.isPorVencer()}">Vence pronto</span>
+            <span class="etiqueta etiqueta--vencido" th:if="${aviso.isVencido()}">Vencido</span>
+          </p>
+          <p class="aviso__datos"
+             th:text="|Vence el ${aviso.reto().fechaLimiteTexto} · Recompensa: ${aviso.reto().xp} XP|"></p>
+        </li>
+      </ul>
+    </main>
+    <nav th:replace="~{fragments/navegacion :: barra('avisos')}"></nav>
+  </body>
+</html>
