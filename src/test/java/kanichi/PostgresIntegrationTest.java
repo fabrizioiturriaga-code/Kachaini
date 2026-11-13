@@ -70,6 +70,86 @@ class PostgresIntegrationTest {
   @Autowired kanichi.service.RecompensaService recompensas;
   @Autowired kanichi.service.DesafioService desafios;
   @Autowired kanichi.service.LigaService ligas;
+  @Autowired kanichi.service.UnidadDocenteService unidadesDocente;
+
+  @Test
+  void unidadDelDocenteSoloLaVenLosEstudiantesDeSuGrado() throws Exception {
+    var docenteForm = new RegistroForm();
+    docenteForm.setNombre("Docente");
+    docenteForm.setCorreo("docente@example.org");
+    docenteForm.setContrasena("Historia123");
+    docenteForm.setConfirmacion("Historia123");
+    docenteForm.setRol(Rol.DOCENTE);
+    docenteForm.setArea("Historia");
+    auth.registrar(docenteForm);
+    auth.registrar(form("ana@example.org"));
+    auth.registrar(form("luis@example.org"));
+    Long docente = usuarios.findByCorreo("docente@example.org").orElseThrow().getId();
+    Long ana = usuarios.findByCorreo("ana@example.org").orElseThrow().getId();
+    Long luis = usuarios.findByCorreo("luis@example.org").orElseThrow().getId();
+    jdbc.update("UPDATE docentes SET autorizado = true WHERE id = ?", docente);
+    jdbc.update("UPDATE estudiantes SET onboarding_completado = true");
+    jdbc.update("UPDATE estudiantes SET grado = 2 WHERE id = ?", luis);
+
+    var leccion = new kanichi.dto.LeccionDocenteForm();
+    leccion.setTitulo("Los incas");
+    leccion.setContenido("Los incas construyeron Machu Picchu.");
+    leccion.setPregunta("¿Quiénes construyeron Machu Picchu?");
+    leccion.setOpcionA("Los mayas");
+    leccion.setOpcionB("Los incas");
+    leccion.setOpcionC("Los aztecas");
+    leccion.setRespuestaCorrecta(1);
+    Long unidad = unidadesDocente.crear(docente, 1, "Unidad del profe", leccion);
+    Long leccionId =
+        jdbc.queryForObject(
+            "SELECT id FROM lecciones_docente WHERE unidad_id = ?", Long.class, unidad);
+
+    var sesionDocente = iniciarSesion("docente@example.org");
+    mvc.perform(get("/docente/unidades").session(sesionDocente))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("Unidad del profe")));
+
+    var sesionAna = iniciarSesion("ana@example.org");
+    mvc.perform(get("/inicio").session(sesionAna))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("Unidad del profe")));
+    mvc.perform(
+            post("/estudiante/lecciones-docente/" + leccionId)
+                .param("respuesta", "1")
+                .param("intento", UUID.randomUUID().toString())
+                .session(sesionAna)
+                .with(csrf()))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("¡Correcto!")));
+    assertEquals(
+        1,
+        jdbc.queryForObject(
+            "SELECT count(*) FROM lecciones_docente_completadas WHERE estudiante_id = ?",
+            Integer.class,
+            ana));
+    assertEquals(
+        kanichi.model.LeccionDocente.XP,
+        jdbc.queryForObject("SELECT xp FROM estudiantes WHERE id = ?", Integer.class, ana));
+
+    var sesionLuis = iniciarSesion("luis@example.org");
+    mvc.perform(get("/inicio").session(sesionLuis))
+        .andExpect(status().isOk())
+        .andExpect(content().string(not(containsString("Unidad del profe"))));
+    mvc.perform(get("/estudiante/lecciones-docente/" + leccionId).session(sesionLuis))
+        .andExpect(status().isNotFound());
+  }
+
+  private MockHttpSession iniciarSesion(String correo) throws Exception {
+    return (MockHttpSession)
+        mvc.perform(
+                post("/login")
+                    .with(csrf())
+                    .param("correo", correo)
+                    .param("contrasena", "Historia123"))
+            .andReturn()
+            .getRequest()
+            .getSession(false);
+  }
 
   @Test
   void recompensasDesafioYLigaConPostgres() throws Exception {

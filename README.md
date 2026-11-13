@@ -52,3 +52,5 @@ La aplicación queda disponible en [localhost:8080](http://localhost:8080). Las 
 [Panel docente: HU-07 y HU-09](docs/panel-docente.md).
 
 [Reportes del salón y mensajes: HU-19 y HU-20](docs/reportes-y-mensajes.md).
+
+[Unidades y lecciones del docente: HU-27](docs/unidades-docente.md).

@@ -9,6 +9,7 @@ import kanichi.dto.UnidadMapa;
 import kanichi.dto.UsuarioSesion;
 import kanichi.model.Liga;
 import kanichi.model.Logro;
+import kanichi.service.LeccionDocenteService;
 import kanichi.service.LeccionService;
 import kanichi.service.LigaService;
 import kanichi.service.ModuloInicialService;
@@ -24,16 +25,19 @@ public class NavegacionController {
   private final ModuloInicialService moduloInicialService;
   private final RankingService rankingService;
   private final LigaService ligaService;
+  private final LeccionDocenteService leccionDocenteService;
 
   public NavegacionController(
       LeccionService leccionService,
       ModuloInicialService moduloInicialService,
       RankingService rankingService,
-      LigaService ligaService) {
+      LigaService ligaService,
+      LeccionDocenteService leccionDocenteService) {
     this.leccionService = leccionService;
     this.moduloInicialService = moduloInicialService;
     this.rankingService = rankingService;
     this.ligaService = ligaService;
+    this.leccionDocenteService = leccionDocenteService;
   }
 
   @GetMapping("/inicio")
@@ -45,6 +49,8 @@ public class NavegacionController {
     MapaAprendizaje mapa = leccionService.obtenerMapa(usuario.getId());
     model.addAttribute("nombre", usuario.getNombre());
     model.addAttribute("unidades", mapa.unidades());
+    model.addAttribute(
+        "unidadesDocente", leccionDocenteService.unidadesDelMapa(usuario.getId()));
     model.addAttribute(
         "unidadActiva",
         mapa.unidades().stream().filter(UnidadMapa::isActiva).findFirst().orElse(null));

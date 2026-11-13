@@ -151,6 +151,12 @@ public class RecompensaService {
               yield new Entrada(
                   fila.fecha(), "📖", "Lección completada: " + leccion.getTitulo(), leccion.getXp());
             }
+            case "LECCION_DOCENTE" ->
+                new Entrada(
+                    fila.fecha(),
+                    "📚",
+                    "Lección de tu docente completada: " + fila.referencia(),
+                    null);
             case "INSIGNIA" -> {
               Logro logro = Logro.valueOf(fila.referencia());
               yield new Entrada(

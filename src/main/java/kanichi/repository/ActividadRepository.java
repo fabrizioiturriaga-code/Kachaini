@@ -33,6 +33,10 @@ public class ActividadRepository {
         SELECT 'LECCION', leccion, fecha, NULL, NULL
         FROM lecciones_completadas WHERE estudiante_id = ?
         UNION ALL
+        SELECT 'LECCION_DOCENTE', l.titulo, c.fecha, NULL, NULL
+        FROM lecciones_docente_completadas c JOIN lecciones_docente l ON l.id = c.leccion_id
+        WHERE c.estudiante_id = ?
+        UNION ALL
         SELECT 'INSIGNIA', logro, fecha, NULL, NULL
         FROM logros_estudiante WHERE estudiante_id = ?
         UNION ALL
@@ -54,6 +58,8 @@ public class ActividadRepository {
       """
       SELECT
         (SELECT COUNT(*) FROM lecciones_completadas
+          WHERE estudiante_id = ? AND fecha >= ? AND fecha < ?)
+        + (SELECT COUNT(*) FROM lecciones_docente_completadas
           WHERE estudiante_id = ? AND fecha >= ? AND fecha < ?)
         + (SELECT COUNT(*) FROM practicas_realizadas
           WHERE estudiante_id = ? AND fecha >= ? AND fecha < ?) AS tareas,
@@ -90,14 +96,15 @@ public class ActividadRepository {
         estudianteId,
         estudianteId,
         estudianteId,
+        estudianteId,
         limite);
   }
 
   public Avance avanceEntre(Long estudianteId, Instant desde, Instant hasta) {
     Timestamp d = Timestamp.from(desde);
     Timestamp h = Timestamp.from(hasta);
-    Object[] parametros = new Object[18];
-    for (int i = 0; i < 6; i++) {
+    Object[] parametros = new Object[21];
+    for (int i = 0; i < 7; i++) {
       parametros[i * 3] = estudianteId;
       parametros[i * 3 + 1] = d;
       parametros[i * 3 + 2] = h;
@@ -112,8 +119,10 @@ public class ActividadRepository {
     Boolean existe =
         jdbc.queryForObject(
             "SELECT EXISTS (SELECT 1 FROM lecciones_completadas WHERE estudiante_id = ?)"
+                + " OR EXISTS (SELECT 1 FROM lecciones_docente_completadas WHERE estudiante_id = ?)"
                 + " OR EXISTS (SELECT 1 FROM practicas_realizadas WHERE estudiante_id = ?)",
             Boolean.class,
+            estudianteId,
             estudianteId,
             estudianteId);
     return Boolean.TRUE.equals(existe);

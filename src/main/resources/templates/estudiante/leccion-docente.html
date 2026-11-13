@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title th:text="|${leccion.titulo} · Kaichaini|">Lección · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/mapa.css}">
+    <link rel="stylesheet" th:href="@{/css/logros.css}">
+    <script defer th:src="@{/js/leccion.js}"></script>
+  </head>
+  <body class="con-barra-inferior">
+    <main>
+      <p><a th:href="@{/estudiante/unidades-docente/{id}(id=${unidad.id()})}">← Volver a la unidad</a></p>
+      <div th:replace="~{fragments/energia :: barra(${energia})}"></div>
+      <h1 th:text="${leccion.titulo}">Lección</h1>
+      <p th:each="parrafo : ${leccion.parrafos}" th:text="${parrafo}"></p>
+      <p>Recompensa: <strong th:text="|${leccion.xp} XP|"></strong></p>
+      <section th:if="${acierto != null or error != null}" tabindex="-1" data-enfocar-resultado>
+        <p role="status" th:if="${acierto}" th:text="${acierto}"></p>
+        <div class="logro-desbloqueado" role="status"
+             th:if="${logrosNuevos != null and !logrosNuevos.isEmpty()}">
+          <p class="logro-desbloqueado__titulo">🎉 ¡Logro desbloqueado!</p>
+          <div class="insignia insignia--obtenida" th:each="logro : ${logrosNuevos}">
+            <span class="insignia__icono" aria-hidden="true" th:text="${logro.icono}">🏅</span>
+            <strong th:text="${logro.nombre}">Logro</strong>
+            <p class="insignia__descripcion" th:text="${logro.descripcion}"></p>
+          </div>
+          <a th:href="@{/estudiante/retos}">Ver mi colección</a>
+        </div>
+        <p role="alert" th:if="${error}" th:text="${error}"></p>
+        <p th:if="${respuestaElegida}">
+          <strong>Tu respuesta:</strong> <span th:text="${respuestaElegida}"></span>
+        </p>
+        <a th:if="${acierto != null and unidadCompletada}" th:href="@{/inicio}">Continuar al mapa</a>
+        <a th:if="${acierto != null and !unidadCompletada}"
+           th:href="@{/estudiante/unidades-docente/{id}(id=${unidad.id()})}">Continuar a la unidad</a>
+      </section>
+      <p role="status" th:if="${completada and acierto == null}">✅ Ya completaste esta lección.</p>
+      <p role="alert" th:if="${!completada and energia.isAgotada() and error == null}"
+         th:text="|Sin energía. Vuelve en ${energia.minutosParaRecarga()} min o repasa el contenido de la lección.|"></p>
+      <form th:if="${!completada and !energia.isAgotada()}" method="post" data-opcion-multiple
+            th:action="@{/estudiante/lecciones-docente/{id}(id=${leccion.id})}">
+        <input type="hidden" name="intento" th:value="${intento}">
+        <fieldset>
+          <legend th:text="${leccion.pregunta}">Pregunta</legend>
+          <th:block th:each="opcion, i : ${leccion.opciones}">
+            <label>
+              <input type="radio" name="respuesta" th:value="${i.index}" required>
+              <span th:text="${opcion}">Opción</span>
+            </label>
+          </th:block>
+        </fieldset>
+        <button type="submit" data-responder>Responder</button>
+      </form>
+    </main>
+    <nav th:replace="~{fragments/navegacion :: barra('inicio')}"></nav>
+  </body>
+</html>

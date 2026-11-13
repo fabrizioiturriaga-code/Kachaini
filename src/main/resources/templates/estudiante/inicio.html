@@ -52,6 +52,27 @@
                  th:text="${unidad.estrellas()}">☆☆☆</p>
             </div>
           </li>
+          <li th:each="propia : ${unidadesDocente}" th:with="unidad=${propia.mapa()}"
+              class="unidad" th:classappend="${unidad.claseCss()}">
+            <span class="unidad__numero" th:text="${unidad.numero()}">3</span>
+            <div class="unidad__cuerpo">
+              <p class="unidad__titulo">
+                <a th:if="${!unidad.isBloqueada()}"
+                   th:href="@{/estudiante/unidades-docente/{id}(id=${propia.id()})}"
+                   th:text="${unidad.titulo()}">Unidad</a>
+                <span th:if="${unidad.isBloqueada()}" th:text="${unidad.titulo()}">Unidad</span>
+              </p>
+              <p class="unidad__estado"
+                 th:text="${unidad.isActiva()} ? 'En progreso · Unidad de tu docente' : (${unidad.isBloqueada()} ? '🔒 Bloqueada' : '✅ Completada')">
+              </p>
+              <progress class="unidad__progreso" max="100" th:value="${unidad.porcentaje()}"
+                        th:attr="aria-label=|Progreso de la unidad ${unidad.numero()}|"
+                        th:text="|${unidad.porcentaje()}%|">0%</progress>
+              <p class="unidad__estrellas"
+                 th:attr="aria-label=|${unidad.leccionesCompletadas()} de ${unidad.leccionesTotal()} lecciones completadas|"
+                 th:text="${unidad.estrellas()}">☆☆☆</p>
+            </div>
+          </li>
         </ol>
         <p><a th:href="@{/onboarding}">Repasar el módulo inicial</a></p>
       </section>

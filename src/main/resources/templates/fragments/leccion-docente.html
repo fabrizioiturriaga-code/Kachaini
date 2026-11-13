@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <th:block th:fragment="campos(leccion, prefijo)">
+      <label th:for="|${prefijo}-titulo|">Título de la lección</label>
+      <input th:id="|${prefijo}-titulo|" name="titulo" required th:maxlength="${maximoTitulo}"
+             th:value="${leccion.titulo}">
+
+      <label th:for="|${prefijo}-contenido|">Contenido (un párrafo por línea)</label>
+      <textarea th:id="|${prefijo}-contenido|" name="contenido" rows="6" required
+                th:maxlength="${maximoContenido}" th:text="${leccion.contenido}"></textarea>
+
+      <label th:for="|${prefijo}-pregunta|">Pregunta</label>
+      <input th:id="|${prefijo}-pregunta|" name="pregunta" required th:maxlength="${maximoPregunta}"
+             th:value="${leccion.pregunta}">
+
+      <label th:for="|${prefijo}-opcion-a|">Opción 1</label>
+      <input th:id="|${prefijo}-opcion-a|" name="opcionA" required th:maxlength="${maximoOpcion}"
+             th:value="${leccion.opcionA}">
+      <label th:for="|${prefijo}-opcion-b|">Opción 2</label>
+      <input th:id="|${prefijo}-opcion-b|" name="opcionB" required th:maxlength="${maximoOpcion}"
+             th:value="${leccion.opcionB}">
+      <label th:for="|${prefijo}-opcion-c|">Opción 3</label>
+      <input th:id="|${prefijo}-opcion-c|" name="opcionC" required th:maxlength="${maximoOpcion}"
+             th:value="${leccion.opcionC}">
+
+      <fieldset>
+        <legend>Respuesta correcta</legend>
+        <label th:each="numero : ${#numbers.sequence(0, 2)}">
+          <input type="radio" name="respuestaCorrecta" th:value="${numero}" required
+                 th:checked="${leccion.respuestaCorrecta == numero}">
+          <span th:text="|Opción ${numero + 1}|">Opción 1</span>
+        </label>
+      </fieldset>
+    </th:block>
+  </body>
+</html>
