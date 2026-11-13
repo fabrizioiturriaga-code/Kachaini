@@ -78,7 +78,8 @@ class OnboardingControllerTest {
         .andExpect(content().string(containsString("Módulo inicial")))
         .andExpect(content().string(containsString("href=\"/onboarding/misiones/bienvenida\"")))
         .andExpect(content().string(containsString("🔒 Bloqueada")))
-        .andExpect(content().string(containsString("aria-label=\"Navegación principal\"")));
+        .andExpect(content().string(containsString("Soy Kai, tu guía por la historia")))
+        .andExpect(content().string(containsString("Misión 1 de 4")));
   }
 
   @Test

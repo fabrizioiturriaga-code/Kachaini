@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <th:block th:fragment="nodo(unidad, indice, x, y)">
+      <g th:attr="transform=|translate(${x} ${y})|">
+        <th:block th:if="${unidad.isActiva()}">
+          <circle r="44" fill="#FFE2C2"/><circle r="32" fill="#B84D08"/>
+          <text y="11" text-anchor="middle" font-family="'Baloo 2',sans-serif" font-weight="800"
+                font-size="30" fill="#fff" th:text="${unidad.numero()}">1</text>
+        </th:block>
+        <th:block th:if="${unidad.isCompletada()}">
+          <circle r="34" fill="#E8F6EC"/><circle r="26" fill="#17783F"/>
+          <path d="M-10 1l7 7 13-14" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        </th:block>
+        <th:block th:if="${unidad.isBloqueada()}">
+          <circle r="30" fill="#F4EEE4" stroke="#C9BBA6" stroke-width="3"/>
+          <g transform="translate(-9 -11)"><rect x="1" y="9" width="16" height="12" rx="3" fill="#8C9A90"/><path d="M4.5 9V6.5a4.5 4.5 0 0 1 9 0V9" stroke="#8C9A90" stroke-width="2.4" fill="none"/></g>
+        </th:block>
+      </g>
+    </th:block>
+  </body>
+</html>

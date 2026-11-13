@@ -22,14 +22,14 @@
 
 .foro__mensaje {
   padding: .8rem 1rem;
-  border: 2px solid #d7dde4;
+  border: 2px solid #f0e4d2;
   border-radius: .75rem;
   background: white;
 }
 
 .foro-propio {
-  border-color: #154f9a;
-  background: #f2f7fe;
+  border-color: #b84d08;
+  background: #fff9f2;
 }
 
 .foro-automatico {
@@ -47,7 +47,7 @@
 
 .foro__fecha {
   margin-left: auto;
-  color: #5d6773;
+  color: #55645a;
   font-size: .8rem;
 }
 

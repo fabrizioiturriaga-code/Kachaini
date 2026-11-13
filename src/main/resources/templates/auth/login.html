@@ -4,30 +4,71 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Ingresar · Kaichaini</title>
+    <link rel="icon" type="image/png" th:href="@{/img/kai.png}">
     <link rel="stylesheet" th:href="@{/css/auth.css}">
-    <script defer th:src="@{/js/auth.js}">
-    </script>
+    <link rel="stylesheet" th:href="@{/css/acceso.css}">
+    <script defer th:src="@{/js/auth.js}"></script>
+    <script defer th:src="@{/js/acceso.js}"></script>
   </head>
   <body>
-    <main>
-      <h1>Kaichaini</h1>
-      <h2>Iniciar sesión</h2>
-      <p role="status" th:if="${mensaje}" th:text="${mensaje}">
-      </p>
-      <p id="error-login" role="alert" tabindex="-1" th:if="${param.error}">Correo o contraseña incorrectos</p>
-      <p role="alert" th:if="${param.revocada}">Tu sesión dejó de estar autorizada. Comunícate con la institución.</p>
-      <p role="status" th:if="${param.logout}">Sesión cerrada.</p>
-      <form method="post" th:action="@{/login}">
-        <label for="correo">Correo</label>
-        <input id="correo" name="correo" th:attr="aria-invalid=${errorLogin},aria-describedby=${errorLogin ? 'error-login' : null}" type="email" required maxlength="254" autocomplete="username">
-        <label for="contrasena">Contraseña</label>
-        <input id="contrasena" name="contrasena" th:attr="aria-invalid=${errorLogin},aria-describedby=${errorLogin ? 'error-login' : null}" type="password" required autocomplete="current-password">
-        <button type="button" data-password="contrasena" aria-pressed="false">Mostrar contraseña</button>
-        <button type="submit">Ingresar</button>
-      </form>
-      <a th:href="@{/registro}">Crear una cuenta</a>
+    <svg th:replace="~{fragments/iconos :: simbolos}"></svg>
+    <main class="acceso">
+      <section class="acceso__portada" aria-label="Kaichaini">
+        <div class="burbuja" style="top:-120px;left:-100px;width:320px;height:320px;background:#fff;opacity:.45"></div>
+        <div class="burbuja" style="bottom:-110px;right:-90px;width:260px;height:260px;background:var(--verde-claro)"></div>
+        <img class="acceso__logo" th:src="@{/img/logo-kaichaini.png}" alt="Logo de Kaichaini">
+        <img class="acceso__kai" th:src="@{/img/kai.png}" alt="" aria-hidden="true">
+        <p class="acceso__lema">Tu aventura por la historia continúa aquí.</p>
+      </section>
+
+      <section class="acceso__lado">
+        <div class="acceso__tarjeta">
+          <div>
+            <h1>¡Qué bueno verte de nuevo!</h1>
+            <p class="acceso__sub">Inicia sesión para seguir con tu aventura.</p>
+          </div>
+
+          <p class="aviso-acceso aviso-acceso--ok" role="status" th:if="${mensaje}">
+            <svg class="icono"><use href="#i-ok"/></svg><span th:text="${mensaje}"></span>
+          </p>
+          <p class="aviso-acceso aviso-acceso--ok" role="status" th:if="${param.logout}">
+            <svg class="icono"><use href="#i-ok"/></svg><span>Sesión cerrada.</span>
+          </p>
+          <p id="error-login" class="aviso-acceso aviso-acceso--error" role="alert" tabindex="-1" th:if="${param.error}">
+            <svg class="icono"><use href="#i-alerta"/></svg><span>Correo o contraseña incorrectos</span>
+          </p>
+          <p class="aviso-acceso aviso-acceso--error" role="alert" th:if="${param.revocada}">
+            <svg class="icono"><use href="#i-alerta"/></svg><span>Tu sesión dejó de estar autorizada. Comunícate con la institución.</span>
+          </p>
+
+          <form method="post" th:action="@{/login}">
+            <div class="grupo">
+              <label for="correo">Correo</label>
+              <div class="campo" th:classappend="${errorLogin} ? 'campo--error'">
+                <svg class="icono"><use href="#i-correo"/></svg>
+                <input id="correo" name="correo" type="email" required maxlength="254" autocomplete="username"
+                       placeholder="nombre@colegio.edu.pe"
+                       th:attr="aria-invalid=${errorLogin},aria-describedby=${errorLogin ? 'error-login' : null}">
+              </div>
+            </div>
+            <div class="grupo">
+              <label for="contrasena">Contraseña</label>
+              <div class="campo campo--clave" th:classappend="${errorLogin} ? 'campo--error'">
+                <svg class="icono"><use href="#i-candado"/></svg>
+                <input id="contrasena" name="contrasena" type="password" required autocomplete="current-password"
+                       placeholder="Tu contraseña"
+                       th:attr="aria-invalid=${errorLogin},aria-describedby=${errorLogin ? 'error-login' : null}">
+                <button type="button" class="ojo" data-campo="contrasena" aria-label="Mostrar contraseña" aria-pressed="false">
+                  <svg class="icono ojo__abierto"><use href="#i-ojo"/></svg>
+                  <svg class="icono ojo__tachado"><use href="#i-ojo"/><use href="#i-tachado"/></svg>
+                </button>
+              </div>
+            </div>
+            <button type="submit" class="boton-principal">Iniciar sesión</button>
+          </form>
+          <p class="acceso__enlace">¿Aún no tienes cuenta? <a th:href="@{/registro}">Regístrate</a></p>
+        </div>
+      </section>
     </main>
   </body>
 </html>
-
-

@@ -1,15 +1,15 @@
 .practica__unidad {
   margin-top: -.5rem;
-  color: #5d6773;
+  color: #55645a;
   font-size: .9rem;
 }
 
 .lectura__texto {
   margin: 1rem 0;
   padding: 1rem;
-  border-left: 4px solid #2478ca;
+  border-left: 4px solid #17783f;
   border-radius: .25rem;
-  background: #eef5fd;
+  background: #fff4e8;
   line-height: 1.6;
 }
 
@@ -27,7 +27,7 @@
 
 .lectura__preguntas fieldset {
   margin: 0 0 1rem;
-  border: 1px solid #c9d2dc;
+  border: 1px solid #e0cdb4;
   border-radius: .5rem;
 }
 
@@ -60,7 +60,7 @@
 .lectura__resumen th,
 .lectura__resumen td {
   padding: .4rem .6rem;
-  border: 1px solid #c9d2dc;
+  border: 1px solid #e0cdb4;
   text-align: left;
 }
 
@@ -79,7 +79,7 @@
 }
 
 .respuesta--correcta {
-  background: #eefaf0;
+  background: #e8f6ec;
 }
 
 .respuesta--incorrecta {
@@ -97,7 +97,7 @@
   min-height: 3rem;
   margin: 1rem 0;
   padding: .6rem;
-  border: 2px dashed #c9d2dc;
+  border: 2px dashed #e0cdb4;
   border-radius: .5rem;
 }
 
@@ -114,7 +114,7 @@
 .arrastre__destino {
   margin: .6rem 0;
   padding: .8rem;
-  border: 2px solid #c9d2dc;
+  border: 2px solid #e0cdb4;
   border-radius: .5rem;
 }
 
@@ -129,21 +129,21 @@
   align-items: center;
   min-height: 2.8rem;
   padding: .3rem;
-  border: 2px dashed #9aa6b2;
+  border: 2px dashed #8c9a90;
   border-radius: .5rem;
-  background: #f7f9fb;
+  background: #fff9f2;
   cursor: pointer;
 }
 
 .arrastre__zona:empty::before {
   content: "Suelta aquí";
-  color: #5d6773;
+  color: #55645a;
   font-size: .9rem;
 }
 
 .arrastre__ficha {
   padding: .4rem .8rem;
-  border: 2px solid #2478ca;
+  border: 2px solid #17783f;
   border-radius: 1rem;
   background: white;
   color: #1b4f86;
@@ -152,7 +152,7 @@
 }
 
 .arrastre__ficha[aria-pressed="true"] {
-  background: #2478ca;
+  background: #17783f;
   color: white;
 }
 
@@ -161,13 +161,13 @@
 }
 
 .arrastre--encima {
-  border-color: #2478ca;
-  background: #eef5fd;
+  border-color: #17783f;
+  background: #fff4e8;
 }
 
 .arrastre__destino--correcto {
-  border-color: #2b8a3e;
-  background: #eefaf0;
+  border-color: #17783f;
+  background: #e8f6ec;
 }
 
 .arrastre__destino--incorrecto {

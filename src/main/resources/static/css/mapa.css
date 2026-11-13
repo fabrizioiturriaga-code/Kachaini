@@ -11,7 +11,7 @@
   align-items: flex-start;
   margin: .6rem 0;
   padding: .8rem;
-  border: 2px solid #c9d2dc;
+  border: 2px solid #e0cdb4;
   border-radius: .5rem;
 }
 
@@ -22,7 +22,7 @@
   width: 2.2rem;
   height: 2.2rem;
   border-radius: 50%;
-  background: #c9d2dc;
+  background: #e0cdb4;
   font-weight: 700;
 }
 
@@ -53,29 +53,29 @@
 }
 
 .unidad--activa {
-  border-color: #2478ca;
-  background: #eef5fd;
+  border-color: #17783f;
+  background: #fff4e8;
 }
 
 .unidad--activa .unidad__numero {
-  background: #2478ca;
+  background: #17783f;
   color: white;
 }
 
 .unidad--completada {
-  border-color: #2b8a3e;
-  background: #eefaf0;
+  border-color: #17783f;
+  background: #e8f6ec;
 }
 
 .unidad--completada .unidad__numero {
-  background: #2b8a3e;
+  background: #17783f;
   color: white;
 }
 
 .unidad--bloqueada {
-  border-color: #d5d9de;
-  background: #f1f2f4;
-  color: #5d6773;
+  border-color: #f0e4d2;
+  background: #fff9f2;
+  color: #55645a;
   filter: grayscale(1);
 }
 
@@ -99,7 +99,7 @@
   width: 1.6rem;
   height: .9rem;
   border-radius: .25rem;
-  background: #e2e5e9;
+  background: #f0e4d2;
   transition: background .3s, transform .3s;
 }
 
@@ -166,7 +166,7 @@
 
 .estadisticas div {
   padding: .75rem;
-  border: 1px solid #d7dce5;
+  border: 1px solid #f0e4d2;
   border-radius: .5rem;
 }
 
@@ -188,15 +188,15 @@
 .accesos a {
   display: block;
   padding: 1rem 1.2rem;
-  border: 2px solid #c9d2dc;
+  border: 2px solid #e0cdb4;
   border-radius: .5rem;
   font-weight: 700;
   text-decoration: none;
 }
 
 .accesos a:hover {
-  border-color: #2478ca;
-  background: #eef5fd;
+  border-color: #17783f;
+  background: #fff4e8;
 }
 
 @media (min-width: 900px) {

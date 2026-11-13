@@ -37,12 +37,12 @@
   gap: .5rem;
   max-height: 18rem;
   overflow-y: auto;
-  border: 2px solid #d7dde4;
+  border: 2px solid #f0e4d2;
   border-radius: .5rem;
 }
 
 .mensajes-envio__estudiante small {
-  color: #5d6773;
+  color: #55645a;
 }
 
 .bandeja {
@@ -54,14 +54,14 @@
 }
 
 .bandeja__item {
-  border: 2px solid #d7dde4;
+  border: 2px solid #f0e4d2;
   border-radius: .75rem;
   background: white;
 }
 
 .bandeja__item--nuevo {
-  border-color: #154f9a;
-  background: #f2f7fe;
+  border-color: #b84d08;
+  background: #fff9f2;
 }
 
 .bandeja__enlace {
@@ -93,7 +93,7 @@
 
 .bandeja__cabecera small,
 .bandeja__fecha {
-  color: #5d6773;
+  color: #55645a;
   font-size: .8rem;
 }
 
@@ -132,7 +132,7 @@
 }
 
 .conversacion__titulo small {
-  color: #5d6773;
+  color: #55645a;
   font-size: 1rem;
   font-weight: 400;
 }
@@ -150,16 +150,16 @@
   align-self: flex-start;
   max-width: min(36rem, 85%);
   padding: .6rem .9rem;
-  border: 2px solid #d7dde4;
+  border: 2px solid #f0e4d2;
   border-radius: .9rem .9rem .9rem .2rem;
   background: white;
 }
 
 .chat__mensaje--propio {
   align-self: flex-end;
-  border-color: #154f9a;
+  border-color: #b84d08;
   border-radius: .9rem .9rem .2rem .9rem;
-  background: #f2f7fe;
+  background: #fff9f2;
 }
 
 .chat__texto {
@@ -172,7 +172,7 @@
   display: flex;
   gap: .4rem;
   margin: .3rem 0 0;
-  color: #5d6773;
+  color: #55645a;
   font-size: .75rem;
 }
 

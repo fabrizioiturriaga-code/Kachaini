@@ -35,7 +35,8 @@ public class SecurityConfig {
     http.authorizeHttpRequests(
         permisos ->
             permisos
-                .requestMatchers("/", "/registro", "/login", "/css/**", "/js/**", "/error")
+                .requestMatchers(
+                    "/", "/registro", "/login", "/css/**", "/js/**", "/img/**", "/error")
                 .permitAll()
                 .requestMatchers("/estudiante/**")
                 .hasRole("ESTUDIANTE")

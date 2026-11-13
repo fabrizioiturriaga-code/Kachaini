@@ -3,33 +3,44 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Sesión · Kaichaini</title>
+    <title>Panel docente · Kaichaini</title>
+    <link rel="icon" type="image/png" th:href="@{/img/kai.png}">
     <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/acceso.css}">
+    <link rel="stylesheet" th:href="@{/css/intro.css}">
+    <link rel="stylesheet" th:href="@{/css/inicio.css}">
   </head>
-  <body>
-    <main>
-      <h1>Sesión iniciada</h1>
-      <p th:text="${usuario.nombre}">
-      </p>
-      <p th:text="${usuario.rol}">
-      </p>
-      <p>Destino temporal de integración. El onboarding, inicio y panel docente pertenecen a historias futuras.</p>
-      <section th:if="${usuario.rol.name() == 'DOCENTE'}" aria-labelledby="titulo-panel-docente">
-        <h2 id="titulo-panel-docente">Panel docente</h2>
-        <ul>
-          <li><a th:href="@{/docente/progreso}">📊 Progreso de estudiantes</a></li>
-          <li><a th:href="@{/docente/multiplicadores}">✨ Multiplicadores de XP</a></li>
-          <li><a th:href="@{/docente/unidades}">📚 Mis unidades</a></li>
-          <li><a th:href="@{/docente/retos}">📣 Publicar retos</a></li>
-          <li><a th:href="@{/docente/reportes}">📈 Reportes del salón</a></li>
-          <li><a th:href="@{/docente/mensajes}">✉️ Mensajes</a></li>
-        </ul>
-      </section>
-      <a th:if="${usuario.rol.name() == 'ESTUDIANTE'}" th:href="@{/estudiante/perfil}">Mi perfil</a>
-      <a th:href="@{/cuenta/contrasena}">Cambiar contraseña</a>
-      <form method="post" th:action="@{/logout}">
-        <button type="submit">Cerrar sesión</button>
-      </form>
+  <body class="con-barra-inferior">
+    <main class="inicio tema-3">
+      <div th:replace="~{fragments/fondos :: escena(3)}"></div>
+      <div class="burbuja" style="top:-140px;right:-120px;width:340px;height:340px;background:var(--verde-claro)"></div>
+
+      <header class="inicio__cabecera">
+        <div>
+          <h1 th:text="|¡Hola, Prof. ${usuario.nombre}!|">¡Hola, Prof.!</h1>
+          <p>Panel docente · Historia</p>
+        </div>
+        <div class="inicio__chips">
+          <span class="chip chip--verde">Docente</span>
+        </div>
+      </header>
+
+      <div class="bienvenida-docente">
+        <div class="intro__panel intro__panel--verde">
+          <div class="burbuja" style="top:-60px;right:-50px;width:190px;height:190px;background:#fff;opacity:.55"></div>
+          <div class="burbuja" style="bottom:-70px;left:-60px;width:210px;height:210px;background:#fff;opacity:.45"></div>
+          <p class="globo">¡Bienvenido! Elige una sección en el menú para empezar.</p>
+          <img class="intro__kai" th:src="@{/img/kai.png}" alt="" aria-hidden="true">
+        </div>
+        <section class="intro__texto" aria-labelledby="titulo-bienvenida">
+          <span class="intro__antetitulo">Tu panel</span>
+          <h1 id="titulo-bienvenida">Acompaña el viaje de tus estudiantes</h1>
+          <p>Desde el menú puedes seguir el progreso de tus estudiantes, preparar unidades y lecciones para tu grado,
+            publicar retos, asignar multiplicadores de XP, revisar los reportes del salón y conversar con tus estudiantes.</p>
+        </section>
+      </div>
     </main>
+    <nav th:replace="~{fragments/navegacion-docente :: barra('panel')}"></nav>
   </body>
 </html>

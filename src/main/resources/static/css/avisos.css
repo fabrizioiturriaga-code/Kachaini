@@ -17,14 +17,14 @@
 
 .aviso {
   padding: .9rem 1rem;
-  border: 2px solid #d7dde4;
+  border: 2px solid #f0e4d2;
   border-radius: .75rem;
   background: white;
 }
 
 .aviso--nuevo {
-  border-color: #154f9a;
-  background: #f2f7fe;
+  border-color: #b84d08;
+  background: #fff9f2;
 }
 
 .aviso__titulo {
@@ -34,7 +34,7 @@
 
 .aviso__datos {
   margin: 0;
-  color: #3d4756;
+  color: #1e2a22;
   font-size: .9rem;
 }
 
@@ -47,7 +47,7 @@
 }
 
 .etiqueta--nuevo {
-  background: #154f9a;
+  background: #b84d08;
   color: white;
 }
 
@@ -57,8 +57,8 @@
 }
 
 .etiqueta--vencido {
-  background: #e6e9ee;
-  color: #5d6773;
+  background: #f0e4d2;
+  color: #55645a;
 }
 
 .reto-detalle dt {
@@ -81,7 +81,7 @@
 }
 
 .etiqueta--completado {
-  background: #d9f2df;
+  background: #e8f6ec;
   color: #1d6b34;
 }
 

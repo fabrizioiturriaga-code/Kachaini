@@ -4,86 +4,148 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Inicio · Kaichaini</title>
+    <link rel="icon" type="image/png" th:href="@{/img/kai.png}">
     <link rel="stylesheet" th:href="@{/css/auth.css}">
     <link rel="stylesheet" th:href="@{/css/navegacion.css}">
     <link rel="stylesheet" th:href="@{/css/mapa.css}">
     <link rel="stylesheet" th:href="@{/css/avisos.css}">
+    <link rel="stylesheet" th:href="@{/css/acceso.css}">
+    <link rel="stylesheet" th:href="@{/css/intro.css}">
+    <link rel="stylesheet" th:href="@{/css/inicio.css}">
   </head>
-  <body class="con-barra-inferior">
-    <main>
-      <h1><span class="saludo__avatar" aria-hidden="true" th:if="${avatarSesion}"
-                th:text="${avatarSesion}">✨</span>
-        ¡Hola, <span th:text="${nombre}">estudiante</span>!</h1>
-      <p role="status" th:if="${mensaje}" th:text="${mensaje}"></p>
-      <p role="alert" th:if="${error}" th:text="${error}"></p>
-      <p role="status" th:each="aviso : ${notificaciones}" th:text="${aviso}"></p>
+  <body class="con-barra-inferior"
+        th:with="grado=${unidades.isEmpty() ? null : (unidades[0].numero() - 1) / 2 + 1},
+                 propias=${unidadesDocente != null ? unidadesDocente : {}},
+                 total=${unidades.size() + propias.size()}">
+    <main class="inicio" th:classappend="${grado != null} ? |tema-${grado}|">
+      <div th:replace="~{fragments/fondos :: escena(${grado})}"></div>
+      <div class="burbuja" style="top:-140px;right:-120px;width:340px;height:340px;background:var(--naranja-claro)"></div>
+
+      <header class="inicio__cabecera">
+        <img class="inicio__kai" th:src="@{/img/kai.png}" alt="" aria-hidden="true">
+        <div>
+          <h1><span class="saludo__avatar" aria-hidden="true" th:if="${avatarSesion}"
+                    th:text="${avatarSesion}">✨</span>
+            ¡Hola, <span th:text="${nombre}">estudiante</span>!</h1>
+          <p>Continúa tu viaje por la historia</p>
+        </div>
+        <div class="inicio__chips">
+          <span class="chip">Historia</span>
+          <span class="chip chip--verde" th:if="${grado != null}" th:text="|${grado}.° de secundaria|">1.° de secundaria</span>
+        </div>
+      </header>
+
+      <div class="inicio__avisos">
+        <p role="status" th:if="${mensaje}" th:text="${mensaje}"></p>
+        <p role="alert" th:if="${error}" th:text="${error}"></p>
+        <p role="status" th:each="aviso : ${notificaciones}" th:text="${aviso}"></p>
         <p class="alerta-avisos" role="status"
-         th:if="${resumenAvisos != null and resumenAvisos.hayPendientes()}">
-        <span aria-hidden="true">🔔</span>
-        <span th:text="${resumenAvisos.texto()}">Tienes 1 reto nuevo.</span>
-        <a th:href="@{/estudiante/avisos}">Ver avisos</a>
-      </p>
-      <div th:replace="~{fragments/energia :: barra(${energia})}"></div>
-      <div th:replace="~{fragments/racha :: contador(${diasRacha}, false)}"></div>
-      <section aria-labelledby="titulo-mapa">
-        <h2 id="titulo-mapa">Mapa de misiones</h2>
-        <p th:if="${unidadActiva}">
-          Continúa con la unidad
-          <strong th:text="|${unidadActiva.numero()}. ${unidadActiva.titulo()}|"></strong>.
+           th:if="${resumenAvisos != null and resumenAvisos.hayPendientes()}">
+          <span aria-hidden="true">🔔</span>
+          <span th:text="${resumenAvisos.texto()}">Tienes 1 reto nuevo.</span>
+          <a th:href="@{/estudiante/avisos}">Ver avisos</a>
         </p>
-        <ol class="mapa-misiones">
-          <li th:each="unidad : ${unidades}" class="unidad" th:classappend="${unidad.claseCss()}"
-              th:attr="aria-current=${unidad.isActiva()} ? 'step'">
-            <span class="unidad__numero" th:text="${unidad.numero()}">1</span>
-            <div class="unidad__cuerpo">
-              <p class="unidad__titulo">
-                <a th:if="${!unidad.isBloqueada()}" th:href="@{/estudiante/unidades/{n}(n=${unidad.numero()})}"
-                   th:text="${unidad.titulo()}">Unidad</a>
-                <span th:if="${unidad.isBloqueada()}" th:text="${unidad.titulo()}">Unidad</span>
-              </p>
-              <p class="unidad__estado"
-                 th:text="${unidad.isActiva()} ? 'En progreso' : (${unidad.isBloqueada()} ? '🔒 Bloqueada' : '✅ Completada')">
-              </p>
-              <progress class="unidad__progreso" max="100" th:value="${unidad.porcentaje()}"
-                        th:attr="aria-label=|Progreso de la unidad ${unidad.numero()}|"
-                        th:text="|${unidad.porcentaje()}%|">0%</progress>
-              <p class="unidad__estrellas"
-                 th:attr="aria-label=|${unidad.leccionesCompletadas()} de ${unidad.leccionesTotal()} lecciones completadas|"
-                 th:text="${unidad.estrellas()}">☆☆☆</p>
-            </div>
-          </li>
-          <li th:each="propia : ${unidadesDocente}" th:with="unidad=${propia.mapa()}"
-              class="unidad" th:classappend="${unidad.claseCss()}">
-            <span class="unidad__numero" th:text="${unidad.numero()}">3</span>
-            <div class="unidad__cuerpo">
-              <p class="unidad__titulo">
-                <a th:if="${!unidad.isBloqueada()}"
-                   th:href="@{/estudiante/unidades-docente/{id}(id=${propia.id()})}"
-                   th:text="${unidad.titulo()}">Unidad</a>
-                <span th:if="${unidad.isBloqueada()}" th:text="${unidad.titulo()}">Unidad</span>
-              </p>
-              <p class="unidad__estado"
-                 th:text="${unidad.isActiva()} ? 'En progreso · Unidad de tu docente' : (${unidad.isBloqueada()} ? '🔒 Bloqueada' : '✅ Completada')">
-              </p>
-              <progress class="unidad__progreso" max="100" th:value="${unidad.porcentaje()}"
-                        th:attr="aria-label=|Progreso de la unidad ${unidad.numero()}|"
-                        th:text="|${unidad.porcentaje()}%|">0%</progress>
-              <p class="unidad__estrellas"
-                 th:attr="aria-label=|${unidad.leccionesCompletadas()} de ${unidad.leccionesTotal()} lecciones completadas|"
-                 th:text="${unidad.estrellas()}">☆☆☆</p>
-            </div>
-          </li>
-        </ol>
-        <p><a th:href="@{/onboarding}">Repasar el módulo inicial</a></p>
-      </section>
-      <section aria-labelledby="titulo-practica">
-        <h2 id="titulo-practica">Práctica</h2>
-        <ul class="accesos">
-          <li><a th:href="@{/estudiante/lecturas}">📖 Lecturas</a></li>
-          <li><a th:href="@{/estudiante/arrastre}">🧩 Arrastrar y soltar</a></li>
-        </ul>
-      </section>
+      </div>
+
+      <div class="inicio__rejilla">
+        <section class="inicio__tarjeta" aria-labelledby="titulo-mapa">
+          <h2 id="titulo-mapa">Mapa de misiones<span th:if="${grado != null}" th:text="| · ${grado}.° grado|"></span></h2>
+          <p th:if="${unidadActiva}">
+            Continúa con la unidad
+            <strong th:text="|${unidadActiva.numero()}. ${unidadActiva.titulo()}|"></strong>.
+          </p>
+
+          <svg class="inicio__camino" th:if="${total > 0}"
+               th:attr="viewBox=|0 0 ${total * 150 + 50} 210|,aria-label=|Camino con ${total} unidades|"
+               role="img">
+            <th:block th:if="${total > 1}">
+              <line th:each="i : ${#numbers.sequence(1, total - 1)}"
+                    th:attr="x1=${70 + (i - 1) * 150},y1=${(i - 1) % 2 == 0 ? 140 : 70},x2=${70 + i * 150},y2=${i % 2 == 0 ? 140 : 70}"
+                    stroke="#E0CDB4" stroke-width="7" stroke-linecap="round" stroke-dasharray="1 15"/>
+            </th:block>
+            <th:block th:each="unidad, it : ${unidades}"
+                      th:with="x=${70 + it.index * 150}, y=${it.index % 2 == 0 ? 140 : 70}">
+              <th:block th:replace="~{fragments/camino :: nodo(${unidad}, ${it.index}, ${x}, ${y})}"></th:block>
+            </th:block>
+            <th:block th:each="propia, it : ${propias}"
+                      th:with="i=${unidades.size() + it.index}, x=${70 + i * 150}, y=${i % 2 == 0 ? 140 : 70}">
+              <th:block th:replace="~{fragments/camino :: nodo(${propia.mapa()}, ${i}, ${x}, ${y})}"></th:block>
+            </th:block>
+            <path th:with="x=${70 + (total - 1) * 150 + 95}, y=${(total - 1) % 2 == 0 ? 120 : 50}"
+                  th:attr="transform=|translate(${x} ${y})|"
+                  d="M18 0l7 14 15 2-11 10 3 15-14-8-14 8 3-15-11-10 15-2z"
+                  fill="#FFC27A" stroke="#E8710A" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+
+          <ol class="mapa-misiones">
+            <li th:each="unidad : ${unidades}" class="unidad" th:classappend="${unidad.claseCss()}"
+                th:attr="aria-current=${unidad.isActiva()} ? 'step'">
+              <span class="unidad__numero" th:text="${unidad.numero()}">1</span>
+              <div class="unidad__cuerpo">
+                <p class="unidad__titulo">
+                  <a th:if="${!unidad.isBloqueada()}" th:href="@{/estudiante/unidades/{n}(n=${unidad.numero()})}"
+                     th:text="${unidad.titulo()}">Unidad</a>
+                  <span th:if="${unidad.isBloqueada()}" th:text="${unidad.titulo()}">Unidad</span>
+                </p>
+                <p class="unidad__estado"
+                   th:text="${unidad.isActiva()} ? 'En progreso' : (${unidad.isBloqueada()} ? '🔒 Bloqueada' : '✅ Completada')">
+                </p>
+                <progress class="unidad__progreso" max="100" th:value="${unidad.porcentaje()}"
+                          th:attr="aria-label=|Progreso de la unidad ${unidad.numero()}|"
+                          th:text="|${unidad.porcentaje()}%|">0%</progress>
+                <p class="unidad__estrellas"
+                   th:attr="aria-label=|${unidad.leccionesCompletadas()} de ${unidad.leccionesTotal()} lecciones completadas|"
+                   th:text="${unidad.estrellas()}">☆☆☆</p>
+              </div>
+            </li>
+            <li th:each="propia : ${propias}" th:with="unidad=${propia.mapa()}"
+                class="unidad" th:classappend="${unidad.claseCss()}">
+              <span class="unidad__numero" th:text="${unidad.numero()}">3</span>
+              <div class="unidad__cuerpo">
+                <p class="unidad__titulo">
+                  <a th:if="${!unidad.isBloqueada()}"
+                     th:href="@{/estudiante/unidades-docente/{id}(id=${propia.id()})}"
+                     th:text="${unidad.titulo()}">Unidad</a>
+                  <span th:if="${unidad.isBloqueada()}" th:text="${unidad.titulo()}">Unidad</span>
+                </p>
+                <p class="unidad__estado"
+                   th:text="${unidad.isActiva()} ? 'En progreso · Unidad de tu docente' : (${unidad.isBloqueada()} ? '🔒 Bloqueada' : '✅ Completada')">
+                </p>
+                <progress class="unidad__progreso" max="100" th:value="${unidad.porcentaje()}"
+                          th:attr="aria-label=|Progreso de la unidad ${unidad.numero()}|"
+                          th:text="|${unidad.porcentaje()}%|">0%</progress>
+                <p class="unidad__estrellas"
+                   th:attr="aria-label=|${unidad.leccionesCompletadas()} de ${unidad.leccionesTotal()} lecciones completadas|"
+                   th:text="${unidad.estrellas()}">☆☆☆</p>
+              </div>
+            </li>
+          </ol>
+        </section>
+
+        <div class="inicio__lateral">
+          <section class="inicio__tarjeta inicio__tarjeta--intro" aria-labelledby="titulo-intro">
+            <span class="inicio__antetitulo">Tu módulo introductorio</span>
+            <h2 id="titulo-intro">Módulo inicial con Kai</h2>
+            <p>Repasa cómo funciona Kaichaini, qué es la historia y cómo ubicarnos en el tiempo.</p>
+            <a class="boton-principal boton-principal--verde" th:href="@{/onboarding}">📖 Repasar introducción con Kai</a>
+          </section>
+
+          <section class="inicio__tarjeta" aria-label="Energía y racha">
+            <div th:replace="~{fragments/energia :: barra(${energia})}"></div>
+            <div th:replace="~{fragments/racha :: contador(${diasRacha}, false)}"></div>
+          </section>
+
+          <section class="inicio__tarjeta" aria-labelledby="titulo-practica">
+            <h2 id="titulo-practica">Práctica</h2>
+            <ul class="accesos">
+              <li><a th:href="@{/estudiante/lecturas}">📖 Lecturas</a></li>
+              <li><a th:href="@{/estudiante/arrastre}">🧩 Arrastrar y soltar</a></li>
+            </ul>
+          </section>
+        </div>
+      </div>
     </main>
     <nav th:replace="~{fragments/navegacion :: barra('inicio')}"></nav>
+
   </body>
 </html>

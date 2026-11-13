@@ -4,36 +4,63 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title th:text="|${mision.titulo} · Kaichaini|">Misión · Kaichaini</title>
+    <link rel="icon" type="image/png" th:href="@{/img/kai.png}">
     <link rel="stylesheet" th:href="@{/css/auth.css}">
-    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/acceso.css}">
+    <link rel="stylesheet" th:href="@{/css/intro.css}">
   </head>
-  <body class="con-barra-inferior">
-    <main>
-      <p th:text="|Misión ${mision.numero} · ${mision.tipo.etiqueta}|"></p>
-      <h1 th:text="${mision.titulo}">Misión</h1>
-      <p role="alert" th:if="${error}" th:text="${error}"></p>
-      <p th:each="parrafo : ${mision.contenido}" th:text="${parrafo}"></p>
-      <p>
-        Recompensa: <strong th:text="|${mision.xp} XP|"></strong>
-        <span th:if="${mision.insignia.present}"
-              th:text="|y la insignia ${mision.insignia.get().icono} ${mision.insignia.get().nombre}|"></span>
-      </p>
-      <p role="status" th:if="${completada}">✅ Ya completaste esta misión.</p>
-      <form th:unless="${completada}" method="post"
-            th:action="@{/onboarding/misiones/{c}(c=${mision.codigo})}">
-        <fieldset th:if="${mision.pregunta != null}">
-          <legend th:text="${mision.pregunta.enunciado()}">Pregunta</legend>
-          <th:block th:each="opcion, i : ${mision.pregunta.opciones()}">
-            <label>
-              <input type="radio" name="respuesta" th:value="${i.index}" required>
-              <span th:text="${opcion}">Opción</span>
-            </label>
-          </th:block>
-        </fieldset>
-        <button type="submit" th:text="${mision.pregunta != null} ? 'Responder' : 'Completar misión'">Completar misión</button>
-      </form>
-      <a th:href="@{/onboarding}">Volver al módulo inicial</a>
-    </main>
-    <nav th:replace="~{fragments/navegacion :: barra('inicio')}"></nav>
+  <body>
+    <div class="intro tema-1">
+      <div th:replace="~{fragments/fondos :: escena(1)}"></div>
+      <header class="intro__cabecera">
+        <img th:src="@{/img/logo-kaichaini.png}" alt="Logo de Kaichaini">
+        <span class="intro__paso" th:text="|Misión ${mision.numero} de 4|">Misión 1 de 4</span>
+        <a th:href="@{/onboarding}">Volver al módulo inicial</a>
+      </header>
+
+      <main class="intro__principal">
+        <div class="intro__panel" th:classappend="${completada} ? 'intro__panel--verde'">
+          <div class="burbuja" style="top:-60px;right:-50px;width:190px;height:190px;background:#fff;opacity:.55"></div>
+          <div class="burbuja" style="bottom:-70px;left:-60px;width:210px;height:210px;background:#fff;opacity:.45"></div>
+          <div class="intro__ficha" aria-hidden="true"
+               th:text="${mision.tipo.name() == 'TUTORIAL'} ? '⭐' : (${mision.tipo.name() == 'LECCION'} ? '📖' : '🎯')">⭐</div>
+          <p class="globo"
+             th:text="${completada} ? '¡Ya completaste esta misión!' : (${mision.tipo.name() == 'TUTORIAL'} ? 'Te cuento cómo funciona Kaichaini.' : (${mision.tipo.name() == 'LECCION'} ? '¡Aprendamos algo nuevo!' : '¿Listo para el reto?'))">¡Hola!</p>
+          <img class="intro__kai" th:src="@{/img/kai.png}" alt="" aria-hidden="true">
+        </div>
+
+        <section class="intro__texto" aria-labelledby="titulo-mision">
+          <span class="intro__antetitulo" th:text="|Misión ${mision.numero} · ${mision.tipo.etiqueta}|">Misión 1 · Tutorial</span>
+          <h1 id="titulo-mision" th:text="${mision.titulo}">Misión</h1>
+          <p class="aviso-acceso aviso-acceso--error" role="alert" th:if="${error}" th:text="${error}"></p>
+          <p th:each="parrafo : ${mision.contenido}" th:text="${parrafo}"></p>
+          <div class="intro__recompensa">
+            <span class="chip" th:text="|Recompensa: ${mision.xp} XP|">Recompensa</span>
+            <span class="chip chip--verde" th:if="${mision.insignia.present}"
+                  th:text="|Insignia ${mision.insignia.get().icono} ${mision.insignia.get().nombre}|"></span>
+          </div>
+          <p class="aviso-acceso aviso-acceso--ok" role="status" th:if="${completada}">✅ Ya completaste esta misión.</p>
+          <form th:unless="${completada}" method="post"
+                th:action="@{/onboarding/misiones/{c}(c=${mision.codigo})}">
+            <fieldset th:if="${mision.pregunta != null}">
+              <legend th:text="${mision.pregunta.enunciado()}">Pregunta</legend>
+              <th:block th:each="opcion, i : ${mision.pregunta.opciones()}">
+                <label>
+                  <input type="radio" name="respuesta" th:value="${i.index}" required>
+                  <span th:text="${opcion}">Opción</span>
+                </label>
+              </th:block>
+            </fieldset>
+            <div class="intro__acciones">
+              <button type="submit" class="boton-principal"
+                      th:text="${mision.pregunta != null} ? 'Responder' : 'Completar misión'">Completar misión</button>
+            </div>
+          </form>
+          <div class="intro__acciones" th:if="${completada}">
+            <a class="boton-principal boton-principal--secundario" th:href="@{/onboarding}">Volver al módulo inicial</a>
+          </div>
+        </section>
+      </main>
+    </div>
   </body>
 </html>

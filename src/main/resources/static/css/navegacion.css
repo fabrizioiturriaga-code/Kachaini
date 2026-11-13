@@ -1,5 +1,5 @@
 body.con-barra-inferior {
-  padding-bottom: 5rem;
+  padding-bottom: 5.5rem;
 }
 
 .barra-inferior {
@@ -10,21 +10,27 @@ body.con-barra-inferior {
   z-index: 10;
   display: flex;
   justify-content: space-around;
-  padding: .3rem 0;
-  border-top: 1px solid #d5d9de;
+  padding: .4rem 0;
+  border-top: 2px solid var(--tarjeta, #f0e4d2);
   background: white;
 }
 
 .barra-inferior__enlace {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: .1rem;
-  padding: .3rem .8rem;
-  border-radius: .5rem;
-  color: #5d6773;
+  padding: .35rem .8rem;
+  border-radius: 16px;
+  color: var(--suave, #55645a);
   font-size: .8rem;
+  font-weight: 800;
   text-decoration: none;
+}
+
+.barra-inferior__enlace:hover {
+  color: var(--tinta, #1e2a22);
 }
 
 .barra-inferior__icono {
@@ -33,14 +39,28 @@ body.con-barra-inferior {
 }
 
 .barra-inferior__enlace--activo {
-  background: #eef5fd;
-  color: #154f9a;
-  font-weight: 700;
+  background: var(--fondo, #fff9f2);
+  color: var(--naranja-fuerte, #b84d08);
+}
+
+.barra-inferior__contador {
+  position: absolute;
+  top: .1rem;
+  right: .3rem;
+  min-width: 1.2rem;
+  padding: 0 .3rem;
+  border-radius: 1rem;
+  background: var(--rojo, #c62828);
+  color: white;
+  font-size: .7rem;
+  font-weight: 800;
+  line-height: 1.2rem;
+  text-align: center;
 }
 
 @media (min-width: 900px) {
   body.con-barra-inferior {
-    padding: 0 0 0 15rem;
+    padding: 0 0 0 17rem;
   }
 
   body.con-barra-inferior main {
@@ -52,56 +72,41 @@ body.con-barra-inferior {
   .barra-inferior {
     top: 0;
     right: auto;
-    width: 15rem;
+    width: 17rem;
     flex-direction: column;
     justify-content: flex-start;
-    gap: .3rem;
-    padding: 1.5rem 1rem;
+    gap: .4rem;
+    padding: 1.4rem 1rem;
+    overflow-y: auto;
     border-top: none;
-    border-right: 1px solid #d5d9de;
-  }
-
-  .barra-inferior::before {
-    content: "Kaichaini";
-    padding: 0 .8rem 1.5rem;
-    color: #154f9a;
-    font-size: 1.5rem;
-    font-weight: 800;
+    border-right: 2px solid var(--tarjeta, #f0e4d2);
+    box-shadow: 8px 0 24px rgba(30, 42, 34, .04);
   }
 
   .barra-inferior__enlace {
     flex-direction: row;
     gap: .8rem;
-    padding: .7rem .8rem;
+    min-height: 52px;
+    padding: 0 .8rem;
     font-size: 1rem;
   }
 
+  .barra-inferior__icono {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 44px;
+    height: 36px;
+    border-radius: 14px;
+  }
+
   .barra-inferior__enlace:hover {
-    background: #f3f5f7;
+    background: var(--fondo, #fff9f2);
   }
 
-  .barra-inferior__enlace--activo:hover {
-    background: #eef5fd;
+  .barra-inferior__enlace--activo .barra-inferior__icono {
+    background: var(--naranja-claro, #ffe2c2);
   }
-}
-
-.barra-inferior__enlace {
-  position: relative;
-}
-
-.barra-inferior__contador {
-  position: absolute;
-  top: .1rem;
-  right: .3rem;
-  min-width: 1.2rem;
-  padding: 0 .3rem;
-  border-radius: 1rem;
-  background: #c62828;
-  color: white;
-  font-size: .7rem;
-  font-weight: 700;
-  line-height: 1.2rem;
-  text-align: center;
 }
 
 @media (max-width: 599px) {
@@ -117,5 +122,120 @@ body.con-barra-inferior {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+}
+
+.barra-inferior__svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.barra-inferior__marca, .barra-inferior__usuario {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .barra-inferior__marca {
+    display: flex;
+    flex: none;
+    justify-content: center;
+    padding: 4px 0 14px;
+  }
+
+  .barra-inferior__marca img {
+    width: auto;
+    height: 96px;
+  }
+
+  .barra-inferior__usuario {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: auto;
+    padding: 14px;
+    border: 2px solid var(--tarjeta, #f0e4d2);
+    border-radius: 20px;
+    background: var(--fondo, #fff9f2);
+  }
+
+  .barra-inferior__quien {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .barra-inferior__avatar {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 2px solid var(--naranja-fuerte, #b84d08);
+    border-radius: 50%;
+    background: white;
+    font-size: 24px;
+  }
+
+  .barra-inferior__datos {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .barra-inferior__nombre {
+    overflow: hidden;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .barra-inferior__rol {
+    color: var(--suave, #55645a);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .barra-inferior__usuario form {
+    margin: 0;
+  }
+
+  .barra-inferior__salir {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    height: 42px;
+    margin: 0;
+    padding: 0;
+    border: 2px solid #f3c9c5;
+    border-radius: 12px;
+    background: white;
+    box-shadow: none;
+    color: #9f1d1d;
+    font-size: 14px;
+    font-weight: 800;
+  }
+
+  .barra-inferior__salir:hover {
+    background: #fdecea;
+  }
+
+  .barra-inferior__salir:active {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .barra-inferior__salir .barra-inferior__svg {
+    width: 18px;
+    height: 18px;
   }
 }

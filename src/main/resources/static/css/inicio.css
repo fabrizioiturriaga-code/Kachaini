@@ -1,0 +1,167 @@
+body.con-barra-inferior main.inicio {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: none;
+  min-height: 100vh;
+  margin: 0;
+  padding: 32px 40px 220px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: linear-gradient(180deg, var(--fondo) 0%, var(--tema, var(--fondo)) 100%);
+  box-shadow: none;
+}
+
+main.inicio > :not(.escena):not(.burbuja) {
+  position: relative;
+  z-index: 1;
+}
+
+.inicio__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+.inicio__kai {
+  width: auto;
+  height: 76px;
+}
+
+.inicio__cabecera h1 {
+  margin: 0;
+  font-size: 34px;
+}
+
+.inicio__cabecera p {
+  margin: 4px 0 0;
+  color: var(--suave);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.inicio__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.inicio__avisos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.inicio__avisos:empty {
+  display: none;
+}
+
+.inicio__avisos p {
+  margin: 0;
+}
+
+.inicio__rejilla {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.inicio__lateral {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.inicio__tarjeta {
+  position: relative;
+  padding: 24px;
+  border: 2px solid var(--tarjeta);
+  border-radius: 28px;
+  background: white;
+  box-shadow: 0 4px 0 rgba(30, 42, 34, .05);
+}
+
+.inicio__tarjeta h2 {
+  margin: 0 0 8px;
+  font-size: 24px;
+}
+
+.inicio__tarjeta > p {
+  margin: 0 0 8px;
+}
+
+.inicio__tarjeta--intro {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-color: var(--verde-borde);
+  background: var(--verde-claro);
+}
+
+.inicio__tarjeta--intro h2, .inicio__tarjeta--intro p {
+  margin: 0;
+}
+
+.inicio__tarjeta--intro p {
+  color: #2e4636;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.inicio__antetitulo {
+  color: #0f5a2e;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.inicio__camino {
+  display: block;
+  width: 100%;
+  max-height: 240px;
+  margin: 8px 0 4px;
+}
+
+.inicio__tarjeta .energia, .inicio__tarjeta .racha {
+  margin: 0 0 10px;
+}
+
+.inicio__tarjeta .racha {
+  margin-bottom: 0;
+}
+
+@media (max-width: 1100px) {
+  .inicio__rejilla {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 899px) {
+  body.con-barra-inferior main.inicio {
+    padding: 20px 16px 200px;
+  }
+
+  .inicio__chips {
+    margin-left: 0;
+  }
+}
+
+.bienvenida-docente {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 40px;
+  align-items: center;
+  max-width: 1180px;
+}
+
+@media (max-width: 1100px) {
+  .bienvenida-docente {
+    grid-template-columns: 1fr;
+  }
+}

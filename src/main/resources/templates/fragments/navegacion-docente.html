@@ -2,46 +2,50 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
   <body>
     <nav th:fragment="barra(activo)" class="barra-inferior" aria-label="Navegación del docente">
+      <svg th:replace="~{fragments/navegacion :: iconos}"></svg>
+      <a class="barra-inferior__marca" th:href="@{/docente/panel}" aria-label="Kaichaini, ir al panel">
+        <img th:src="@{/img/logo-kaichaini.png}" alt="Logo de Kaichaini">
+      </a>
       <a th:href="@{/docente/panel}" class="barra-inferior__enlace"
          th:classappend="${activo == 'panel'} ? 'barra-inferior__enlace--activo'"
          th:attr="aria-current=${activo == 'panel'} ? 'page'">
-        <span class="barra-inferior__icono" aria-hidden="true">🏠</span>
+        <span class="barra-inferior__icono" aria-hidden="true"><svg class="barra-inferior__svg"><use href="#n-inicio"/></svg></span>
         <span class="barra-inferior__texto">Panel</span>
       </a>
       <a th:href="@{/docente/progreso}" class="barra-inferior__enlace"
          th:classappend="${activo == 'progreso'} ? 'barra-inferior__enlace--activo'"
          th:attr="aria-current=${activo == 'progreso'} ? 'page'">
-        <span class="barra-inferior__icono" aria-hidden="true">📊</span>
+        <span class="barra-inferior__icono" aria-hidden="true"><svg class="barra-inferior__svg"><use href="#n-progreso"/></svg></span>
         <span class="barra-inferior__texto">Progreso</span>
       </a>
       <a th:href="@{/docente/multiplicadores}" class="barra-inferior__enlace"
          th:classappend="${activo == 'multiplicadores'} ? 'barra-inferior__enlace--activo'"
          th:attr="aria-current=${activo == 'multiplicadores'} ? 'page'">
-        <span class="barra-inferior__icono" aria-hidden="true">✨</span>
+        <span class="barra-inferior__icono" aria-hidden="true"><svg class="barra-inferior__svg"><use href="#n-multiplicador"/></svg></span>
         <span class="barra-inferior__texto">Multiplicadores</span>
       </a>
       <a th:href="@{/docente/unidades}" class="barra-inferior__enlace"
          th:classappend="${activo == 'unidades'} ? 'barra-inferior__enlace--activo'"
          th:attr="aria-current=${activo == 'unidades'} ? 'page'">
-        <span class="barra-inferior__icono" aria-hidden="true">📚</span>
+        <span class="barra-inferior__icono" aria-hidden="true"><svg class="barra-inferior__svg"><use href="#n-unidades"/></svg></span>
         <span class="barra-inferior__texto">Unidades</span>
       </a>
           <a th:href="@{/docente/retos}" class="barra-inferior__enlace"
          th:classappend="${activo == 'retos'} ? 'barra-inferior__enlace--activo'"
          th:attr="aria-current=${activo == 'retos'} ? 'page'">
-        <span class="barra-inferior__icono" aria-hidden="true">📣</span>
+        <span class="barra-inferior__icono" aria-hidden="true"><svg class="barra-inferior__svg"><use href="#n-retos"/></svg></span>
         <span class="barra-inferior__texto">Retos</span>
       </a>
       <a th:href="@{/docente/reportes}" class="barra-inferior__enlace"
          th:classappend="${activo == 'reportes'} ? 'barra-inferior__enlace--activo'"
          th:attr="aria-current=${activo == 'reportes'} ? 'page'">
-        <span class="barra-inferior__icono" aria-hidden="true">📈</span>
+        <span class="barra-inferior__icono" aria-hidden="true"><svg class="barra-inferior__svg"><use href="#n-reportes"/></svg></span>
         <span class="barra-inferior__texto">Reportes</span>
       </a>
       <a th:href="@{/docente/mensajes}" class="barra-inferior__enlace"
          th:classappend="${activo == 'mensajes'} ? 'barra-inferior__enlace--activo'"
          th:attr="aria-current=${activo == 'mensajes'} ? 'page'">
-        <span class="barra-inferior__icono" aria-hidden="true">✉️</span>
+        <span class="barra-inferior__icono" aria-hidden="true"><svg class="barra-inferior__svg"><use href="#n-mensajes"/></svg></span>
         <span class="barra-inferior__texto">Mensajes</span>
         <span class="barra-inferior__contador"
           th:if="${mensajesSinLeer != null and mensajesSinLeer > 0}"
@@ -49,9 +53,10 @@
           th:attr="aria-label=|${mensajesSinLeer} sin leer|">1</span>
       </a>
       <a th:href="@{/cuenta/contrasena}" class="barra-inferior__enlace">
-        <span class="barra-inferior__icono" aria-hidden="true">🔑</span>
+        <span class="barra-inferior__icono" aria-hidden="true"><svg class="barra-inferior__svg"><use href="#n-clave"/></svg></span>
         <span class="barra-inferior__texto">Contraseña</span>
       </a>
+      <div th:replace="~{fragments/navegacion :: usuario}"></div>
     </nav>
   </body>
 </html>

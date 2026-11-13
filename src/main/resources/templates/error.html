@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Algo pasó · Kaichaini</title>
+    <link rel="icon" type="image/png" th:href="@{/img/kai.png}">
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/acceso.css}">
+  </head>
+  <body>
+    <main class="pagina-error">
+      <div class="pagina-error__tarjeta">
+        <img th:src="@{/img/kai.png}" alt="" aria-hidden="true" style="height:140px">
+        <th:block th:switch="${status != null ? status.toString() : ''}">
+          <th:block th:case="'403'">
+            <h1>No pudimos abrir esta página</h1>
+            <p>Puede que tu sesión haya vencido o que esta sección no esté disponible para tu cuenta.
+              Si estabas iniciando sesión, vuelve a intentarlo.</p>
+          </th:block>
+          <th:block th:case="'404'">
+            <h1>No encontramos esta página</h1>
+            <p>Revisa el enlace o vuelve al inicio para seguir con tu aventura.</p>
+          </th:block>
+          <th:block th:case="*">
+            <h1>Algo salió mal</h1>
+            <p>Tuvimos un problema al cargar esta página. Inténtalo de nuevo en unos momentos.</p>
+          </th:block>
+        </th:block>
+        <div class="pagina-error__acciones">
+          <a class="boton-principal" th:href="@{/login}">Volver a iniciar sesión</a>
+          <a class="boton-principal boton-principal--secundario" th:href="@{/}">Ir al inicio</a>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

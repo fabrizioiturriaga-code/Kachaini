@@ -16,7 +16,7 @@
 
 .reporte__fecha {
   margin: .3rem 0 0;
-  color: #5d6773;
+  color: #55645a;
   font-size: .9rem;
 }
 
@@ -31,10 +31,10 @@
   width: auto;
   margin: 0;
   padding: .6rem 1rem;
-  border: 2px solid #154f9a;
+  border: 2px solid #b84d08;
   border-radius: .5rem;
   background: white;
-  color: #154f9a;
+  color: #b84d08;
   font: inherit;
   font-weight: 700;
   text-decoration: none;
@@ -42,7 +42,7 @@
 }
 
 .reporte__boton:hover {
-  background: #eef5fd;
+  background: #fff4e8;
 }
 
 .reporte-sube {
@@ -62,7 +62,7 @@
   gap: .4rem;
   padding: 1rem 1rem 1rem 2rem;
   border-radius: .5rem;
-  background: #f3f7fc;
+  background: #fff9f2;
 }
 
 .reporte__columnas {
@@ -79,12 +79,12 @@
 
 .reporte__lista li span:last-child {
   display: block;
-  color: #5d6773;
+  color: #55645a;
   font-size: .9rem;
 }
 
 .reporte__ayuda {
-  color: #5d6773;
+  color: #55645a;
   font-size: .9rem;
 }
 

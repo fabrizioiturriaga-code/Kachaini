@@ -15,7 +15,7 @@
   align-items: center;
   gap: .3rem;
   padding: 1rem .75rem;
-  border: 2px solid #d7dde4;
+  border: 2px solid #f0e4d2;
   border-radius: .75rem;
   background: #fff;
   text-align: center;
@@ -30,7 +30,7 @@
 .insignia__como {
   margin: 0;
   font-size: .85rem;
-  color: #3d4756;
+  color: #1e2a22;
 }
 
 .insignia__estado {
@@ -91,9 +91,9 @@
   gap: .8rem;
   margin: 1rem 0;
   padding: .9rem 1rem;
-  border: 2px solid #154f9a;
+  border: 2px solid #b84d08;
   border-radius: .75rem;
-  background: #f2f7fe;
+  background: #fff9f2;
 }
 
 .liga-actual__icono {
@@ -119,14 +119,14 @@
 
 .ligas li {
   padding: .35rem .6rem;
-  border: 1px solid #d7dde4;
+  border: 1px solid #f0e4d2;
   border-radius: 1rem;
   font-size: .85rem;
 }
 
 .ligas li[aria-current] {
-  border-color: #154f9a;
-  background: #e8f0fb;
+  border-color: #b84d08;
+  background: #ffe2c2;
   font-weight: 700;
 }
 
@@ -141,12 +141,12 @@
   align-items: center;
   gap: .6rem;
   padding: .55rem .75rem;
-  border-bottom: 1px solid #e6e9ee;
+  border-bottom: 1px solid #f0e4d2;
 }
 
 .ranking li[aria-current] {
   border-radius: .5rem;
-  background: #e8f0fb;
+  background: #ffe2c2;
   font-weight: 700;
 }
 
@@ -160,7 +160,7 @@
 }
 
 .historial {
-  color: #3d4756;
+  color: #1e2a22;
   font-size: .9rem;
 }
 

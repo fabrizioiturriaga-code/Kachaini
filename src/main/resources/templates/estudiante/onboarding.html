@@ -4,44 +4,68 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Módulo inicial · Kaichaini</title>
+    <link rel="icon" type="image/png" th:href="@{/img/kai.png}">
     <link rel="stylesheet" th:href="@{/css/auth.css}">
-    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/acceso.css}">
+    <link rel="stylesheet" th:href="@{/css/intro.css}">
   </head>
-  <body class="con-barra-inferior">
-    <main>
-      <h1>¡Bienvenido, <span th:text="${nombre}">estudiante</span>!</h1>
-      <p role="status" th:if="${mensaje}" th:text="${mensaje}"></p>
-      <p role="alert" th:if="${error}" th:text="${error}"></p>
-      <section aria-labelledby="titulo-modulo">
-        <h2 id="titulo-modulo">Módulo inicial</h2>
-        <p th:unless="${progreso.completado()}">
-          Completa estas misiones introductorias para desbloquear la primera unidad del mapa de misiones.
-        </p>
-        <p>
-          Progreso: <strong th:text="|${progreso.completadas()} de ${progreso.total()} misiones|"></strong>
-          · XP: <strong th:text="|${progreso.xp()} / ${xpTotal}|"></strong>
-        </p>
-        <ol class="mapa-misiones">
-          <li th:each="estado : ${progreso.misiones()}" class="unidad" th:classappend="${estado.claseCss()}"
-              th:attr="aria-current=${estado.disponible() and !estado.completada()} ? 'step'">
-            <span class="unidad__numero" th:text="${estado.mision().numero}">1</span>
-            <div>
-              <p class="unidad__titulo">
-                <a th:if="${estado.disponible()}" th:href="@{/onboarding/misiones/{c}(c=${estado.mision().codigo})}"
-                   th:text="${estado.mision().titulo}">Misión</a>
-                <span th:unless="${estado.disponible()}" th:text="${estado.mision().titulo}">Misión</span>
-              </p>
-              <p class="unidad__estado"
-                 th:text="${estado.completada()} ? '✅ Completada' : (${estado.disponible()} ? |Disponible · +${estado.mision().xp} XP| : '🔒 Bloqueada')">
-              </p>
-            </div>
-          </li>
-        </ol>
-        <p th:if="${progreso.completado()}">
-          ¡Completaste el módulo inicial! <a th:href="@{/inicio}">Ir al mapa de misiones</a>
-        </p>
-      </section>
-    </main>
-    <nav th:replace="~{fragments/navegacion :: barra('inicio')}"></nav>
+  <body th:with="pendientes=${progreso.misiones().?[#this.disponible() and !#this.completada()]},
+                 siguiente=${pendientes.isEmpty() ? null : pendientes[0]}">
+    <div class="intro tema-1">
+      <div th:replace="~{fragments/fondos :: escena(1)}"></div>
+      <header class="intro__cabecera">
+        <img th:src="@{/img/logo-kaichaini.png}" alt="Logo de Kaichaini">
+        <span class="intro__paso"
+              th:text="${progreso.completado()} ? 'Módulo completado' : |Misión ${progreso.completadas() + 1} de ${progreso.total()}|">Misión 1 de 4</span>
+      </header>
+
+      <main class="intro__principal">
+        <div class="intro__panel" th:classappend="${progreso.completado()} ? 'intro__panel--verde'">
+          <div class="burbuja" style="top:-60px;right:-50px;width:190px;height:190px;background:#fff;opacity:.55"></div>
+          <div class="burbuja" style="bottom:-70px;left:-60px;width:210px;height:210px;background:#fff;opacity:.45"></div>
+          <div class="intro__ficha" aria-hidden="true" th:text="${progreso.completado()} ? '🏆' : '⭐'">⭐</div>
+          <p class="globo" aria-live="polite" th:if="${mensaje}" th:text="${mensaje}"></p>
+          <p class="globo" th:unless="${mensaje}"
+             th:text="${progreso.completado()} ? |¡Lo lograste, ${nombre}! Ya puedes recorrer el mapa.| : |¡Hola, ${nombre}! Soy Kai, tu guía por la historia.|">¡Hola! Soy Kai.</p>
+          <img class="intro__kai" th:src="@{/img/kai.png}" alt="" aria-hidden="true">
+        </div>
+
+        <section class="intro__texto" aria-labelledby="titulo-modulo">
+          <span class="intro__antetitulo">Módulo inicial</span>
+          <h1 id="titulo-modulo" th:text="${progreso.completado()} ? '¡Módulo completado!' : '¡Bienvenido a Kaichaini!'">¡Bienvenido a Kaichaini!</h1>
+          <p class="aviso-acceso aviso-acceso--error" role="alert" th:if="${error}" th:text="${error}"></p>
+          <p th:unless="${progreso.completado()}">
+            Completa estas misiones introductorias para desbloquear la primera unidad del mapa de misiones.
+          </p>
+          <p>
+            Progreso: <strong th:text="|${progreso.completadas()} de ${progreso.total()} misiones|"></strong>
+            · XP: <strong th:text="|${progreso.xp()} / ${xpTotal}|"></strong>
+          </p>
+          <ol class="puntos" aria-hidden="true">
+            <li th:each="estado : ${progreso.misiones()}"
+                th:classappend="${estado.completada()} ? 'puntos--hecho' : (${siguiente != null and estado.mision() == siguiente.mision()} ? 'puntos--actual')"></li>
+          </ol>
+          <ol class="intro__misiones">
+            <li th:each="estado : ${progreso.misiones()}"
+                th:classappend="${estado.completada()} ? 'hecha' : (${estado.disponible()} ? 'disponible' : 'bloqueada')"
+                th:attr="aria-current=${estado.disponible() and !estado.completada()} ? 'step'">
+              <span class="n" th:text="${estado.mision().numero}">1</span>
+              <a th:if="${estado.disponible()}" th:href="@{/onboarding/misiones/{c}(c=${estado.mision().codigo})}"
+                 th:text="${estado.mision().titulo}">Misión</a>
+              <span th:unless="${estado.disponible()}" th:text="${estado.mision().titulo}">Misión</span>
+              <span class="estado"
+                    th:text="${estado.completada()} ? '✅ Completada' : (${estado.disponible()} ? |Disponible · +${estado.mision().xp} XP| : '🔒 Bloqueada')"></span>
+            </li>
+          </ol>
+          <div class="intro__acciones">
+            <a th:if="${siguiente != null}" class="boton-principal"
+               th:href="@{/onboarding/misiones/{c}(c=${siguiente.mision().codigo})}"
+               th:text="${progreso.completadas() == 0} ? 'Comenzar' : 'Siguiente misión'">Comenzar</a>
+            <a th:if="${progreso.completado()}" class="boton-principal boton-principal--verde"
+               th:href="@{/inicio}">Ir al mapa de misiones</a>
+          </div>
+        </section>
+      </main>
+    </div>
   </body>
 </html>
