@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title th:text="|${unidad.titulo} · Kaichaini|">Unidad · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/docente.css}">
+    <link rel="stylesheet" th:href="@{/css/avisos.css}">
+  </head>
+  <body class="con-barra-inferior">
+    <main>
+      <p><a th:href="@{/docente/unidades}">← Volver a mis unidades</a></p>
+      <h1 th:text="|📚 ${unidad.titulo}|">Unidad</h1>
+      <p th:text="|Visible para los estudiantes de ${unidad.grado}.° de secundaria.|"></p>
+      <p role="status" th:if="${mensaje}" th:text="${mensaje}"></p>
+      <p role="alert" th:if="${error}" th:text="${error}"></p>
+
+      <section aria-labelledby="titulo-datos-unidad">
+        <h2 id="titulo-datos-unidad">Datos de la unidad</h2>
+        <form method="post" th:action="@{/docente/unidades/{id}(id=${unidad.id})}" class="formulario-reto">
+          <label for="grado">Grado</label>
+          <select id="grado" name="grado" required>
+            <option th:each="g : ${grados}" th:value="${g}" th:text="|${g}.° de secundaria|"
+                    th:selected="${g == unidad.grado}">1.°</option>
+          </select>
+          <label for="tituloUnidad">Título de la unidad</label>
+          <input id="tituloUnidad" name="tituloUnidad" required th:maxlength="${maximoTitulo}"
+                 th:value="${unidad.titulo}">
+          <button type="submit">Guardar unidad</button>
+        </form>
+      </section>
+
+      <section aria-labelledby="titulo-lecciones">
+        <h2 id="titulo-lecciones" th:text="|Lecciones (${lecciones.size()} de ${maximoLecciones})|">Lecciones</h2>
+        <ol class="avisos">
+          <li class="aviso" th:each="leccion : ${lecciones}">
+            <p class="aviso__titulo" th:text="${leccion.titulo}">Lección</p>
+            <p class="aviso__datos"
+               th:text="|${leccion.pregunta} · Respuesta correcta: ${leccion.opciones[leccion.respuestaCorrecta]}|"></p>
+            <a th:href="@{/docente/unidades/{id}/lecciones/{l}(id=${unidad.id},l=${leccion.id})}">Editar</a>
+            <form th:if="${lecciones.size() > 1}" method="post"
+                  th:action="@{/docente/unidades/{id}/lecciones/{l}/eliminar(id=${unidad.id},l=${leccion.id})}">
+              <button type="submit">Eliminar</button>
+            </form>
+          </li>
+        </ol>
+      </section>
+
+      <section aria-labelledby="titulo-nueva-leccion" th:if="${lecciones.size() < maximoLecciones}">
+        <h2 id="titulo-nueva-leccion">Agregar lección</h2>
+        <p role="alert" th:if="${errorLeccion}" th:text="${errorLeccion}"></p>
+        <form method="post" th:action="@{/docente/unidades/{id}/lecciones(id=${unidad.id})}"
+              class="formulario-reto">
+          <th:block th:replace="~{fragments/leccion-docente :: campos(${nuevaLeccion}, 'nueva')}"></th:block>
+          <button type="submit">Agregar lección</button>
+        </form>
+      </section>
+    </main>
+    <nav th:replace="~{fragments/navegacion-docente :: barra('unidades')}"></nav>
+  </body>
+</html>

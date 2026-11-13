@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Mis unidades · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/docente.css}">
+    <link rel="stylesheet" th:href="@{/css/avisos.css}">
+  </head>
+  <body class="con-barra-inferior">
+    <main>
+      <h1>📚 Mis unidades</h1>
+      <p>Las unidades que crees aparecen en el mapa de aprendizaje de los estudiantes del grado elegido.</p>
+      <p role="status" th:if="${mensaje}" th:text="${mensaje}"></p>
+      <p role="alert" th:if="${error}" th:text="${error}"></p>
+
+      <section aria-labelledby="titulo-mis-unidades">
+        <h2 id="titulo-mis-unidades">Unidades creadas</h2>
+        <p th:if="${unidades.isEmpty()}">Todavía no creaste unidades.</p>
+        <ul class="avisos" th:unless="${unidades.isEmpty()}">
+          <li class="aviso" th:each="resumen : ${unidades}">
+            <p class="aviso__titulo">
+              <a th:href="@{/docente/unidades/{id}(id=${resumen.unidad().id})}"
+                 th:text="${resumen.unidad().titulo}">Unidad</a>
+            </p>
+            <p class="aviso__datos"
+               th:text="|${resumen.unidad().grado}.° de secundaria · ${resumen.lecciones()} ${resumen.lecciones() == 1 ? 'lección' : 'lecciones'}|"></p>
+          </li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="titulo-nueva-unidad">
+        <h2 id="titulo-nueva-unidad">Nueva unidad</h2>
+        <form method="post" th:action="@{/docente/unidades}" class="formulario-reto">
+          <label for="grado">Grado</label>
+          <select id="grado" name="grado" required>
+            <option value="">Elige un grado</option>
+            <option th:each="g : ${grados}" th:value="${g}" th:text="|${g}.° de secundaria|"
+                    th:selected="${g == grado}">1.°</option>
+          </select>
+
+          <label for="tituloUnidad">Título de la unidad</label>
+          <input id="tituloUnidad" name="tituloUnidad" required th:maxlength="${maximoTitulo}"
+                 th:value="${tituloUnidad}">
+
+          <h3>Primera lección</h3>
+          <th:block th:replace="~{fragments/leccion-docente :: campos(${leccion}, 'nueva')}"></th:block>
+
+          <button type="submit">Crear unidad</button>
+        </form>
+      </section>
+    </main>
+    <nav th:replace="~{fragments/navegacion-docente :: barra('unidades')}"></nav>
+  </body>
+</html>

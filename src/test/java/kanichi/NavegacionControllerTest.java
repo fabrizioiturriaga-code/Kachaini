@@ -54,6 +54,7 @@ class NavegacionControllerTest {
   @MockBean RankingService rankingService;
   @MockBean LeccionService leccionService;
   @MockBean kanichi.service.LigaService ligaService;
+  @MockBean kanichi.service.LeccionDocenteService leccionDocenteService;
 
   @BeforeEach
   void setup() {
