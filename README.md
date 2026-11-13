@@ -50,3 +50,5 @@ La aplicación queda disponible en [localhost:8080](http://localhost:8080). Las 
 [Recompensas, desafíos y ligas: HU-16, HU-17 y HU-21](docs/recompensas-desafios-y-ligas.md).
 
 [Panel docente: HU-07 y HU-09](docs/panel-docente.md).
+
+[Reportes del salón y mensajes: HU-19 y HU-20](docs/reportes-y-mensajes.md).

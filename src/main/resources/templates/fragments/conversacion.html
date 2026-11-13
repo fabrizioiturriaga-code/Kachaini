@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <div th:fragment="chat(conversacion, ruta)" class="conversacion">
+      <h1 class="conversacion__titulo">
+        <span aria-hidden="true" th:text="${conversacion.contacto().avatar()}">✨</span>
+        <span th:text="${conversacion.contacto().nombre()}">Nombre</span>
+        <small th:text="${conversacion.contacto().detalle()}">Detalle</small>
+      </h1>
+      <p role="status" th:if="${mensaje}" th:text="${mensaje}"></p>
+      <p role="alert" th:if="${error}" th:text="${error}"></p>
+
+      <p th:if="${conversacion.mensajes().isEmpty()}">Todavía no hay mensajes. ¡Escribe el primero!</p>
+      <ol class="chat" th:unless="${conversacion.mensajes().isEmpty()}" aria-label="Mensajes de la conversación">
+        <li th:each="m : ${conversacion.mensajes()}" class="chat__mensaje"
+            th:classappend="${m.propio()} ? 'chat__mensaje--propio'">
+          <p class="chat__texto" th:text="${m.texto()}">Mensaje</p>
+          <p class="chat__datos">
+            <span th:text="${m.propio()} ? 'Tú' : ${conversacion.contacto().nombre()}">Autor</span>
+            <time th:text="${m.fecha()}">13/11 08:30</time>
+            <span th:if="${m.propio()}" th:text="${m.leido()} ? '· Leído' : '· Enviado'">· Enviado</span>
+          </p>
+        </li>
+      </ol>
+
+      <form method="post" th:action="@{${ruta}}" class="chat__formulario">
+        <label for="texto">Responder</label>
+        <textarea id="texto" name="texto" required th:maxlength="${largoMensaje}"
+                  th:text="${texto}"></textarea>
+        <button type="submit">Enviar</button>
+      </form>
+    </div>
+  </body>
+</html>

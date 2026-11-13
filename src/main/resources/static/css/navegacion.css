@@ -103,3 +103,19 @@ body.con-barra-inferior {
   line-height: 1.2rem;
   text-align: center;
 }
+
+@media (max-width: 599px) {
+  .barra-inferior__enlace {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: .3rem .1rem;
+    font-size: .65rem;
+  }
+
+  .barra-inferior__texto {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

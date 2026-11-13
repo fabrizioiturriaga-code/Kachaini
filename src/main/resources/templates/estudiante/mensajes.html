@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Mensajes · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/mensajes.css}">
+  </head>
+  <body class="con-barra-inferior">
+    <main>
+      <h1>✉️ Mensajes</h1>
+      <p>Aquí ves los mensajes de tus docentes. También puedes escribirles si tienes una duda.</p>
+      <p role="status" th:if="${mensaje}" th:text="${mensaje}"></p>
+      <p role="alert" th:if="${error}" th:text="${error}"></p>
+
+      <section aria-labelledby="titulo-conversaciones">
+        <h2 id="titulo-conversaciones">Conversaciones</h2>
+        <p th:if="${conversaciones.isEmpty()}">Todavía no tienes mensajes.</p>
+        <ul class="bandeja" th:unless="${conversaciones.isEmpty()}">
+          <li th:each="c : ${conversaciones}" class="bandeja__item"
+              th:classappend="${c.tieneSinLeer()} ? 'bandeja__item--nuevo'">
+            <a th:href="@{/estudiante/mensajes/{id}(id=${c.contacto().id()})}" class="bandeja__enlace">
+              <span class="bandeja__avatar" aria-hidden="true" th:text="${c.contacto().avatar()}">🧑‍🏫</span>
+              <span class="bandeja__cuerpo">
+                <span class="bandeja__cabecera">
+                  <strong th:text="${c.contacto().nombre()}">Nombre</strong>
+                  <small th:text="${c.contacto().detalle()}">Historia</small>
+                  <time class="bandeja__fecha" th:text="${c.fecha()}">13/11 08:30</time>
+                </span>
+                <span class="bandeja__vista-previa"
+                      th:text="${c.ultimoEsPropio()} ? |Tú: ${c.ultimoTexto()}| : ${c.ultimoTexto()}">Mensaje</span>
+              </span>
+              <span class="bandeja__contador" th:if="${c.tieneSinLeer()}" th:text="${c.sinLeer()}"
+                    th:attr="aria-label=|${c.sinLeer()} sin leer|">1</span>
+            </a>
+          </li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="titulo-escribir">
+        <h2 id="titulo-escribir">Escribir a un docente</h2>
+        <p th:if="${docentes.isEmpty()}">Todavía no hay docentes disponibles.</p>
+        <form th:unless="${docentes.isEmpty()}" method="post" th:action="@{/estudiante/mensajes}"
+              class="mensajes-envio">
+          <label for="docente">Docente</label>
+          <select id="docente" name="docente" required>
+            <option value="">Elige un docente</option>
+            <option th:each="d : ${docentes}" th:value="${d.id()}"
+                    th:text="|${d.nombre()} · ${d.detalle()}|"
+                    th:selected="${docenteElegido == d.id()}">Docente</option>
+          </select>
+          <label for="texto">Mensaje</label>
+          <textarea id="texto" name="texto" required th:maxlength="${largoMensaje}"
+                    placeholder="Escribe tu duda o comentario" th:text="${texto}"></textarea>
+          <button type="submit">Enviar mensaje</button>
+        </form>
+      </section>
+    </main>
+    <nav th:replace="~{fragments/navegacion :: barra('mensajes')}"></nav>
+  </body>
+</html>

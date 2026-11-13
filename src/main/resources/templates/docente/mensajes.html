@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Mensajes · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/docente.css}">
+    <link rel="stylesheet" th:href="@{/css/mensajes.css}">
+  </head>
+  <body class="con-barra-inferior">
+    <main>
+      <h1>✉️ Mensajes</h1>
+      <p>Escribe a un estudiante, a varios o a todo un salón para resolver dudas, enviar recordatorios o brindar apoyo. Ellos pueden responderte desde su bandeja.</p>
+      <p role="status" th:if="${mensaje}" th:text="${mensaje}"></p>
+      <p role="alert" th:if="${error}" th:text="${error}"></p>
+
+      <section aria-labelledby="titulo-nuevo">
+        <h2 id="titulo-nuevo">Nuevo mensaje</h2>
+        <form th:replace="~{fragments/filtro-salon :: filtro('/docente/mensajes')}"></form>
+
+        <p th:if="${estudiantes != null and estudiantes.isEmpty()}">No hay estudiantes registrados en este salón.</p>
+        <form th:if="${estudiantes != null and !estudiantes.isEmpty()}" method="post"
+              th:action="@{/docente/mensajes}" class="mensajes-envio">
+          <input type="hidden" name="grado" th:value="${grado}">
+          <input type="hidden" name="seccion" th:value="${seccion}">
+
+          <label class="mensajes-envio__todos">
+            <input type="checkbox" name="todos" value="true">
+            <span th:text="|Enviar a todo el salón (${estudiantes.size()} ${estudiantes.size() == 1 ? 'estudiante' : 'estudiantes'})|">Enviar a todo el salón</span>
+          </label>
+
+          <fieldset class="mensajes-envio__estudiantes">
+            <legend th:text="${seccion} ? |O elige estudiantes de ${grado}.° ${seccion}| : |O elige estudiantes de ${grado}.° de secundaria|">Estudiantes</legend>
+            <label th:each="alumno : ${estudiantes}" class="mensajes-envio__estudiante">
+              <input type="checkbox" name="estudiantes" th:value="${alumno.id()}">
+              <span aria-hidden="true" th:text="${alumno.avatar()}">✨</span>
+              <span th:text="${alumno.nombre()}">Nombre</span>
+              <small th:text="${alumno.detalle()}">1.° A</small>
+            </label>
+          </fieldset>
+
+          <label for="texto">Mensaje</label>
+          <textarea id="texto" name="texto" required th:maxlength="${largoMensaje}"
+                    placeholder="Por ejemplo: recuerden terminar la unidad antes del viernes"
+                    th:text="${texto}"></textarea>
+          <button type="submit">Enviar mensaje</button>
+        </form>
+      </section>
+
+      <section aria-labelledby="titulo-conversaciones">
+        <h2 id="titulo-conversaciones">Conversaciones</h2>
+        <p th:if="${conversaciones.isEmpty()}">Todavía no tienes conversaciones.</p>
+        <ul class="bandeja" th:unless="${conversaciones.isEmpty()}">
+          <li th:each="c : ${conversaciones}" class="bandeja__item"
+              th:classappend="${c.tieneSinLeer()} ? 'bandeja__item--nuevo'">
+            <a th:href="@{/docente/mensajes/{id}(id=${c.contacto().id()})}" class="bandeja__enlace">
+              <span class="bandeja__avatar" aria-hidden="true" th:text="${c.contacto().avatar()}">✨</span>
+              <span class="bandeja__cuerpo">
+                <span class="bandeja__cabecera">
+                  <strong th:text="${c.contacto().nombre()}">Nombre</strong>
+                  <small th:text="${c.contacto().detalle()}">1.° A</small>
+                  <time class="bandeja__fecha" th:text="${c.fecha()}">13/11 08:30</time>
+                </span>
+                <span class="bandeja__vista-previa"
+                      th:text="${c.ultimoEsPropio()} ? |Tú: ${c.ultimoTexto()}| : ${c.ultimoTexto()}">Mensaje</span>
+              </span>
+              <span class="bandeja__contador" th:if="${c.tieneSinLeer()}" th:text="${c.sinLeer()}"
+                    th:attr="aria-label=|${c.sinLeer()} sin leer|">1</span>
+            </a>
+          </li>
+        </ul>
+      </section>
+    </main>
+    <nav th:replace="~{fragments/navegacion-docente :: barra('mensajes')}"></nav>
+  </body>
+</html>

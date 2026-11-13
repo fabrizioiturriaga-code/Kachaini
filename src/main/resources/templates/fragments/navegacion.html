@@ -30,6 +30,16 @@
           th:text="${resumenAvisos.nuevos()}"
           th:attr="aria-label=|${resumenAvisos.nuevos()} sin leer|">1</span>
       </a>
+      <a th:href="@{/estudiante/mensajes}" class="barra-inferior__enlace"
+         th:classappend="${activo == 'mensajes'} ? 'barra-inferior__enlace--activo'"
+         th:attr="aria-current=${activo == 'mensajes'} ? 'page'">
+        <span class="barra-inferior__icono" aria-hidden="true">✉️</span>
+        <span class="barra-inferior__texto">Mensajes</span>
+        <span class="barra-inferior__contador"
+          th:if="${mensajesSinLeer != null and mensajesSinLeer > 0}"
+          th:text="${mensajesSinLeer}"
+          th:attr="aria-label=|${mensajesSinLeer} sin leer|">1</span>
+      </a>
       <a th:href="@{/estudiante/perfil}" class="barra-inferior__enlace"
          th:classappend="${activo == 'perfil'} ? 'barra-inferior__enlace--activo'"
          th:attr="aria-current=${activo == 'perfil'} ? 'page'">
