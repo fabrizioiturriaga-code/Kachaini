@@ -61,8 +61,10 @@
             <p class="aviso__titulo" th:text="${publicado.reto().titulo}">Reto</p>
             <p class="aviso__datos"
                th:text="|${publicado.reto().destinatarios} · Vence el ${publicado.reto().fechaLimiteTexto} · ${publicado.reto().xp} XP|"></p>
-            <p class="aviso__datos"
-               th:text="|Notificados: ${publicado.notificados()} · Lo abrieron: ${publicado.leidos()}|"></p>
+                        <p class="aviso__datos"
+               th:text="|Notificados: ${publicado.notificados()} · Lo abrieron: ${publicado.leidos()} · Lo completaron: ${publicado.completados()}|"></p>
+            <p class="completaron" th:unless="${publicado.completaron().isEmpty()}"
+               th:text="|✅ ${#strings.listJoin(publicado.completaron(), ', ')}|"></p>
           </li>
         </ul>
       </section>

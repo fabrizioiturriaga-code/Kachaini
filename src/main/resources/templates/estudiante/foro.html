@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Foro del salón · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/foro.css}">
+  </head>
+  <body class="con-barra-inferior">
+    <main>
+      <p><a th:href="@{/estudiante/comunidad}">← Volver a Comunidad</a></p>
+      <h1><span aria-hidden="true">💬</span> Foro del salón</h1>
+      <p th:text="|Solo lo ven los estudiantes de ${foro.salon()}.|">Solo lo ven los estudiantes de tu salón.</p>
+      <p role="status" th:if="${mensaje}" th:text="${mensaje}"></p>
+      <p role="alert" th:if="${error}" th:text="${error}"></p>
+
+      <form method="post" th:action="@{/estudiante/foro}" class="foro-formulario">
+        <label for="texto">Escribe a tu salón</label>
+        <textarea id="texto" name="texto" required th:maxlength="${largoMensaje}"
+                  placeholder="Comparte una duda, un consejo o felicita a tus compañeros"
+                  th:text="${texto}"></textarea>
+        <button type="submit">Publicar</button>
+      </form>
+
+      <p th:if="${foro.mensajes().isEmpty()}">Todavía no hay mensajes. ¡Escribe el primero!</p>
+      <ol class="foro" th:unless="${foro.mensajes().isEmpty()}" aria-label="Mensajes del foro">
+        <li class="foro__mensaje" th:each="m : ${foro.mensajes()}"
+            th:classappend="${m.isAutomatico()} ? 'foro-automatico' : (${m.propio()} ? 'foro-propio')">
+          <p class="foro__autor">
+            <span aria-hidden="true" th:text="${m.avatar()}">👤</span>
+            <strong th:text="${m.autor()}">Ana</strong>
+            <span th:if="${m.propio()}">(Tú)</span>
+            <time class="foro__fecha" th:text="${m.fecha()}">13/11 08:30</time>
+          </p>
+          <p class="foro__texto" th:text="${m.texto()}">Mensaje</p>
+        </li>
+      </ol>
+    </main>
+    <nav th:replace="~{fragments/navegacion :: barra('comunidad')}"></nav>
+  </body>
+</html>

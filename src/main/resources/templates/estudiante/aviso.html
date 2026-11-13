@@ -12,8 +12,11 @@
     <main>
       <p><a th:href="@{/estudiante/avisos}">← Volver a avisos</a></p>
       <h1 th:text="${aviso.reto().titulo}">Reto</h1>
+      <p role="status" th:if="${mensaje}" th:text="${mensaje}"></p>
+      <p role="alert" th:if="${error}" th:text="${error}"></p>
       <p>
-        <span class="etiqueta"
+        <span class="etiqueta etiqueta--completado" th:if="${aviso.completado()}">✅ Completado</span>
+        <span class="etiqueta" th:unless="${aviso.completado()}"
               th:classappend="${aviso.isVencido()} ? 'etiqueta--vencido' : (${aviso.isPorVencer()} ? 'etiqueta--por-vencer' : 'etiqueta--nuevo')"
               th:text="${aviso.estado().etiqueta}">Vigente</span>
       </p>
@@ -31,6 +34,11 @@
         <dt>Recompensa</dt>
         <dd th:text="|${aviso.reto().xp} XP|">20 XP</dd>
       </dl>
+      <form method="post" class="boton-completar" th:if="${aviso.isPuedeCompletarse()}"
+            th:action="@{/estudiante/avisos/{id}/completar(id=${aviso.reto().id})}">
+        <button type="submit">✅ Marcar como completado</button>
+      </form>
+      <p th:if="${aviso.isVencido()}">Este reto ya venció, ya no se puede completar.</p>
     </main>
     <nav th:replace="~{fragments/navegacion :: barra('avisos')}"></nav>
   </body>

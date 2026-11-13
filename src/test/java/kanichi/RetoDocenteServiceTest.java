@@ -2,6 +2,7 @@ package kanichi;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -14,12 +15,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import kanichi.dto.AvisoReto;
+import kanichi.dto.ResultadoReto;
 import kanichi.model.Estudiante;
 import kanichi.model.Notificacion;
 import kanichi.model.RetoDocente;
 import kanichi.repository.EstudianteRepository;
 import kanichi.repository.NotificacionRepository;
 import kanichi.repository.RetoDocenteRepository;
+import kanichi.service.ForoService;
 import kanichi.service.RetoDocenteService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,9 +37,10 @@ class RetoDocenteServiceTest {
   private final RetoDocenteRepository retos = mock(RetoDocenteRepository.class);
   private final NotificacionRepository notificaciones = mock(NotificacionRepository.class);
   private final EstudianteRepository estudiantes = mock(EstudianteRepository.class);
+  private final ForoService foroService = mock(ForoService.class);
   private final RetoDocenteService service =
       new RetoDocenteService(
-          retos, notificaciones, estudiantes, Clock.fixed(AHORA, ZoneOffset.UTC));
+          retos, notificaciones, estudiantes, foroService, Clock.fixed(AHORA, ZoneOffset.UTC));
 
   @BeforeEach
   void setup() {
@@ -142,6 +146,98 @@ class RetoDocenteServiceTest {
   }
 
   @Test
+  void completarDaLaXpYLoAnunciaEnElForoCuandoTodoElSalonTermino() {
+    Estudiante ana = estudianteDelSalon(1L, 2, "A");
+    Estudiante beto = estudianteDelSalon(2L, 2, "A");
+    Notificacion notificacion = new Notificacion(1L, 10L, AHORA);
+    RetoDocente reto = reto(10L, HOY.plusDays(5));
+    when(estudiantes.findById(1L)).thenReturn(Optional.of(ana));
+    when(estudiantes.bloquearSalon(2, "A")).thenReturn(List.of(ana, beto));
+    when(notificaciones.findByEstudianteIdAndRetoId(1L, 10L))
+        .thenReturn(Optional.of(notificacion));
+    when(retos.findById(10L)).thenReturn(Optional.of(reto));
+    when(notificaciones.contarPendientesDelSalon(10L, 2, "A")).thenReturn(0L);
+    when(foroService.anunciarRetoCompletado(reto, 2, "A")).thenReturn(true);
+
+    ResultadoReto resultado = service.completar(1L, 10L);
+
+    assertEquals(20, resultado.xp());
+    assertTrue(resultado.salonCompleto());
+    assertTrue(notificacion.isCompletada());
+    assertTrue(notificacion.isLeida());
+    verify(ana).sumarXp(20);
+    verify(estudiantes).registrarXp(1L, 20, AHORA);
+    verify(foroService).anunciarRetoCompletado(reto, 2, "A");
+    assertEquals(
+        "¡Reto completado! Ganaste 20 XP. Todo tu salón lo completó: lo anunciamos en el foro 🎉",
+        resultado.mensaje());
+  }
+
+   @Test
+  void siFaltanCompanerosNoSePublicaEnElForo() {
+    Estudiante ana = estudianteDelSalon(1L, 2, "A");
+    Notificacion notificacion = new Notificacion(1L, 10L, AHORA);
+    RetoDocente reto = reto(10L, HOY.plusDays(5));
+    when(estudiantes.findById(1L)).thenReturn(Optional.of(ana));
+    when(estudiantes.bloquearSalon(2, "A")).thenReturn(List.of(ana));
+    when(notificaciones.findByEstudianteIdAndRetoId(1L, 10L))
+        .thenReturn(Optional.of(notificacion));
+    when(retos.findById(10L)).thenReturn(Optional.of(reto));
+    when(notificaciones.contarPendientesDelSalon(10L, 2, "A")).thenReturn(1L);
+
+    ResultadoReto resultado = service.completar(1L, 10L);
+
+    assertFalse(resultado.salonCompleto());
+    assertEquals("¡Reto completado! Ganaste 20 XP.", resultado.mensaje());
+    verifyNoInteractions(foroService);
+  }
+
+    @Test
+  void noSePuedeCompletarDosVecesNiUnRetoVencido() {
+    Estudiante ana = estudianteDelSalon(1L, 2, "A");
+    Notificacion yaCompletada = new Notificacion(1L, 10L, AHORA);
+    yaCompletada.completar(AHORA);
+    Notificacion pendiente = new Notificacion(1L, 11L, AHORA);
+    RetoDocente vigente = reto(10L, HOY.plusDays(5));
+    RetoDocente vencido = reto(11L, HOY.minusDays(1));
+    when(estudiantes.findById(1L)).thenReturn(Optional.of(ana));
+    when(estudiantes.bloquearSalon(2, "A")).thenReturn(List.of(ana));
+    when(notificaciones.findByEstudianteIdAndRetoId(1L, 10L))
+        .thenReturn(Optional.of(yaCompletada));
+    when(retos.findById(10L)).thenReturn(Optional.of(vigente));
+    when(notificaciones.findByEstudianteIdAndRetoId(1L, 11L))
+        .thenReturn(Optional.of(pendiente));
+    when(retos.findById(11L)).thenReturn(Optional.of(vencido));
+
+    assertError("Ya completaste este reto.", () -> service.completar(1L, 10L));
+    assertError("Este reto ya venció.", () -> service.completar(1L, 11L));
+    verify(ana, never()).sumarXp(anyInt());
+    verify(estudiantes, never()).registrarXp(any(), anyInt(), any());
+  }
+
+  @Test
+  void elDocenteVeQuienesCompletaronSuReto() {
+    Estudiante ana = estudianteDelSalon(1L, 2, "A");
+    when(ana.getNombre()).thenReturn("Ana");
+    RetoDocente reto = reto(10L, HOY.plusDays(5));
+    Notificacion completada = new Notificacion(1L, 10L, AHORA);
+    completada.completar(AHORA);
+    when(retos.findByDocenteIdOrderByPublicadoDesc(9L)).thenReturn(List.of(reto));
+    when(notificaciones.countByRetoId(10L)).thenReturn(3L);
+    when(notificaciones.countByRetoIdAndLeidaIsNotNull(10L)).thenReturn(2L);
+    when(notificaciones.findByRetoIdAndCompletadaIsNotNullOrderByCompletadaAsc(10L))
+        .thenReturn(List.of(completada));
+    when(estudiantes.findAllById(List.of(1L))).thenReturn(List.of(ana));
+
+    var publicado = service.publicadosPor(9L).get(0);
+
+    assertEquals(3, publicado.notificados());
+    assertEquals(2, publicado.leidos());
+    assertEquals(List.of("Ana"), publicado.completaron());
+    assertEquals(1, publicado.completados());
+  }
+
+  @Test
   void elEstadoDependeDeLaFechaLimite() {
     assertEquals(RetoDocente.Estado.VIGENTE, reto(1L, HOY.plusDays(3)).estadoEn(HOY));
     assertEquals(RetoDocente.Estado.POR_VENCER, reto(1L, HOY.plusDays(2)).estadoEn(HOY));
@@ -189,6 +285,14 @@ class RetoDocenteServiceTest {
         spy(new RetoDocente(9L, 2, "A", "Reto " + id, "Desc", "Objetivo", fechaLimite, 20, AHORA));
     doReturn(id).when(reto).getId();
     return reto;
+  }
+
+  private static Estudiante estudianteDelSalon(Long id, int grado, String seccion) {
+    Estudiante estudiante = mock(Estudiante.class);
+    when(estudiante.getId()).thenReturn(id);
+    when(estudiante.getGrado()).thenReturn(grado);
+    when(estudiante.getSeccion()).thenReturn(seccion);
+    return estudiante;
   }
 
   private static Estudiante estudiante(Long id) {

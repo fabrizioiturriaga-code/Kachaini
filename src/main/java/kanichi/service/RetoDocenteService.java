@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import kanichi.dto.AvisoReto;
+import kanichi.dto.ResultadoReto;
 import kanichi.dto.ResumenAvisos;
 import kanichi.dto.RetoPublicado;
 import kanichi.model.Estudiante;
@@ -36,27 +37,30 @@ public class RetoDocenteService {
   private final RetoDocenteRepository retos;
   private final NotificacionRepository notificaciones;
   private final EstudianteRepository estudiantes;
+  private final ForoService foroService;
   private final Clock reloj;
 
   @Autowired
   public RetoDocenteService(
       RetoDocenteRepository retos,
       NotificacionRepository notificaciones,
-      EstudianteRepository estudiantes) {
-    this(retos, notificaciones, estudiantes, Clock.systemUTC());
+      EstudianteRepository estudiantes,
+      ForoService foroService) {
+    this(retos, notificaciones, estudiantes, foroService, Clock.systemUTC());
   }
 
   public RetoDocenteService(
       RetoDocenteRepository retos,
       NotificacionRepository notificaciones,
       EstudianteRepository estudiantes,
+      ForoService foroService,
       Clock reloj) {
     this.retos = retos;
     this.notificaciones = notificaciones;
     this.estudiantes = estudiantes;
+    this.foroService = foroService;
     this.reloj = reloj;
   }
-
 
   @Transactional
   public int publicar(
@@ -122,10 +126,10 @@ public class RetoDocenteService {
                 new RetoPublicado(
                     reto,
                     notificaciones.countByRetoId(reto.getId()),
-                    notificaciones.countByRetoIdAndLeidaIsNotNull(reto.getId())))
+                    notificaciones.countByRetoIdAndLeidaIsNotNull(reto.getId()),
+                    nombresDeQuienesCompletaron(reto.getId())))
         .toList();
   }
-
 
   @Transactional(readOnly = true)
   public List<AvisoReto> avisos(Long estudianteId) {
@@ -139,7 +143,7 @@ public class RetoDocenteService {
         .map(
             n -> {
               RetoDocente reto = porId.get(n.getRetoId());
-              return new AvisoReto(reto, n.isLeida(), reto.estadoEn(hoy));
+              return new AvisoReto(reto, n.isLeida(), n.isCompletada(), reto.estadoEn(hoy));
             })
         .sorted(Comparator.comparing(AvisoReto::leida))
         .toList();
@@ -153,18 +157,75 @@ public class RetoDocenteService {
     return new ResumenAvisos(nuevos, porVencer);
   }
 
-  
+  @Transactional
   public AvisoReto abrir(Long estudianteId, Long retoId) {
-    Notificacion notificacion =
-        notificaciones
-            .findByEstudianteIdAndRetoId(estudianteId, retoId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-    RetoDocente reto =
-        retos
-            .findById(retoId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    Notificacion notificacion = notificacionDe(estudianteId, retoId);
+    RetoDocente reto = retoPorId(retoId);
     notificacion.marcarLeida(reloj.instant());
-    return new AvisoReto(reto, true, reto.estadoEn(hoy()));
+    return new AvisoReto(reto, true, notificacion.isCompletada(), reto.estadoEn(hoy()));
+  }
+
+  @Transactional
+  public ResultadoReto completar(Long estudianteId, Long retoId) {
+    Estudiante actual =
+        estudiantes
+            .findById(estudianteId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    int grado = actual.getGrado();
+    String seccion = actual.getSeccion();
+    Estudiante estudiante =
+        estudiantes.bloquearSalon(grado, seccion).stream()
+            .filter(e -> estudianteId.equals(e.getId()))
+            .findFirst()
+            .orElse(actual);
+
+    Notificacion notificacion = notificacionDe(estudianteId, retoId);
+    RetoDocente reto = retoPorId(retoId);
+    if (notificacion.isCompletada()) {
+      throw new IllegalArgumentException("Ya completaste este reto.");
+    }
+    if (reto.estadoEn(hoy()) == RetoDocente.Estado.VENCIDO) {
+      throw new IllegalArgumentException("Este reto ya venció.");
+    }
+
+    Instant ahora = reloj.instant();
+    notificacion.completar(ahora);
+    int xp = reto.getXp();
+    if (xp > 0) {
+      estudiante.sumarXp(xp);
+      estudiantes.registrarXp(estudianteId, xp, ahora);
+    }
+
+    boolean salonCompleto =
+        notificaciones.contarPendientesDelSalon(retoId, grado, seccion) == 0
+            && foroService.anunciarRetoCompletado(reto, grado, seccion);
+    return new ResultadoReto(xp, salonCompleto);
+  }
+
+  private List<String> nombresDeQuienesCompletaron(Long retoId) {
+    List<Long> ids =
+        notificaciones.findByRetoIdAndCompletadaIsNotNullOrderByCompletadaAsc(retoId).stream()
+            .map(Notificacion::getEstudianteId)
+            .toList();
+    if (ids.isEmpty()) {
+      return List.of();
+    }
+    Map<Long, String> nombres =
+        estudiantes.findAllById(ids).stream()
+            .collect(Collectors.toMap(Estudiante::getId, Estudiante::getNombre));
+    return ids.stream().filter(nombres::containsKey).map(nombres::get).toList();
+  }
+
+  private Notificacion notificacionDe(Long estudianteId, Long retoId) {
+    return notificaciones
+        .findByEstudianteIdAndRetoId(estudianteId, retoId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+  }
+
+  private RetoDocente retoPorId(Long retoId) {
+    return retos
+        .findById(retoId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
   }
 
   private LocalDate hoy() {

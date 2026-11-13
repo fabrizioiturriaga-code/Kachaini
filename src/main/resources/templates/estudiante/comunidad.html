@@ -12,6 +12,7 @@
     <main>
       <h1><span aria-hidden="true">❤️</span> Comunidad</h1>
       <p role="status" th:each="aviso : ${notificaciones}" th:text="${aviso}"></p>
+      <p><a th:href="@{/estudiante/foro}">💬 Foro de tu salón</a></p>
       <p><a th:href="@{/estudiante/desafios}">🤝 Desafíos entre estudiantes</a></p>
       <section aria-labelledby="titulo-ranking">
         <h2 id="titulo-ranking">Ranking semanal de tu salón</h2>

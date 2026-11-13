@@ -71,11 +71,26 @@ public class RetoController {
     return "estudiante/avisos";
   }
 
-  @GetMapping("/estudiante/avisos/{retoId}")
+   @GetMapping("/estudiante/avisos/{retoId}")
   public String aviso(
       @AuthenticationPrincipal UsuarioSesion usuario, @PathVariable Long retoId, Model model) {
     model.addAttribute("aviso", retoDocenteService.abrir(usuario.getId(), retoId));
+    model.addAttribute("resumenAvisos", retoDocenteService.resumen(usuario.getId()));
     return "estudiante/aviso";
+  }
+
+  @PostMapping("/estudiante/avisos/{retoId}/completar")
+  public String completar(
+      @AuthenticationPrincipal UsuarioSesion usuario,
+      @PathVariable Long retoId,
+      RedirectAttributes mensajes) {
+    try {
+      mensajes.addFlashAttribute(
+          "mensaje", retoDocenteService.completar(usuario.getId(), retoId).mensaje());
+    } catch (IllegalArgumentException exception) {
+      mensajes.addFlashAttribute("error", exception.getMessage());
+    }
+    return "redirect:/estudiante/avisos/" + retoId;
   }
 
   private void agregarFormulario(UsuarioSesion usuario, Model model) {
