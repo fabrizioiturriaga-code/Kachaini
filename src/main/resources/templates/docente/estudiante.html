@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title th:text="|${detalle.resumen().nombre()} · Kaichaini|">Estudiante · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/docente.css}">
+  </head>
+  <body class="con-barra-inferior" th:with="alumno=${detalle.resumen()}">
+    <main>
+      <p>
+        <a th:href="@{/docente/progreso(grado=${detalle.grado()},seccion=${alumno.seccion()})}">← Volver al salón</a>
+      </p>
+      <h1>
+        <span aria-hidden="true" th:text="${alumno.avatar()}">✨</span>
+        <span th:text="${alumno.nombre()}">Estudiante</span>
+      </h1>
+      <p th:text="|${detalle.grado()}.° ${alumno.seccion()} de secundaria|">Grado</p>
+
+      <dl class="indicadores">
+        <div><dt>Avance del grado</dt><dd th:text="|${alumno.porcentajeAvance()} %|">0 %</dd></div>
+        <div><dt>Misiones completadas</dt><dd th:text="${alumno.misionesCompletadas()}">0</dd></div>
+        <div><dt>Lecciones completadas</dt><dd th:text="${alumno.leccionesCompletadas()}">0</dd></div>
+        <div><dt>XP acumulada</dt><dd th:text="${alumno.xp()}">0</dd></div>
+        <div><dt>Racha activa</dt><dd th:text="|${alumno.diasRacha()} ${alumno.diasRacha() == 1 ? 'día' : 'días'}|">0 días</dd></div>
+        <div>
+          <dt>Multiplicador</dt>
+          <dd th:text="${alumno.tieneMultiplicador()} ? |${alumno.multiplicador()} hasta ${alumno.multiplicadorHasta()}| : 'Ninguno'">Ninguno</dd>
+        </div>
+      </dl>
+
+      <section aria-labelledby="titulo-semana">
+        <h2 id="titulo-semana">Avance semanal</h2>
+        <p th:text="|XP ganada en los últimos 7 días: ${detalle.xpSemana()}|">XP</p>
+        <ol class="grafico-semanal" aria-label="XP ganada por día">
+          <li th:each="dia : ${detalle.semana()}" class="grafico-semanal__dia">
+            <span class="grafico-semanal__valor" th:text="${dia.xp()}">0</span>
+            <span class="grafico-semanal__barra" aria-hidden="true"
+                  th:style="|height: ${dia.porcentaje()}%|"></span>
+            <span class="grafico-semanal__etiqueta" th:text="${dia.dia()}">lun 01/01</span>
+          </li>
+        </ol>
+      </section>
+
+      <section aria-labelledby="titulo-unidades">
+        <h2 id="titulo-unidades">Avance por unidad</h2>
+        <ul class="unidades-docente">
+          <li th:each="unidad : ${detalle.unidades()}">
+            <strong th:text="|Unidad ${unidad.numero()}: ${unidad.titulo()}|">Unidad</strong>
+            <progress th:max="${unidad.leccionesTotal()}" th:value="${unidad.leccionesCompletadas()}"
+                      th:attr="aria-label=|Avance de la unidad ${unidad.numero()}|"></progress>
+            <span th:text="|${unidad.leccionesCompletadas()} de ${unidad.leccionesTotal()} lecciones|">0 de 3</span>
+          </li>
+        </ul>
+      </section>
+    </main>
+    <nav th:replace="~{fragments/navegacion-docente :: barra('progreso')}"></nav>
+  </body>
+</html>

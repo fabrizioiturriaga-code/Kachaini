@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <form th:fragment="filtro(ruta)" method="get" th:action="@{${ruta}}" class="filtro-salon">
+      <div>
+        <label for="grado">Grado</label>
+        <select id="grado" name="grado" required>
+          <option value="">Selecciona</option>
+          <option th:each="g : ${grados}" th:value="${g}" th:text="|${g}.° de secundaria|"
+                  th:selected="${grado == g}"></option>
+        </select>
+      </div>
+      <div>
+        <label for="seccion">Sección</label>
+        <select id="seccion" name="seccion">
+          <option value="">Todas</option>
+          <option th:each="s : ${secciones}" th:value="${s}" th:text="${s}"
+                  th:selected="${seccion == s}"></option>
+        </select>
+      </div>
+      <button type="submit">Ver estudiantes</button>
+    </form>
+  </body>
+</html>

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <nav th:fragment="barra(activo)" class="barra-inferior" aria-label="Navegación del docente">
+      <a th:href="@{/docente/panel}" class="barra-inferior__enlace"
+         th:classappend="${activo == 'panel'} ? 'barra-inferior__enlace--activo'"
+         th:attr="aria-current=${activo == 'panel'} ? 'page'">
+        <span class="barra-inferior__icono" aria-hidden="true">🏠</span>
+        <span class="barra-inferior__texto">Panel</span>
+      </a>
+      <a th:href="@{/docente/progreso}" class="barra-inferior__enlace"
+         th:classappend="${activo == 'progreso'} ? 'barra-inferior__enlace--activo'"
+         th:attr="aria-current=${activo == 'progreso'} ? 'page'">
+        <span class="barra-inferior__icono" aria-hidden="true">📊</span>
+        <span class="barra-inferior__texto">Progreso</span>
+      </a>
+      <a th:href="@{/docente/multiplicadores}" class="barra-inferior__enlace"
+         th:classappend="${activo == 'multiplicadores'} ? 'barra-inferior__enlace--activo'"
+         th:attr="aria-current=${activo == 'multiplicadores'} ? 'page'">
+        <span class="barra-inferior__icono" aria-hidden="true">✨</span>
+        <span class="barra-inferior__texto">Multiplicadores</span>
+      </a>
+      <a th:href="@{/cuenta/contrasena}" class="barra-inferior__enlace">
+        <span class="barra-inferior__icono" aria-hidden="true">🔑</span>
+        <span class="barra-inferior__texto">Contraseña</span>
+      </a>
+    </nav>
+  </body>
+</html>

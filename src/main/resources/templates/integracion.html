@@ -14,6 +14,13 @@
       <p th:text="${usuario.rol}">
       </p>
       <p>Destino temporal de integración. El onboarding, inicio y panel docente pertenecen a historias futuras.</p>
+      <section th:if="${usuario.rol.name() == 'DOCENTE'}" aria-labelledby="titulo-panel-docente">
+        <h2 id="titulo-panel-docente">Panel docente</h2>
+        <ul>
+          <li><a th:href="@{/docente/progreso}">📊 Progreso de estudiantes</a></li>
+          <li><a th:href="@{/docente/multiplicadores}">✨ Multiplicadores de XP</a></li>
+        </ul>
+      </section>
       <a th:if="${usuario.rol.name() == 'ESTUDIANTE'}" th:href="@{/estudiante/perfil}">Mi perfil</a>
       <a th:href="@{/cuenta/contrasena}">Cambiar contraseña</a>
       <form method="post" th:action="@{/logout}">

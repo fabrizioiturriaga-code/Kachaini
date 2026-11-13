@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Progreso de estudiantes · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/docente.css}">
+  </head>
+  <body class="con-barra-inferior">
+    <main>
+      <h1>Progreso de estudiantes</h1>
+      <p>Elige un grado y, si quieres, una sección. Cada grado se muestra por separado.</p>
+      <form th:replace="~{fragments/filtro-salon :: filtro('/docente/progreso')}"></form>
+      <p role="alert" th:if="${error}" th:text="${error}"></p>
+
+      <section th:if="${estudiantes != null}" aria-labelledby="titulo-lista">
+        <h2 id="titulo-lista"
+            th:text="${seccion} ? |${grado}.° ${seccion}| : |${grado}.° de secundaria, todas las secciones|">Salón</h2>
+        <p th:if="${estudiantes.isEmpty()}">No hay estudiantes registrados en este salón.</p>
+        <div class="tabla-docente__contenedor" th:unless="${estudiantes.isEmpty()}">
+          <table class="tabla-docente">
+            <caption>Indicadores de progreso por estudiante</caption>
+            <thead>
+              <tr>
+                <th scope="col">Estudiante</th>
+                <th scope="col">Sección</th>
+                <th scope="col">Avance</th>
+                <th scope="col">Misiones</th>
+                <th scope="col">Lecciones</th>
+                <th scope="col">XP</th>
+                <th scope="col">Racha</th>
+                <th scope="col">Multiplicador</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="alumno : ${estudiantes}">
+                <th scope="row">
+                  <span aria-hidden="true" th:text="${alumno.avatar()}">✨</span>
+                  <a th:href="@{/docente/progreso/{id}(id=${alumno.id()})}" th:text="${alumno.nombre()}">Nombre</a>
+                </th>
+                <td th:text="${alumno.seccion()}">A</td>
+                <td>
+                  <progress max="100" th:value="${alumno.porcentajeAvance()}"
+                            th:attr="aria-label=|Avance de ${alumno.nombre()}|"></progress>
+                  <span th:text="|${alumno.porcentajeAvance()} %|">0 %</span>
+                </td>
+                <td th:text="${alumno.misionesCompletadas()}">0</td>
+                <td th:text="${alumno.leccionesCompletadas()}">0</td>
+                <td th:text="${alumno.xp()}">0</td>
+                <td th:text="|${alumno.diasRacha()} ${alumno.diasRacha() == 1 ? 'día' : 'días'}|">0 días</td>
+                <td th:text="${alumno.tieneMultiplicador()} ? ${alumno.multiplicador()} : '—'">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+    <nav th:replace="~{fragments/navegacion-docente :: barra('progreso')}"></nav>
+  </body>
+</html>
