@@ -1,0 +1,187 @@
+.mensajes-envio {
+  display: grid;
+  gap: .5rem;
+  max-width: 40rem;
+  margin: 1rem 0;
+}
+
+.mensajes-envio textarea {
+  min-height: 5rem;
+}
+
+.mensajes-envio__todos,
+.mensajes-envio__estudiante {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  width: auto;
+  margin: 0;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.mensajes-envio__todos {
+  font-weight: 700;
+}
+
+.mensajes-envio input[type="checkbox"] {
+  display: inline-block;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0;
+}
+
+.mensajes-envio__estudiantes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: .5rem;
+  max-height: 18rem;
+  overflow-y: auto;
+  border: 2px solid #d7dde4;
+  border-radius: .5rem;
+}
+
+.mensajes-envio__estudiante small {
+  color: #5d6773;
+}
+
+.bandeja {
+  display: grid;
+  gap: .5rem;
+  margin: 1rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bandeja__item {
+  border: 2px solid #d7dde4;
+  border-radius: .75rem;
+  background: white;
+}
+
+.bandeja__item--nuevo {
+  border-color: #154f9a;
+  background: #f2f7fe;
+}
+
+.bandeja__enlace {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  padding: .7rem 1rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.bandeja__avatar {
+  font-size: 1.6rem;
+}
+
+.bandeja__cuerpo {
+  display: grid;
+  flex: 1;
+  gap: .2rem;
+  min-width: 0;
+}
+
+.bandeja__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .4rem;
+}
+
+.bandeja__cabecera small,
+.bandeja__fecha {
+  color: #5d6773;
+  font-size: .8rem;
+}
+
+.bandeja__fecha {
+  margin-left: auto;
+}
+
+.bandeja__vista-previa {
+  overflow: hidden;
+  color: #3b4450;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bandeja__item--nuevo .bandeja__vista-previa {
+  font-weight: 700;
+}
+
+.bandeja__contador {
+  min-width: 1.4rem;
+  padding: 0 .4rem;
+  border-radius: 1rem;
+  background: #c62828;
+  color: white;
+  font-size: .75rem;
+  font-weight: 700;
+  line-height: 1.4rem;
+  text-align: center;
+}
+
+.conversacion__titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .5rem;
+}
+
+.conversacion__titulo small {
+  color: #5d6773;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+  margin: 1rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chat__mensaje {
+  align-self: flex-start;
+  max-width: min(36rem, 85%);
+  padding: .6rem .9rem;
+  border: 2px solid #d7dde4;
+  border-radius: .9rem .9rem .9rem .2rem;
+  background: white;
+}
+
+.chat__mensaje--propio {
+  align-self: flex-end;
+  border-color: #154f9a;
+  border-radius: .9rem .9rem .2rem .9rem;
+  background: #f2f7fe;
+}
+
+.chat__texto {
+  margin: 0;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.chat__datos {
+  display: flex;
+  gap: .4rem;
+  margin: .3rem 0 0;
+  color: #5d6773;
+  font-size: .75rem;
+}
+
+.chat__formulario {
+  display: grid;
+  gap: .4rem;
+  max-width: 40rem;
+}
+
+.chat__formulario textarea {
+  min-height: 4.5rem;
+}

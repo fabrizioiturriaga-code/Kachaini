@@ -26,6 +26,22 @@
         <span class="barra-inferior__icono" aria-hidden="true">📣</span>
         <span class="barra-inferior__texto">Retos</span>
       </a>
+      <a th:href="@{/docente/reportes}" class="barra-inferior__enlace"
+         th:classappend="${activo == 'reportes'} ? 'barra-inferior__enlace--activo'"
+         th:attr="aria-current=${activo == 'reportes'} ? 'page'">
+        <span class="barra-inferior__icono" aria-hidden="true">📈</span>
+        <span class="barra-inferior__texto">Reportes</span>
+      </a>
+      <a th:href="@{/docente/mensajes}" class="barra-inferior__enlace"
+         th:classappend="${activo == 'mensajes'} ? 'barra-inferior__enlace--activo'"
+         th:attr="aria-current=${activo == 'mensajes'} ? 'page'">
+        <span class="barra-inferior__icono" aria-hidden="true">✉️</span>
+        <span class="barra-inferior__texto">Mensajes</span>
+        <span class="barra-inferior__contador"
+          th:if="${mensajesSinLeer != null and mensajesSinLeer > 0}"
+          th:text="${mensajesSinLeer}"
+          th:attr="aria-label=|${mensajesSinLeer} sin leer|">1</span>
+      </a>
       <a th:href="@{/cuenta/contrasena}" class="barra-inferior__enlace">
         <span class="barra-inferior__icono" aria-hidden="true">🔑</span>
         <span class="barra-inferior__texto">Contraseña</span>

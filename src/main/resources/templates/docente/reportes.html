@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Reportes del salón · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/docente.css}">
+    <link rel="stylesheet" th:href="@{/css/reportes.css}">
+    <script th:src="@{/js/reporte.js}" defer></script>
+  </head>
+  <body class="con-barra-inferior">
+    <main>
+      <h1>📈 Reportes del salón</h1>
+      <p class="reporte__sin-imprimir">
+        Genera un reporte del rendimiento general de un grado o de una sección para identificar
+        tendencias, dificultades y oportunidades de mejora.
+      </p>
+
+      <form method="get" th:action="@{/docente/reportes}" class="filtro-salon reporte__sin-imprimir">
+        <div>
+          <label for="grado">Grado</label>
+          <select id="grado" name="grado" required>
+            <option value="">Selecciona</option>
+            <option th:each="g : ${grados}" th:value="${g}" th:text="|${g}.° de secundaria|"
+                    th:selected="${grado == g}"></option>
+          </select>
+        </div>
+        <div>
+          <label for="seccion">Sección</label>
+          <select id="seccion" name="seccion">
+            <option value="">Todas</option>
+            <option th:each="s : ${secciones}" th:value="${s}" th:text="${s}"
+                    th:selected="${seccion == s}"></option>
+          </select>
+        </div>
+        <button type="submit">Generar reporte</button>
+      </form>
+      <p role="alert" th:if="${error}" th:text="${error}"></p>
+
+      <article th:if="${reporte != null}" class="reporte" aria-labelledby="titulo-reporte">
+        <header class="reporte__encabezado">
+          <div>
+            <h2 id="titulo-reporte" th:text="|Rendimiento de ${reporte.salon()}|">Rendimiento</h2>
+            <p class="reporte__fecha" th:text="|Generado el ${reporte.generado()}|">Generado</p>
+          </div>
+          <div class="reporte__acciones reporte__sin-imprimir" th:unless="${reporte.isVacio()}">
+            <a class="reporte__boton"
+               th:href="@{/docente/reportes/exportar(grado=${reporte.grado()},seccion=${reporte.seccion()})}">
+              ⬇️ Exportar a Excel (CSV)
+            </a>
+            <button type="button" class="reporte__boton" data-imprimir>🖨️ Imprimir o guardar PDF</button>
+          </div>
+        </header>
+
+        <p th:if="${reporte.isVacio()}">No hay estudiantes registrados en este salón.</p>
+
+        <th:block th:unless="${reporte.isVacio()}">
+          <dl class="indicadores">
+            <div>
+              <dt>Estudiantes</dt>
+              <dd th:text="${reporte.totalEstudiantes()}">0</dd>
+            </div>
+            <div>
+              <dt>Avance promedio del grado</dt>
+              <dd th:text="|${reporte.promedioAvance()} %|">0 %</dd>
+            </div>
+            <div>
+              <dt>Activos en los últimos 7 días</dt>
+              <dd th:text="|${reporte.activosSemana()} (${reporte.porcentajeActivos()} %)|">0</dd>
+            </div>
+            <div>
+              <dt>XP de los últimos 7 días</dt>
+              <dd>
+                <span th:text="${reporte.xpSemana()}">0</span>
+                <small th:if="${reporte.variacionSemanal() != null}"
+                       th:classappend="${reporte.variacionSemanal() < 0} ? 'reporte-baja' : 'reporte-sube'"
+                       th:text="${reporte.variacionSemanal() >= 0} ? |+${reporte.variacionSemanal()} %| : |${reporte.variacionSemanal()} %|">+0 %</small>
+              </dd>
+            </div>
+            <div>
+              <dt>Aciertos del salón</dt>
+              <dd th:text="${reporte.porcentajeAciertos() != null} ? |${reporte.porcentajeAciertos()} %| : 'Sin intentos'">0 %</dd>
+            </div>
+            <div>
+              <dt>Racha promedio</dt>
+              <dd th:text="|${reporte.promedioRacha()} ${reporte.promedioRacha() == 1 ? 'día' : 'días'}|">0 días</dd>
+            </div>
+          </dl>
+
+          <section aria-labelledby="titulo-observaciones">
+            <h3 id="titulo-observaciones">Tendencias y observaciones</h3>
+            <ul class="reporte__observaciones">
+              <li th:each="observacion : ${reporte.observaciones()}" th:text="${observacion}">Observación</li>
+            </ul>
+          </section>
+
+          <section aria-labelledby="titulo-semana">
+            <h3 id="titulo-semana">XP del salón por día</h3>
+            <ol class="grafico-semanal" aria-label="XP ganada por el salón cada día">
+              <li th:each="dia : ${reporte.semana()}" class="grafico-semanal__dia">
+                <span class="grafico-semanal__valor" th:text="${dia.xp()}">0</span>
+                <span class="grafico-semanal__barra" aria-hidden="true"
+                      th:style="|height: ${dia.porcentaje()}%|"></span>
+                <span class="grafico-semanal__etiqueta" th:text="${dia.dia()}">lun 01/01</span>
+              </li>
+            </ol>
+          </section>
+
+          <section aria-labelledby="titulo-unidades">
+            <h3 id="titulo-unidades">Avance por unidad</h3>
+            <div class="tabla-docente__contenedor">
+              <table class="tabla-docente">
+                <caption>Estudiantes según su avance en cada unidad del grado</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Unidad</th>
+                    <th scope="col">Completaron</th>
+                    <th scope="col">En curso</th>
+                    <th scope="col">Sin empezar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="unidad : ${reporte.unidades()}">
+                    <th scope="row" th:text="|${unidad.numero()}. ${unidad.titulo()}|">Unidad</th>
+                    <td>
+                      <progress max="100" th:value="${unidad.porcentaje()}"
+                                th:attr="aria-label=|Completaron la unidad ${unidad.numero()}|"></progress>
+                      <span th:text="|${unidad.completaron()} (${unidad.porcentaje()} %)|">0</span>
+                    </td>
+                    <td th:text="${unidad.enCurso()}">0</td>
+                    <td th:text="${unidad.sinEmpezar()}">0</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <div class="reporte__columnas">
+            <section aria-labelledby="titulo-destacados">
+              <h3 id="titulo-destacados">🏅 Destacados de la semana</h3>
+              <p th:if="${reporte.destacados().isEmpty()}">Nadie ganó XP en los últimos 7 días.</p>
+              <ol class="reporte__lista" th:unless="${reporte.destacados().isEmpty()}">
+                <li th:each="fila : ${reporte.destacados()}">
+                  <span aria-hidden="true" th:text="${fila.avatar()}">✨</span>
+                  <strong th:text="${fila.nombre()}">Nombre</strong>
+                  <span th:text="|${fila.seccion()} · ${fila.xpSemana()} XP|">A · 0 XP</span>
+                </li>
+              </ol>
+            </section>
+
+            <section aria-labelledby="titulo-apoyo">
+              <h3 id="titulo-apoyo">🔎 Necesitan apoyo</h3>
+              <p class="reporte__ayuda"
+                 th:text="|Estudiantes sin XP en los últimos 7 días o con menos del ${aciertosMinimos} % de aciertos (desde ${minimoIntentos} intentos).|">
+                Criterio
+              </p>
+              <p th:if="${reporte.requierenApoyo().isEmpty()}">Ningún estudiante necesita apoyo por ahora.</p>
+              <ul class="reporte__lista" th:unless="${reporte.requierenApoyo().isEmpty()}">
+                <li th:each="fila : ${reporte.requierenApoyo()}">
+                  <span aria-hidden="true" th:text="${fila.avatar()}">✨</span>
+                  <a th:href="@{/docente/progreso/{id}(id=${fila.id()})}" th:text="${fila.nombre()}">Nombre</a>
+                  <span th:text="|${fila.seccion()} · ${fila.motivoApoyo()}|">Motivo</span>
+                </li>
+              </ul>
+            </section>
+          </div>
+
+          <section aria-labelledby="titulo-detalle">
+            <h3 id="titulo-detalle">Detalle por estudiante</h3>
+            <div class="tabla-docente__contenedor">
+              <table class="tabla-docente">
+                <caption>Rendimiento de cada estudiante</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Estudiante</th>
+                    <th scope="col">Sección</th>
+                    <th scope="col">Avance</th>
+                    <th scope="col">Lecciones</th>
+                    <th scope="col">XP total</th>
+                    <th scope="col">XP 7 días</th>
+                    <th scope="col">Racha</th>
+                    <th scope="col">Aciertos</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="fila : ${reporte.filas()}"
+                      th:classappend="${fila.necesitaApoyo()} ? 'reporte__fila-apoyo'">
+                    <th scope="row">
+                      <span aria-hidden="true" th:text="${fila.avatar()}">✨</span>
+                      <a th:href="@{/docente/progreso/{id}(id=${fila.id()})}" th:text="${fila.nombre()}">Nombre</a>
+                    </th>
+                    <td th:text="${fila.seccion()}">A</td>
+                    <td th:text="|${fila.porcentajeAvance()} %|">0 %</td>
+                    <td th:text="${fila.leccionesCompletadas()}">0</td>
+                    <td th:text="${fila.xp()}">0</td>
+                    <td th:text="${fila.xpSemana()}">0</td>
+                    <td th:text="|${fila.diasRacha()} ${fila.diasRacha() == 1 ? 'día' : 'días'}|">0 días</td>
+                    <td th:text="${fila.porcentajeAciertos() != null} ? |${fila.porcentajeAciertos()} % (${fila.aciertos()}/${fila.aciertos() + fila.errores()})| : '—'">—</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </th:block>
+      </article>
+    </main>
+    <nav th:replace="~{fragments/navegacion-docente :: barra('reportes')}"></nav>
+  </body>
+</html>

@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title th:text="|${conversacion.contacto().nombre()} · Mensajes · Kaichaini|">Conversación · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/mensajes.css}">
+  </head>
+  <body class="con-barra-inferior">
+    <main>
+      <p><a th:href="@{/docente/mensajes}">← Volver a Mensajes</a></p>
+      <div th:replace="~{fragments/conversacion :: chat(${conversacion}, |/docente/mensajes/${conversacion.contacto().id()}|)}"></div>
+    </main>
+    <nav th:replace="~{fragments/navegacion-docente :: barra('mensajes')}"></nav>
+  </body>
+</html>
