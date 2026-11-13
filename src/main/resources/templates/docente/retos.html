@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Publicar retos · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/docente.css}">
+    <link rel="stylesheet" th:href="@{/css/avisos.css}">
+  </head>
+  <body class="con-barra-inferior">
+    <main>
+      <h1>📣 Publicar un reto</h1>
+      <p>Los estudiantes del salón recibirán un aviso en cuanto publiques el reto.</p>
+      <p role="status" th:if="${mensaje}" th:text="${mensaje}"></p>
+      <p role="alert" th:if="${error}" th:text="${error}"></p>
+
+      <form method="post" th:action="@{/docente/retos}" class="formulario-reto">
+        <label for="grado">Grado</label>
+        <select id="grado" name="grado" required>
+          <option value="">Elige un grado</option>
+          <option th:each="g : ${grados}" th:value="${g}" th:text="|${g}.° de secundaria|"
+                  th:selected="${g == grado}">1.°</option>
+        </select>
+
+        <label for="seccion">Sección</label>
+        <select id="seccion" name="seccion">
+          <option value="">Todas las secciones</option>
+          <option th:each="s : ${secciones}" th:value="${s}" th:text="${s}"
+                  th:selected="${s == seccion}">A</option>
+        </select>
+
+        <label for="titulo">Título</label>
+        <input id="titulo" name="titulo" maxlength="100" required th:value="${titulo}">
+
+        <label for="descripcion">Descripción</label>
+        <textarea id="descripcion" name="descripcion" maxlength="1000" required
+                  th:text="${descripcion}"></textarea>
+
+        <label for="objetivos">Objetivos (uno por línea)</label>
+        <textarea id="objetivos" name="objetivos" maxlength="1000" required
+                  th:text="${objetivos}"></textarea>
+
+        <label for="fechaLimite">Fecha límite</label>
+        <input id="fechaLimite" name="fechaLimite" type="date" required
+               th:min="${hoy}" th:value="${fechaLimite}">
+
+        <label for="xp">Recompensa (XP)</label>
+        <input id="xp" name="xp" type="number" min="0" th:max="${xpMaxima}" required
+               th:value="${xp != null} ? ${xp} : 20">
+
+        <button type="submit">Publicar reto</button>
+      </form>
+
+      <section aria-labelledby="titulo-publicados">
+        <h2 id="titulo-publicados">Retos publicados</h2>
+        <p th:if="${retos.isEmpty()}">Todavía no publicaste retos.</p>
+        <ul class="avisos" th:unless="${retos.isEmpty()}">
+          <li class="aviso" th:each="publicado : ${retos}">
+            <p class="aviso__titulo" th:text="${publicado.reto().titulo}">Reto</p>
+            <p class="aviso__datos"
+               th:text="|${publicado.reto().destinatarios} · Vence el ${publicado.reto().fechaLimiteTexto} · ${publicado.reto().xp} XP|"></p>
+            <p class="aviso__datos"
+               th:text="|Notificados: ${publicado.notificados()} · Lo abrieron: ${publicado.leidos()}|"></p>
+          </li>
+        </ul>
+      </section>
+    </main>
+    <nav th:replace="~{fragments/navegacion-docente :: barra('retos')}"></nav>
+  </body>
+</html>

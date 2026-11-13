@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title th:text="|${aviso.reto().titulo} · Kaichaini|">Reto · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/avisos.css}">
+  </head>
+  <body class="con-barra-inferior">
+    <main>
+      <p><a th:href="@{/estudiante/avisos}">← Volver a avisos</a></p>
+      <h1 th:text="${aviso.reto().titulo}">Reto</h1>
+      <p>
+        <span class="etiqueta"
+              th:classappend="${aviso.isVencido()} ? 'etiqueta--vencido' : (${aviso.isPorVencer()} ? 'etiqueta--por-vencer' : 'etiqueta--nuevo')"
+              th:text="${aviso.estado().etiqueta}">Vigente</span>
+      </p>
+      <dl class="reto-detalle">
+        <dt>Descripción</dt>
+        <dd th:text="${aviso.reto().descripcion}">Descripción</dd>
+        <dt>Objetivos</dt>
+        <dd>
+          <ul>
+            <li th:each="objetivo : ${aviso.reto().listaObjetivos}" th:text="${objetivo}">Objetivo</li>
+          </ul>
+        </dd>
+        <dt>Fecha límite</dt>
+        <dd th:text="${aviso.reto().fechaLimiteTexto}">01/01/2026</dd>
+        <dt>Recompensa</dt>
+        <dd th:text="|${aviso.reto().xp} XP|">20 XP</dd>
+      </dl>
+    </main>
+    <nav th:replace="~{fragments/navegacion :: barra('avisos')}"></nav>
+  </body>
+</html>
