@@ -1,0 +1,189 @@
+.filtro-salon {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .8rem;
+  align-items: flex-end;
+  margin: 1rem 0;
+}
+
+.filtro-salon > div {
+  flex: 1 1 10rem;
+}
+
+.filtro-salon label {
+  margin-top: 0;
+}
+
+.filtro-salon button {
+  margin: 0;
+}
+
+.tabla-docente__contenedor {
+  overflow-x: auto;
+}
+
+.tabla-docente {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .95rem;
+}
+
+.tabla-docente caption {
+  margin-bottom: .5rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+.tabla-docente th,
+.tabla-docente td {
+  padding: .5rem .6rem;
+  border-bottom: 1px solid #d5d9de;
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.tabla-docente thead th {
+  background: #f3f5f7;
+}
+
+.tabla-docente tbody tr:hover {
+  background: #f7f9fb;
+}
+
+.tabla-docente progress {
+  display: inline-block;
+  width: 5rem;
+  vertical-align: middle;
+}
+
+.tabla-docente input[type="checkbox"] {
+  display: inline-block;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0;
+}
+
+.tabla-docente label {
+  display: inline;
+  margin: 0;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.indicadores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: .8rem;
+  margin: 1rem 0;
+}
+
+.indicadores > div {
+  padding: .8rem;
+  border: 2px solid #c9d2dc;
+  border-radius: .5rem;
+}
+
+.indicadores dt {
+  color: #5d6773;
+  font-size: .85rem;
+}
+
+.indicadores dd {
+  margin: .2rem 0 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.grafico-semanal {
+  display: flex;
+  gap: .5rem;
+  align-items: flex-end;
+  height: 12rem;
+  margin: 1rem 0;
+  padding: 0 0 .5rem;
+  border-bottom: 2px solid #c9d2dc;
+  list-style: none;
+}
+
+.grafico-semanal__dia {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+}
+
+.grafico-semanal__barra {
+  width: 70%;
+  min-height: 2px;
+  border-radius: .3rem .3rem 0 0;
+  background: #2478ca;
+}
+
+.grafico-semanal__valor {
+  font-size: .8rem;
+  font-weight: 700;
+}
+
+.grafico-semanal__etiqueta {
+  margin-top: .3rem;
+  color: #5d6773;
+  font-size: .75rem;
+  text-align: center;
+}
+
+.unidades-docente {
+  padding: 0;
+  list-style: none;
+}
+
+.unidades-docente li {
+  display: grid;
+  gap: .3rem;
+  margin: .6rem 0;
+  padding: .8rem;
+  border: 2px solid #c9d2dc;
+  border-radius: .5rem;
+}
+
+.unidades-docente progress {
+  width: 100%;
+}
+
+.multiplicadores__opciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  border-radius: .5rem;
+}
+
+.multiplicadores__factor {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  width: auto;
+  margin: 0;
+  cursor: pointer;
+}
+
+.multiplicadores__factor input {
+  width: auto;
+  margin: 0;
+}
+
+.multiplicadores #dias {
+  max-width: 8rem;
+}
+
+.multiplicadores__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.multiplicadores__ayuda {
+  color: #5d6773;
+  font-size: .9rem;
+}

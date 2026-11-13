@@ -36,8 +36,8 @@ public class LeccionService {
   private final EntregaDesarrolloRepository entregaRepository;
   private final MapaMisionesService mapaMisionesService;
   private final Clock reloj;
+  private final CalculadoraXp calculadoraXp;
 
-  @Autowired
   public LeccionService(
       EstudianteRepository estudianteRepository,
       EntregaDesarrolloRepository entregaRepository,
@@ -45,15 +45,44 @@ public class LeccionService {
     this(estudianteRepository, entregaRepository, mapaMisionesService, Clock.systemUTC());
   }
 
+  @Autowired
+  public LeccionService(
+      EstudianteRepository estudianteRepository,
+      EntregaDesarrolloRepository entregaRepository,
+      MapaMisionesService mapaMisionesService,
+      CalculadoraXp calculadoraXp) {
+    this(
+        estudianteRepository,
+        entregaRepository,
+        mapaMisionesService,
+        Clock.systemUTC(),
+        calculadoraXp);
+  }
+
   public LeccionService(
       EstudianteRepository estudianteRepository,
       EntregaDesarrolloRepository entregaRepository,
       MapaMisionesService mapaMisionesService,
       Clock reloj) {
+    this(
+        estudianteRepository,
+        entregaRepository,
+        mapaMisionesService,
+        reloj,
+        CalculadoraXp.SIN_MULTIPLICADOR);
+  }
+
+  public LeccionService(
+      EstudianteRepository estudianteRepository,
+      EntregaDesarrolloRepository entregaRepository,
+      MapaMisionesService mapaMisionesService,
+      Clock reloj,
+      CalculadoraXp calculadoraXp) {
     this.estudianteRepository = estudianteRepository;
     this.entregaRepository = entregaRepository;
     this.mapaMisionesService = mapaMisionesService;
     this.reloj = reloj;
+    this.calculadoraXp = calculadoraXp;
   }
 
   @Transactional(readOnly = true)
@@ -175,7 +204,11 @@ public class LeccionService {
 
     boolean rachaAumentada = !estudiante.rachaEn(ahora).completadaHoy();
     estudiante.registrarLeccion(leccion, ahora);
-    estudianteRepository.registrarXp(estudianteId, leccion.getXp(), ahora);
+    int xpGanada = calculadoraXp.calcular(estudianteId, leccion.getXp(), ahora);
+    if (xpGanada > leccion.getXp()) {
+      estudiante.sumarXp(xpGanada - leccion.getXp());
+    }
+    estudianteRepository.registrarXp(estudianteId, xpGanada, ahora);
     List<Logro> logrosNuevos = EvaluadorLogros.otorgarNuevos(estudiante, ahora);
     boolean unidadCompletada =
         Leccion.deUnidad(leccion.getUnidad()).stream().allMatch(estudiante::haCompletado);
@@ -185,7 +218,7 @@ public class LeccionService {
             : null;
     return new ResultadoLeccion(
         Resultado.CORRECTA,
-        leccion.getXp(),
+        xpGanada,
         estudiante.estadoEnergia(ahora),
         unidadCompletada,
         desbloqueada,

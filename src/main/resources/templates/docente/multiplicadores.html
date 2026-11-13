@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Multiplicadores de XP · Kaichaini</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/docente.css}">
+  </head>
+  <body class="con-barra-inferior">
+    <main>
+      <h1>Multiplicadores de XP</h1>
+      <p>
+        Mientras el multiplicador esté activo, las lecciones que complete el estudiante le darán más XP,
+        y esa XP cuenta para el ranking de su salón.
+      </p>
+      <form th:replace="~{fragments/filtro-salon :: filtro('/docente/multiplicadores')}"></form>
+      <p role="status" th:if="${mensaje}" th:text="${mensaje}"></p>
+      <p role="alert" th:if="${error}" th:text="${error}"></p>
+
+      <form th:if="${estudiantes != null and !estudiantes.isEmpty()}" method="post"
+            th:action="@{/docente/multiplicadores}" class="multiplicadores">
+        <input type="hidden" name="grado" th:value="${grado}">
+        <input type="hidden" name="seccion" th:value="${seccion}">
+        <div class="tabla-docente__contenedor">
+          <table class="tabla-docente">
+            <caption th:text="${seccion} ? |Estudiantes de ${grado}.° ${seccion}| : |Estudiantes de ${grado}.° de secundaria|">Estudiantes</caption>
+            <thead>
+              <tr>
+                <th scope="col">Elegir</th>
+                <th scope="col">Estudiante</th>
+                <th scope="col">Sección</th>
+                <th scope="col">XP</th>
+                <th scope="col">Multiplicador actual</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="alumno : ${estudiantes}">
+                <td>
+                  <input type="checkbox" name="estudiantes" th:value="${alumno.id()}"
+                         th:id="|estudiante-${alumno.id()}|">
+                </td>
+                <th scope="row">
+                  <label th:for="|estudiante-${alumno.id()}|">
+                    <span aria-hidden="true" th:text="${alumno.avatar()}">✨</span>
+                    <span th:text="${alumno.nombre()}">Nombre</span>
+                  </label>
+                </th>
+                <td th:text="${alumno.seccion()}">A</td>
+                <td th:text="${alumno.xp()}">0</td>
+                <td th:text="${alumno.tieneMultiplicador()} ? |${alumno.multiplicador()} hasta ${alumno.multiplicadorHasta()}| : '—'">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <fieldset class="multiplicadores__opciones">
+          <legend>Multiplicador</legend>
+          <label th:each="f, estado : ${factores}" class="multiplicadores__factor">
+            <input type="radio" name="factor" th:value="${f.name()}" th:checked="${estado.first}">
+            <span th:text="${f.etiqueta}">2x</span>
+          </label>
+        </fieldset>
+        <label for="dias">Duración (días)</label>
+        <input id="dias" name="dias" type="number" value="7" th:min="${diasMinimos}" th:max="${diasMaximos}" required>
+
+        <div class="multiplicadores__acciones">
+          <button type="submit" name="accion" value="asignar">Asignar multiplicador</button>
+          <button type="submit" name="accion" value="retirar" formnovalidate>Quitar multiplicador</button>
+        </div>
+        <p class="multiplicadores__ayuda">
+          Si un estudiante ya tiene un multiplicador, al asignar uno nuevo se reemplaza.
+        </p>
+      </form>
+      <p th:if="${estudiantes != null and estudiantes.isEmpty()}">No hay estudiantes registrados en este salón.</p>
+    </main>
+    <nav th:replace="~{fragments/navegacion-docente :: barra('multiplicadores')}"></nav>
+  </body>
+</html>
