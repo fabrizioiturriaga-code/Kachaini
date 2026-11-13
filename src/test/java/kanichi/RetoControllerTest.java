@@ -18,6 +18,7 @@ import java.util.Optional;
 import kanichi.config.SecurityConfig;
 import kanichi.controller.RetoController;
 import kanichi.dto.AvisoReto;
+import kanichi.dto.ResultadoReto;
 import kanichi.dto.ResumenAvisos;
 import kanichi.dto.RetoPublicado;
 import kanichi.dto.UsuarioSesion;
@@ -77,7 +78,7 @@ class RetoControllerTest {
     when(usuarios.findByCorreo("ana@example.org")).thenReturn(Optional.of(estudiante));
 
     when(retoDocenteService.publicadosPor(2L))
-        .thenReturn(List.of(new RetoPublicado(reto, 25, 10)));
+        .thenReturn(List.of(new RetoPublicado(reto, 25, 10, List.of("Ana", "Beto"))));
     when(retoDocenteService.resumen(1L)).thenReturn(new ResumenAvisos(1, 0));
   }
 
@@ -89,7 +90,10 @@ class RetoControllerTest {
         .andExpect(content().string(containsString("Publicar reto")))
         .andExpect(content().string(containsString("Energía Inca")))
         .andExpect(content().string(containsString("2.° C · Vence el 20/11/2026 · 30 XP")))
-        .andExpect(content().string(containsString("Notificados: 25 · Lo abrieron: 10")));
+        .andExpect(
+            content()
+                .string(containsString("Notificados: 25 · Lo abrieron: 10 · Lo completaron: 2")))
+        .andExpect(content().string(containsString("✅ Ana, Beto")));
   }
 
   @Test
@@ -134,7 +138,7 @@ class RetoControllerTest {
   @Test
   void elEstudianteVeSusAvisosConElContadorDeNuevos() throws Exception {
     when(retoDocenteService.avisos(1L))
-        .thenReturn(List.of(new AvisoReto(reto, false, RetoDocente.Estado.POR_VENCER)));
+        .thenReturn(List.of(new AvisoReto(reto, false, false, RetoDocente.Estado.POR_VENCER)));
 
     mvc.perform(get("/estudiante/avisos").with(user(estudianteSesion())))
         .andExpect(status().isOk())
@@ -149,7 +153,7 @@ class RetoControllerTest {
   @Test
   void elDetalleMuestraDescripcionObjetivosFechaYRecompensa() throws Exception {
     when(retoDocenteService.abrir(1L, 7L))
-        .thenReturn(new AvisoReto(reto, true, RetoDocente.Estado.VIGENTE));
+        .thenReturn(new AvisoReto(reto, true, false, RetoDocente.Estado.VIGENTE));
 
     mvc.perform(get("/estudiante/avisos/7").with(user(estudianteSesion())))
         .andExpect(status().isOk())
@@ -158,7 +162,41 @@ class RetoControllerTest {
         .andExpect(content().string(containsString("<li>Completar la unidad 3</li>")))
         .andExpect(content().string(containsString("<li>Responder sin errores</li>")))
         .andExpect(content().string(containsString("20/11/2026")))
-        .andExpect(content().string(containsString("30 XP")));
+        .andExpect(content().string(containsString("30 XP")))
+        .andExpect(content().string(containsString("Marcar como completado")));
+    verify(retoDocenteService, atLeast(2)).resumen(1L);
+  }
+
+  @Test
+  void unRetoCompletadoNoMuestraElBoton() throws Exception {
+    when(retoDocenteService.abrir(1L, 7L))
+        .thenReturn(new AvisoReto(reto, true, true, RetoDocente.Estado.VIGENTE));
+
+    mvc.perform(get("/estudiante/avisos/7").with(user(estudianteSesion())))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("✅ Completado")))
+        .andExpect(content().string(not(containsString("Marcar como completado"))));
+  }
+
+  @Test
+  void completarElRetoDaLaRecompensaYVuelveAlDetalle() throws Exception {
+    when(retoDocenteService.completar(1L, 7L)).thenReturn(new ResultadoReto(30, false));
+
+    mvc.perform(
+            post("/estudiante/avisos/7/completar").with(csrf()).with(user(estudianteSesion())))
+        .andExpect(redirectedUrl("/estudiante/avisos/7"))
+        .andExpect(flash().attribute("mensaje", "¡Reto completado! Ganaste 30 XP."));
+  }
+
+  @Test
+  void siNoSePuedeCompletarSeMuestraElError() throws Exception {
+    when(retoDocenteService.completar(1L, 7L))
+        .thenThrow(new IllegalArgumentException("Ya completaste este reto."));
+
+    mvc.perform(
+            post("/estudiante/avisos/7/completar").with(csrf()).with(user(estudianteSesion())))
+        .andExpect(redirectedUrl("/estudiante/avisos/7"))
+        .andExpect(flash().attribute("error", "Ya completaste este reto."));
   }
 
   @Test
@@ -185,6 +223,9 @@ class RetoControllerTest {
     mvc.perform(get("/docente/retos").with(user(estudianteSesion())))
         .andExpect(status().isForbidden());
     mvc.perform(get("/estudiante/avisos").with(user(docenteSesion())))
+        .andExpect(status().isForbidden());
+    mvc.perform(
+            post("/estudiante/avisos/7/completar").with(csrf()).with(user(docenteSesion())))
         .andExpect(status().isForbidden());
     mvc.perform(get("/estudiante/avisos"))
         .andExpect(status().is3xxRedirection())

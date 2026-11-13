@@ -79,3 +79,17 @@
 .formulario-reto textarea {
   min-height: 5rem;
 }
+
+.etiqueta--completado {
+  background: #d9f2df;
+  color: #1d6b34;
+}
+
+.boton-completar {
+  margin-top: 1rem;
+}
+
+.completaron {
+  margin: .3rem 0 0;
+  font-size: .9rem;
+}

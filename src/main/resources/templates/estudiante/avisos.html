@@ -20,6 +20,7 @@
             <a th:href="@{/estudiante/avisos/{id}(id=${aviso.reto().id})}"
                th:text="${aviso.reto().titulo}">Reto</a>
             <span class="etiqueta etiqueta--nuevo" th:if="${!aviso.leida()}">Nuevo</span>
+            <span class="etiqueta etiqueta--completado" th:if="${aviso.completado()}">✅ Completado</span>
             <span class="etiqueta etiqueta--por-vencer" th:if="${aviso.isPorVencer()}">Vence pronto</span>
             <span class="etiqueta etiqueta--vencido" th:if="${aviso.isVencido()}">Vencido</span>
           </p>
@@ -30,4 +31,5 @@
     </main>
     <nav th:replace="~{fragments/navegacion :: barra('avisos')}"></nav>
   </body>
+  
 </html>
