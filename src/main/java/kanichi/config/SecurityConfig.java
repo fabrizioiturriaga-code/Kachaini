@@ -38,6 +38,8 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/", "/registro", "/login", "/css/**", "/js/**", "/img/**", "/error")
                 .permitAll()
+                .requestMatchers("/admin/**")
+                .hasRole("ADMIN")
                 .requestMatchers("/estudiante/**")
                 .hasRole("ESTUDIANTE")
                 .requestMatchers("/onboarding", "/onboarding/**", "/inicio")

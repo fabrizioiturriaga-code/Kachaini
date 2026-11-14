@@ -31,4 +31,8 @@ public class Docente extends Usuario {
   public boolean isAutorizado() {
     return autorizado;
   }
+
+  public void cambiarAutorizacion(boolean autorizado) {
+    this.autorizado = autorizado;
+  }
 }

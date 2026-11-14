@@ -9,6 +9,7 @@ import kanichi.exception.RegistroInvalidoException;
 import kanichi.model.Docente;
 import kanichi.model.Estudiante;
 import kanichi.model.Rol;
+import kanichi.model.Secciones;
 import kanichi.model.Usuario;
 import kanichi.repository.UsuarioRepository;
 import kanichi.validation.PoliticaCorreo;
@@ -62,6 +63,8 @@ public class AuthService {
       validarEstudiante(formulario, errores);
     } else if (formulario.getRol() == Rol.DOCENTE) {
       validarDocente(formulario, errores);
+    } else {
+      errores.put("rol", "Selecciona Estudiante o Docente.");
     }
 
     String correo = PoliticaCorreo.normalizar(formulario.getCorreo());
@@ -92,8 +95,8 @@ public class AuthService {
     }
 
     String seccion = formulario.getSeccion();
-    if (seccion == null || !seccion.matches("[A-F]")) {
-      errores.put("seccion", "Selecciona una sección de A a F.");
+    if (!Secciones.esValida(seccion)) {
+      errores.put("seccion", "Selecciona la sección A, B o C.");
     }
     if (tieneContenido(formulario.getArea())) {
       errores.put("area", "El área solo corresponde a docentes.");

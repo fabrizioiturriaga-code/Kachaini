@@ -50,10 +50,8 @@ class RetoDocenteServiceTest {
     when(retos.save(any(RetoDocente.class))).thenAnswer(invocacion -> invocacion.getArgument(0));
     when(estudiantes.findByGradoAndSeccionOrderByNombreAsc(eq(2), anyString()))
         .thenReturn(List.of());
-    when(estudiantes.findByGradoAndSeccionOrderByNombreAsc(2, "A"))
-        .thenReturn(List.of(ana, beto));
-    when(estudiantes.findByGradoAndSeccionOrderByNombreAsc(2, "C"))
-        .thenReturn(List.of(carla));
+    when(estudiantes.findByGradoAndSeccionOrderByNombreAsc(2, "A")).thenReturn(List.of(ana, beto));
+    when(estudiantes.findByGradoAndSeccionOrderByNombreAsc(2, "C")).thenReturn(List.of(carla));
   }
 
   @Test
@@ -89,15 +87,16 @@ class RetoDocenteServiceTest {
     assertError("La recompensa debe ser de 0 a 100 XP.", () -> publicar("A", HOY, 101));
     assertError(
         "Selecciona un grado de 1 a 5.",
-        () ->
-            service.publicar(9L, 7, "A", "Reto", "Descripción", "Objetivo", HOY.plusDays(1), 10));
+        () -> service.publicar(9L, 7, "A", "Reto", "Descripción", "Objetivo", HOY.plusDays(1), 10));
     assertError(
         "El título es obligatorio.",
         () -> service.publicar(9L, 2, "A", "  ", "Descripción", "Objetivo", HOY.plusDays(1), 10));
     assertError(
+        "Selecciona la sección A, B o C.",
+        () -> service.publicar(9L, 2, "F", "Reto", "Descripción", "Objetivo", HOY.plusDays(1), 10));
+    assertError(
         "No hay estudiantes registrados en ese salón.",
-        () ->
-            service.publicar(9L, 2, "F", "Reto", "Descripción", "Objetivo", HOY.plusDays(1), 10));
+        () -> service.publicar(9L, 2, "B", "Reto", "Descripción", "Objetivo", HOY.plusDays(1), 10));
     verify(retos, never()).save(any());
   }
 
@@ -127,8 +126,7 @@ class RetoDocenteServiceTest {
   void abrirMuestraElDetalleYLoMarcaComoLeido() {
     Notificacion notificacion = new Notificacion(1L, 10L, AHORA);
     RetoDocente reto = reto(10L, HOY.plusDays(2));
-    when(notificaciones.findByEstudianteIdAndRetoId(1L, 10L))
-        .thenReturn(Optional.of(notificacion));
+    when(notificaciones.findByEstudianteIdAndRetoId(1L, 10L)).thenReturn(Optional.of(notificacion));
     when(retos.findById(10L)).thenReturn(Optional.of(reto));
 
     AvisoReto aviso = service.abrir(1L, 10L);
@@ -153,8 +151,7 @@ class RetoDocenteServiceTest {
     RetoDocente reto = reto(10L, HOY.plusDays(5));
     when(estudiantes.findById(1L)).thenReturn(Optional.of(ana));
     when(estudiantes.bloquearSalon(2, "A")).thenReturn(List.of(ana, beto));
-    when(notificaciones.findByEstudianteIdAndRetoId(1L, 10L))
-        .thenReturn(Optional.of(notificacion));
+    when(notificaciones.findByEstudianteIdAndRetoId(1L, 10L)).thenReturn(Optional.of(notificacion));
     when(retos.findById(10L)).thenReturn(Optional.of(reto));
     when(notificaciones.contarPendientesDelSalon(10L, 2, "A")).thenReturn(0L);
     when(foroService.anunciarRetoCompletado(reto, 2, "A")).thenReturn(true);
@@ -173,15 +170,14 @@ class RetoDocenteServiceTest {
         resultado.mensaje());
   }
 
-   @Test
+  @Test
   void siFaltanCompanerosNoSePublicaEnElForo() {
     Estudiante ana = estudianteDelSalon(1L, 2, "A");
     Notificacion notificacion = new Notificacion(1L, 10L, AHORA);
     RetoDocente reto = reto(10L, HOY.plusDays(5));
     when(estudiantes.findById(1L)).thenReturn(Optional.of(ana));
     when(estudiantes.bloquearSalon(2, "A")).thenReturn(List.of(ana));
-    when(notificaciones.findByEstudianteIdAndRetoId(1L, 10L))
-        .thenReturn(Optional.of(notificacion));
+    when(notificaciones.findByEstudianteIdAndRetoId(1L, 10L)).thenReturn(Optional.of(notificacion));
     when(retos.findById(10L)).thenReturn(Optional.of(reto));
     when(notificaciones.contarPendientesDelSalon(10L, 2, "A")).thenReturn(1L);
 
@@ -192,7 +188,7 @@ class RetoDocenteServiceTest {
     verifyNoInteractions(foroService);
   }
 
-    @Test
+  @Test
   void noSePuedeCompletarDosVecesNiUnRetoVencido() {
     Estudiante ana = estudianteDelSalon(1L, 2, "A");
     Notificacion yaCompletada = new Notificacion(1L, 10L, AHORA);
@@ -202,11 +198,9 @@ class RetoDocenteServiceTest {
     RetoDocente vencido = reto(11L, HOY.minusDays(1));
     when(estudiantes.findById(1L)).thenReturn(Optional.of(ana));
     when(estudiantes.bloquearSalon(2, "A")).thenReturn(List.of(ana));
-    when(notificaciones.findByEstudianteIdAndRetoId(1L, 10L))
-        .thenReturn(Optional.of(yaCompletada));
+    when(notificaciones.findByEstudianteIdAndRetoId(1L, 10L)).thenReturn(Optional.of(yaCompletada));
     when(retos.findById(10L)).thenReturn(Optional.of(vigente));
-    when(notificaciones.findByEstudianteIdAndRetoId(1L, 11L))
-        .thenReturn(Optional.of(pendiente));
+    when(notificaciones.findByEstudianteIdAndRetoId(1L, 11L)).thenReturn(Optional.of(pendiente));
     when(retos.findById(11L)).thenReturn(Optional.of(vencido));
 
     assertError("Ya completaste este reto.", () -> service.completar(1L, 10L));

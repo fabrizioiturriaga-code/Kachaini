@@ -67,6 +67,9 @@ public class UsuarioSesion extends User {
   }
 
   public String destino() {
+    if (rol == Rol.ADMIN) {
+      return "/admin/docentes";
+    }
     if (rol == Rol.DOCENTE) {
       return "/docente/panel";
     }

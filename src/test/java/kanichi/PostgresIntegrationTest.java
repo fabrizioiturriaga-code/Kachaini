@@ -11,9 +11,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import jakarta.validation.Validator;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.*;
+import kanichi.config.AdministradorInicial;
 import kanichi.dto.RegistroForm;
 import kanichi.model.Leccion;
 import kanichi.model.Rol;
@@ -27,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -67,10 +70,86 @@ class PostgresIntegrationTest {
   @Autowired AuthService auth;
   @Autowired UsuarioRepository usuarios;
   @Autowired JdbcTemplate jdbc;
+  @Autowired PasswordEncoder encoder;
+  @Autowired Validator validator;
   @Autowired kanichi.service.RecompensaService recompensas;
   @Autowired kanichi.service.DesafioService desafios;
   @Autowired kanichi.service.LigaService ligas;
   @Autowired kanichi.service.UnidadDocenteService unidadesDocente;
+
+  @Test
+  void administradorApruebaYRevocaConElMismoLogin() throws Exception {
+    String panel = "/admin/docentes";
+    String correoDocente = "docente.pendiente@example.org";
+    String correoAdmin = "administracion@example.org";
+    var docente = form(correoDocente);
+    docente.setRol(Rol.DOCENTE);
+    docente.setGrado(null);
+    docente.setSeccion(null);
+    docente.setArea("Historia");
+    auth.registrar(docente);
+    Long docenteId = usuarios.findByCorreo(correoDocente).orElseThrow().getId();
+    var provision =
+        new AdministradorInicial(usuarios, encoder, validator, correoAdmin, "Historia123");
+    provision.run(null);
+    provision.run(null);
+    Long adminId = usuarios.findByCorreo(correoAdmin).orElseThrow().getId();
+
+    mvc.perform(get(panel)).andExpect(status().is3xxRedirection());
+    var pendiente =
+        post("/login")
+            .with(csrf())
+            .param("correo", correoDocente)
+            .param("contrasena", "Historia123");
+    mvc.perform(pendiente).andExpect(redirectedUrl("/login?error"));
+    var admin = iniciarSesion(correoAdmin);
+    mvc.perform(get(panel).session(admin))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString(correoDocente)));
+    mvc.perform(get("/docente/panel").session(admin)).andExpect(status().isForbidden());
+    mvc.perform(post(panel + "/" + docenteId + "/aprobar").session(admin))
+        .andExpect(status().isForbidden());
+    mvc.perform(post(panel + "/" + docenteId + "/aprobar").session(admin).with(csrf()))
+        .andExpect(redirectedUrl(panel));
+    assertTrue(usuarios.findByCorreo(correoDocente).orElseThrow().isAutorizado());
+    var sesionDocente = iniciarSesion(correoDocente);
+    mvc.perform(get("/docente/panel").session(sesionDocente)).andExpect(status().isOk());
+    mvc.perform(get(panel).session(sesionDocente)).andExpect(status().isForbidden());
+    mvc.perform(post(panel + "/" + docenteId + "/revocar").session(sesionDocente).with(csrf()))
+        .andExpect(status().isForbidden());
+    mvc.perform(post(panel + "/" + docenteId + "/revocar").session(admin).with(csrf()))
+        .andExpect(redirectedUrl(panel));
+    mvc.perform(get("/docente/panel").session(sesionDocente))
+        .andExpect(redirectedUrl("/login?revocada"));
+    assertEquals(
+        List.of(adminId, adminId),
+        jdbc.queryForList(
+            "SELECT administrador_id FROM docentes_autorizaciones WHERE docente_id=? ORDER BY id",
+            Long.class,
+            docenteId));
+  }
+
+  @Test
+  void registroPublicoRechazaAdministradoresYSeccionesRetiradas() throws Exception {
+    mvc.perform(
+            post("/registro")
+                .with(csrf())
+                .param("nombre", "Prueba")
+                .param("correo", "escalada@example.org")
+                .param("contrasena", "Historia123")
+                .param("confirmacion", "Historia123")
+                .param("rol", "ADMIN"))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("Selecciona Estudiante o Docente.")));
+    assertFalse(usuarios.existsByCorreo("escalada@example.org"));
+    var estudiante = form("alumno@example.org");
+    estudiante.setSeccion("D");
+    assertThrows(
+        kanichi.exception.RegistroInvalidoException.class, () -> auth.registrar(estudiante));
+    estudiante.setSeccion("C");
+    auth.registrar(estudiante);
+    assertTrue(usuarios.existsByCorreo("alumno@example.org"));
+  }
 
   @Test
   void unidadDelDocenteSoloLaVenLosEstudiantesDeSuGrado() throws Exception {
@@ -200,7 +279,8 @@ class PostgresIntegrationTest {
     assertTrue(avisos.get(0).contains("Liga Panaca"));
     assertTrue(ligas.actualizarYNotificar(ana).isEmpty());
     assertEquals(
-        "PANACA", jdbc.queryForObject("SELECT liga FROM estudiantes WHERE id = ?", String.class, ana));
+        "PANACA",
+        jdbc.queryForObject("SELECT liga FROM estudiantes WHERE id = ?", String.class, ana));
 
     var sesion =
         (MockHttpSession)

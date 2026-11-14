@@ -1,8 +1,11 @@
 package kanichi.controller;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import kanichi.dto.RegistroForm;
 import kanichi.exception.RegistroInvalidoException;
+import kanichi.model.Rol;
+import kanichi.model.Secciones;
 import kanichi.repository.UsuarioRepository;
 import kanichi.service.AuthService;
 import kanichi.validation.PoliticaCorreo;
@@ -45,11 +48,19 @@ public class AuthController {
     return "auth/registro";
   }
 
+  @ModelAttribute("secciones")
+  public List<String> secciones() {
+    return Secciones.DISPONIBLES;
+  }
+
   @PostMapping("/registro")
   public String registrar(
       @Valid @ModelAttribute RegistroForm registroForm,
       BindingResult resultado,
       RedirectAttributes mensajesRedireccion) {
+    if (registroForm.getRol() == Rol.ADMIN) {
+      resultado.rejectValue("rol", "registro", "Selecciona Estudiante o Docente.");
+    }
     if (resultado.hasErrors()) {
       return mostrarFormularioConErrores(registroForm);
     }

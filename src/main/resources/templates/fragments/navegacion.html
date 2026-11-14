@@ -22,7 +22,8 @@
               th:text="${usuarioActual.avatar != null} ? ${usuarioActual.avatar} : (${usuarioActual.rol.name() == 'DOCENTE'} ? '🧑‍🏫' : '✨')">✨</span>
         <div class="barra-inferior__datos">
           <span class="barra-inferior__nombre" th:text="${usuarioActual.nombre}">Nombre</span>
-          <span class="barra-inferior__rol" th:text="${usuarioActual.rol.name() == 'DOCENTE'} ? 'Docente' : 'Estudiante'">Estudiante</span>
+          <span class="barra-inferior__rol"
+                th:text="${usuarioActual.rol.name() == 'ADMIN' ? 'Administrador' : (usuarioActual.rol.name() == 'DOCENTE' ? 'Docente' : 'Estudiante')}">Estudiante</span>
         </div>
       </div>
       <form method="post" th:action="@{/logout}">

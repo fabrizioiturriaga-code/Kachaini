@@ -24,11 +24,12 @@ La aplicación utiliza MVC: devuelve HTML o redirecciones, no JSON. Los POST rec
 | POST | `/cuenta/contrasena` | `contrasenaActual`, `contrasenaNueva`, `confirmacion`, `_csrf` | Valida y guarda el cambio; errores conservan el formulario sin devolver contraseñas. |
 | GET | `/onboarding` | Sesión de estudiante | Módulo inicial (HU-06), ver [modulo-inicial.md](modulo-inicial.md). |
 | GET | `/inicio` | Sesión de estudiante | Mapa de misiones (HU-08). Con onboarding pendiente redirige a `/onboarding`. |
-| GET | `/docente/panel` | Sesión de docente autorizado | Destino temporal para docentes. |
+| GET | `/docente/panel` | Sesión de docente autorizado | Panel docente. |
+| GET | `/admin/docentes` | Sesión de administrador | Lista de cuentas docentes pendientes y autorizadas. |
+| POST | `/admin/docentes/{id}/aprobar` | Sesión de administrador y `_csrf` | Habilita la cuenta docente. |
+| POST | `/admin/docentes/{id}/revocar` | Sesión de administrador y `_csrf` | Retira la autorización y bloquea el acceso posterior. |
 
 Las redirecciones utilizan HTTP 302; los formularios y destinos HTML correctos responden HTTP 200. Una petición sin CSRF válido recibe HTTP 403. Tras alcanzar el límite temporal, POST `/login` devuelve HTTP 429 y la cabecera `Retry-After` con los segundos de espera; no se consultan las credenciales durante ese intervalo. El acceso anónimo a rutas privadas redirige al login; una sesión con rol incorrecto recibe HTTP 403.
-
-El panel docente sigue siendo un destino temporal de integración.
 
 ### Campos de POST /registro
 
@@ -40,7 +41,7 @@ El panel docente sigue siendo un destino temporal de integración.
 | `confirmacion` | Debe coincidir con `contrasena`. |
 | `rol` | `ESTUDIANTE` o `DOCENTE`. |
 | `grado` | Obligatorio para estudiante: entero entre 1 y 5. No enviar para docente. |
-| `seccion` | Obligatoria para estudiante: de `A` a `F`. No enviar para docente. |
+| `seccion` | Obligatoria para estudiante: `A`, `B` o `C`. No enviar para docente. |
 | `area` | Obligatoria para docente, máximo 100 caracteres. No enviar para estudiante. |
 
 No se aceptan privilegios adicionales mediante el formulario. Un correo duplicado se informa en el campo `correo`, incluso si dos registros compiten por la misma dirección.
@@ -52,6 +53,7 @@ El cliente debe conservar la cookie de sesión `JSESSIONID`. Tras autenticar se 
 - Estudiante con `onboardingCompletado=false`: `/onboarding`.
 - Estudiante con `onboardingCompletado=true`: `/inicio`.
 - Docente autorizado: `/docente/panel`.
+- Administrador: `/admin/docentes`.
 
 El login normaliza el correo y responde con el mismo mensaje para correo inexistente, contraseña incorrecta y docente pendiente: «Correo o contraseña incorrectos».
 
@@ -88,19 +90,20 @@ Los tipos pertenecen a `kanichi.dto.UsuarioSesion` y `kanichi.model.Rol`. Spring
 
 HU-03 permite a estudiantes consultar y actualizar su nombre visible y avatar prediseñado en `/estudiante/perfil`. HU-05 permite a estudiantes y docentes cambiar la contraseña en `/cuenta/contrasena`, validando la contraseña actual y aplicando la política existente. Cada módulo reutiliza `Usuario`, su repositorio y la configuración de seguridad.
 
-Los cambios de datos deben ejecutarse en servicios transaccionales. La migración `V3__perfil_estudiante.sql` añade el avatar prediseñado; `V4__modulo_inicial.sql` añade XP, misiones completadas y logros; futuras migraciones deben continuar desde V5 sin modificar las ya aplicadas.
+Los cambios de datos deben ejecutarse en servicios transaccionales. Agregar migraciones con una versión posterior a la última del repositorio y conservar las ya aplicadas.
 
 ## Políticas de configuración
 
 - `INSTITUTIONAL_DOMAINS`: dominios admitidos separados por comas. En desarrollo, vacío permite cualquier dominio válido. El perfil `prod` exige una lista no vacía y cookies Secure; activarlo con `SPRING_PROFILES_ACTIVE=prod` y definir los dominios confirmados antes de desplegar.
 - `SESSION_COOKIE_SECURE`: `false` para HTTP local; `true` con HTTPS. La cookie es HttpOnly, SameSite=Lax y la sesión expira tras 30 minutos de inactividad.
-- Los docentes se guardan con `autorizado=false` y no pueden ingresar hasta su aprobación. No existe una ruta pública de activación. Un operador autorizado debe verificar la identidad y activar el ID correspondiente en la base:
 
-```sql
-UPDATE docentes SET autorizado = true WHERE id = :id_docente_verificado;
-```
+## Administración de cuentas docentes
 
-`:id_docente_verificado` representa un parámetro, no SQL listo para pegar. La autorización se carga durante el login y se comprueba de nuevo en cada petición autenticada. Al revocar el permiso, la siguiente petición invalida la sesión y redirige a `/login?revocada`; no se requiere reiniciar la aplicación. La persona responsable de las aprobaciones debe ser designada por el equipo institucional.
+Configura `ADMIN_EMAIL` y `ADMIN_PASSWORD` como variables de entorno antes de arrancar. En Render se guardan en el panel del servicio. Si el correo está libre, el arranque crea la cuenta de administrador con la contraseña almacenada como hash. El registro público admite únicamente estudiantes y docentes. Si la cuenta administrativa ya existe, el arranque conserva su contraseña. Para cambiarla, entra en **Contraseña** en el panel. Una vez creada la cuenta, se pueden retirar las dos variables.
+
+El profesor se registra como docente y queda pendiente. El administrador entra por `/login`, verifica la identidad con la institución y elige **Aprobar** en `/admin/docentes`. El docente puede ingresar con la contraseña que eligió en el registro. **Revocar autorización** invalida el acceso en la siguiente petición autenticada y devuelve la cuenta a pendientes.
+
+La migración `V20__administradores.sql` crea la tabla de administradores y añade el ID del administrador a la auditoría. La aplicación limita el registro y los selectores a las secciones A, B y C.
 
 ## Validación e integración con PostgreSQL
 
@@ -126,7 +129,7 @@ La versión de Flyway administrada por Spring Boot 3.3.5 advierte que su soporte
 
 Los logs de aplicación emiten `LOGIN_EXITOSO`, `LOGIN_FALLIDO`, `LOGIN_LIMITADO`, `LOGOUT` y `SESION_REVOCADA`. Solo los eventos autenticados incluyen ID interno y, en el login, rol; no se registran contraseñas, hashes, correos, cookies ni tokens CSRF.
 
-`V2__auditoria_docente.sql` añade `docentes_autorizaciones`. Un trigger registra cada cambio efectivo de `docentes.autorizado`, incluso mediante SQL: ID docente, nuevo permiso, fecha y usuario de conexión PostgreSQL. Este usuario de BD no identifica por sí solo a la persona operadora; la institución debe mantener esa trazabilidad en su procedimiento de aprobación.
+`docentes_autorizaciones` registra cada cambio efectivo de `docentes.autorizado`. Las acciones del panel guardan el ID del administrador autenticado. Los cambios realizados directamente por SQL conservan el usuario de conexión PostgreSQL y el ID del administrador queda vacío.
 
 Los mensajes de servidor están en `ValidationMessages.properties` y `messages.properties`. Las vistas relacionan errores y campos mediante ARIA; JavaScript enfoca el primer campo inválido disponible y activa los campos obligatorios según el rol.
 

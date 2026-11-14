@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Aprobación docente · Kaichaini</title>
+    <link rel="icon" type="image/png" th:href="@{/img/kai.png}">
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/navegacion.css}">
+    <link rel="stylesheet" th:href="@{/css/avisos.css}">
+  </head>
+  <body class="con-barra-inferior">
+    <main>
+      <h1>Aprobación docente</h1>
+      <p>Verifica con la institución que la persona sea docente antes de aprobar su cuenta.</p>
+      <p role="status" th:if="${mensaje}" th:text="${mensaje}"></p>
+
+      <section aria-labelledby="titulo-pendientes">
+        <h2 id="titulo-pendientes">Pendientes de aprobación</h2>
+        <p th:if="${pendientes.isEmpty()}">No hay cuentas pendientes.</p>
+        <ul class="avisos" th:unless="${pendientes.isEmpty()}">
+          <li class="aviso aviso--nuevo" th:each="cuenta : ${pendientes}">
+            <p class="aviso__titulo" th:text="${cuenta.nombre()}"></p>
+            <p class="aviso__datos" th:text="|${cuenta.correo()} · ${cuenta.area()}|"></p>
+            <form method="post" th:action="@{/admin/docentes/{id}/aprobar(id=${cuenta.id()})}">
+              <button type="submit" th:attr="aria-label=|Aprobar a ${cuenta.nombre()}|">Aprobar</button>
+            </form>
+          </li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="titulo-autorizados">
+        <h2 id="titulo-autorizados">Docentes autorizados</h2>
+        <p th:if="${autorizados.isEmpty()}">Todavía no hay docentes autorizados.</p>
+        <ul class="avisos" th:unless="${autorizados.isEmpty()}">
+          <li class="aviso" th:each="cuenta : ${autorizados}">
+            <p class="aviso__titulo" th:text="${cuenta.nombre()}"></p>
+            <p class="aviso__datos" th:text="|${cuenta.correo()} · ${cuenta.area()}|"></p>
+            <form method="post" th:action="@{/admin/docentes/{id}/revocar(id=${cuenta.id()})}">
+              <button type="submit" th:attr="aria-label=|Revocar autorización de ${cuenta.nombre()}|">Revocar autorización</button>
+            </form>
+          </li>
+        </ul>
+      </section>
+    </main>
+
+    <nav class="barra-inferior" aria-label="Navegación de administración">
+      <svg th:replace="~{fragments/navegacion :: iconos}"></svg>
+      <a class="barra-inferior__marca" th:href="@{/admin/docentes}" aria-label="Kaichaini, ir al panel">
+        <img th:src="@{/img/logo-kaichaini.png}" alt="Logo de Kaichaini">
+      </a>
+      <a class="barra-inferior__enlace barra-inferior__enlace--activo" th:href="@{/admin/docentes}" aria-current="page">
+        <span class="barra-inferior__texto">Docentes</span>
+      </a>
+      <a class="barra-inferior__enlace" th:href="@{/cuenta/contrasena}">
+        <span class="barra-inferior__texto">Contraseña</span>
+      </a>
+      <div th:replace="~{fragments/navegacion :: usuario}"></div>
+    </nav>
+  </body>
+</html>

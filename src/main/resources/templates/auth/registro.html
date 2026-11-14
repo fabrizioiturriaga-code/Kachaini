@@ -125,7 +125,7 @@
                   <select th:field="*{seccion}"
                           th:attr="aria-invalid=${#fields.hasErrors('seccion')},aria-describedby=${#fields.hasErrors('seccion') ? 'error-seccion' : null}">
                     <option value="">Elige tu sección</option>
-                    <option th:each="s : ${ {'A','B','C','D','E','F'} }" th:value="${s}" th:text="|Sección ${s}|">Sección A</option>
+                    <option th:each="s : ${secciones}" th:value="${s}" th:text="|Sección ${s}|">Sección A</option>
                   </select>
                 </div>
                 <p id="error-seccion" class="error" th:errors="*{seccion}"></p>

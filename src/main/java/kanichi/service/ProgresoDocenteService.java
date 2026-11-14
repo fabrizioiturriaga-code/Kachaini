@@ -15,6 +15,7 @@ import kanichi.dto.ProgresoAlumno;
 import kanichi.model.Estudiante;
 import kanichi.model.Leccion;
 import kanichi.model.MultiplicadorXp;
+import kanichi.model.Secciones;
 import kanichi.repository.EstudianteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,7 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class ProgresoDocenteService {
   public static final List<Integer> GRADOS = List.of(1, 2, 3, 4, 5);
-  public static final List<String> SECCIONES = List.of("A", "B", "C", "D", "E", "F");
+  public static final List<String> SECCIONES = Secciones.DISPONIBLES;
   public static final int DIAS_DEL_GRAFICO = 7;
 
   private static final ZoneId ZONA = ZoneId.of("America/Lima");

@@ -76,6 +76,9 @@ public class RetoDocenteService {
       throw new IllegalArgumentException("Selecciona un grado de 1 a 5.");
     }
     String seccionValida = ProgresoDocenteService.normalizarSeccion(seccion);
+    if (seccion != null && !seccion.isBlank() && seccionValida == null) {
+      throw new IllegalArgumentException("Selecciona la sección A, B o C.");
+    }
     String tituloLimpio = obligatorio(titulo, LARGO_TITULO, "El título");
     String descripcionLimpia = obligatorio(descripcion, LARGO_TEXTO, "La descripción");
     String objetivosLimpios = obligatorio(objetivos, LARGO_TEXTO, "Los objetivos");

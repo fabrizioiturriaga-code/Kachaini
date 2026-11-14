@@ -2,5 +2,6 @@ package kanichi.model;
 
 public enum Rol {
   ESTUDIANTE,
-  DOCENTE
+  DOCENTE,
+  ADMIN
 }
