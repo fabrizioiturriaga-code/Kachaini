@@ -65,6 +65,14 @@ class AuthServiceTest {
   }
 
   @Test
+  void cnDocenteSinArea() {
+    form.setRol(Rol.DOCENTE);
+    form.setGrado(null);
+    form.setSeccion(null);
+    rechaza("area");
+  }
+
+  @Test
   void duplicado() {
     when(repository.existsByCorreo("ana@example.org")).thenReturn(true);
     assertThrows(RegistroInvalidoException.class, () -> service.registrar(form));
@@ -100,6 +108,31 @@ class AuthServiceTest {
   void grado() {
     form.setGrado(6);
     rechaza("grado");
+  }
+
+  @Test
+  void cbGradoNulo() {
+    form.setGrado(null);
+    rechaza("grado");
+  }
+
+  @Test
+  void cbGradoMenorQueUno() {
+    form.setGrado(0);
+    rechaza("grado");
+  }
+
+  @Test
+  void cnEstudianteValidoEnLimiteSuperior() {
+    form.setGrado(5);
+    form.setSeccion("C");
+    service.registrar(form);
+    verify(repository)
+        .saveAndFlush(
+            argThat(
+                usuario -> usuario instanceof Estudiante estudiante
+                    && estudiante.getGrado() == 5
+                    && "C".equals(estudiante.getSeccion())));
   }
 
   @Test
