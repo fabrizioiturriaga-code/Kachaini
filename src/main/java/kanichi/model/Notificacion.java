@@ -25,8 +25,10 @@ public class Notificacion {
   private Instant creada;
 
   private Instant leida;
-  
+
   private Instant completada;
+
+  private Instant fallida;
 
   protected Notificacion() {}
 
@@ -41,6 +43,7 @@ public class Notificacion {
       leida = ahora;
     }
   }
+
   public void completar(Instant ahora) {
     marcarLeida(ahora);
     if (completada == null) {
@@ -48,8 +51,19 @@ public class Notificacion {
     }
   }
 
+  public void registrarFallo(Instant ahora) {
+    marcarLeida(ahora);
+    if (fallida == null) {
+      fallida = ahora;
+    }
+  }
+
   public boolean isCompletada() {
     return completada != null;
+  }
+
+  public boolean isFallida() {
+    return fallida != null;
   }
 
   public boolean isLeida() {
@@ -75,8 +89,12 @@ public class Notificacion {
   public Instant getLeida() {
     return leida;
   }
-  
+
   public Instant getCompletada() {
     return completada;
+  }
+
+  public Instant getFallida() {
+    return fallida;
   }
 }

@@ -98,9 +98,9 @@ class RetoControllerTest {
 
   @Test
   void publicarUnRetoNotificaYConfirma() throws Exception {
-    when(retoDocenteService.publicar(
-            eq(2L), eq(2), eq("C"), eq("Energía Inca"), any(), any(), eq(FECHA), eq(30)))
-        .thenReturn(25);
+      when(retoDocenteService.publicar(
+          eq(2L), eq(2), eq("C"), eq("Energía Inca"), any(), any(), eq(FECHA), eq(30), any(), any(), any()))
+      .thenReturn(25);
 
     mvc.perform(
             post("/docente/retos")
@@ -119,7 +119,7 @@ class RetoControllerTest {
 
   @Test
   void unErrorVuelveAMostrarElFormularioConLosDatos() throws Exception {
-    when(retoDocenteService.publicar(any(), any(), any(), any(), any(), any(), any(), any()))
+      when(retoDocenteService.publicar(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
         .thenThrow(new IllegalArgumentException("La fecha límite debe ser hoy o una fecha futura"));
 
     mvc.perform(
@@ -180,7 +180,7 @@ class RetoControllerTest {
 
   @Test
   void completarElRetoDaLaRecompensaYVuelveAlDetalle() throws Exception {
-    when(retoDocenteService.completar(1L, 7L)).thenReturn(new ResultadoReto(30, false));
+    when(retoDocenteService.completar(1L, 7L, null)).thenReturn(new ResultadoReto(30, false));
 
     mvc.perform(
             post("/estudiante/avisos/7/completar").with(csrf()).with(user(estudianteSesion())))
@@ -190,7 +190,7 @@ class RetoControllerTest {
 
   @Test
   void siNoSePuedeCompletarSeMuestraElError() throws Exception {
-    when(retoDocenteService.completar(1L, 7L))
+    when(retoDocenteService.completar(1L, 7L, null))
         .thenThrow(new IllegalArgumentException("Ya completaste este reto."));
 
     mvc.perform(
@@ -231,7 +231,18 @@ class RetoControllerTest {
         .andExpect(status().is3xxRedirection())
         .andExpect(redirectedUrlPattern("**/login"));
   }
+  @Test
+  void unaRespuestaIncorrectaSeMuestraComoError() throws Exception {
+    when(retoDocenteService.completar(1L, 7L, 2)).thenReturn(ResultadoReto.incorrecto());
 
+    mvc.perform(
+            post("/estudiante/avisos/7/completar")
+                .param("respuesta", "2")
+                .with(csrf())
+                .with(user(estudianteSesion())))
+        .andExpect(redirectedUrl("/estudiante/avisos/7"))
+        .andExpect(flash().attribute("error", ResultadoReto.incorrecto().mensaje()));
+  }
   private UsuarioSesion estudianteSesion() {
     return new UsuarioSesion(1L, "Ana", "ana@example.org", "hash", Rol.ESTUDIANTE, true, true);
   }
@@ -240,4 +251,5 @@ class RetoControllerTest {
     return new UsuarioSesion(
         2L, "Docente", "docente@example.org", "hash", Rol.DOCENTE, true, false);
   }
+  
 }
