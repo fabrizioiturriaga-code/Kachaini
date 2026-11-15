@@ -6,7 +6,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-
+import java.util.Arrays;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -246,6 +246,90 @@ class RetoDocenteServiceTest {
 
     assertEquals(List.of("Leer", "Responder"), reto.getListaObjetivos());
     assertEquals("2.° (todas las secciones)", reto.getDestinatarios());
+  }
+    @Test
+  void publicarConPreguntaGuardaLasOpcionesLlenasYLaRespuestaCorrecta() {
+    service.publicar(
+        9L, 2, "A", "Reto", "Desc", "Objetivo", HOY.plusDays(3), 20,
+        "¿Quién fundó el Tahuantinsuyo?", Arrays.asList("Pachacútec", "", "Manco Cápac", null), 2);
+
+    ArgumentCaptor<RetoDocente> reto = ArgumentCaptor.forClass(RetoDocente.class);
+    verify(retos).save(reto.capture());
+    assertTrue(reto.getValue().isConPregunta());
+    assertEquals(List.of("Pachacútec", "Manco Cápac"), reto.getValue().getListaOpciones());
+    assertTrue(reto.getValue().esCorrecta(1));
+  }
+
+  @Test
+  void laPreguntaDelRetoSeValida() {
+    assertError(
+        "La pregunta necesita al menos 2 opciones.",
+        () -> publicarConPregunta("¿Pregunta?", Arrays.asList("A", "", "", ""), 0));
+    assertError(
+        "Las opciones deben ser distintas.",
+        () -> publicarConPregunta("¿Pregunta?", Arrays.asList("Inca", "inca", "", ""), 0));
+    assertError(
+        "Marca cuál de las opciones es la correcta.",
+        () -> publicarConPregunta("¿Pregunta?", Arrays.asList("A", "B", "", ""), 3));
+    assertError(
+        "Escribe la pregunta o deja vacías sus opciones.",
+        () -> publicarConPregunta(" ", Arrays.asList("A", "B", "", ""), 0));
+    verify(retos, never()).save(any());
+  }
+
+  @Test
+  void unRetoConPreguntaSoloSeCompletaConLaRespuestaCorrecta() {
+    Estudiante ana = estudianteDelSalon(1L, 2, "A");
+    Notificacion notificacion = new Notificacion(1L, 10L, AHORA);
+    RetoDocente reto = retoConPregunta(10L);
+    prepararCompletar(ana, notificacion, reto);
+
+    assertError("Elige una respuesta antes de enviar.", () -> service.completar(1L, 10L, null));
+    ResultadoReto resultado = service.completar(1L, 10L, 1);
+
+    assertTrue(resultado.correcto());
+    assertTrue(notificacion.isCompletada());
+    verify(estudiantes).registrarXp(1L, 20, AHORA);
+  }
+
+  @Test
+  void unaRespuestaIncorrectaGastaElUnicoIntento() {
+    Estudiante ana = estudianteDelSalon(1L, 2, "A");
+    Notificacion notificacion = new Notificacion(1L, 10L, AHORA);
+    RetoDocente reto = retoConPregunta(10L);
+    prepararCompletar(ana, notificacion, reto);
+
+    ResultadoReto resultado = service.completar(1L, 10L, 0);
+
+    assertFalse(resultado.correcto());
+    assertTrue(notificacion.isFallida());
+    assertFalse(notificacion.isCompletada());
+    assertError(
+        "Ya respondiste este reto y tu respuesta no fue correcta.",
+        () -> service.completar(1L, 10L, 1));
+    verify(ana, never()).sumarXp(anyInt());
+    verify(estudiantes, never()).registrarXp(any(), anyInt(), any());
+    verifyNoInteractions(foroService);
+  }
+
+  private int publicarConPregunta(String pregunta, List<String> opciones, Integer correcta) {
+    return service.publicar(
+        9L, 2, "A", "Reto", "Desc", "Objetivo", HOY.plusDays(3), 20, pregunta, opciones, correcta);
+  }
+
+  private void prepararCompletar(Estudiante ana, Notificacion notificacion, RetoDocente reto) {
+    when(estudiantes.findById(1L)).thenReturn(Optional.of(ana));
+    when(estudiantes.bloquearSalon(2, "A")).thenReturn(List.of(ana));
+    when(notificaciones.findByEstudianteIdAndRetoId(1L, 10L)).thenReturn(Optional.of(notificacion));
+    when(retos.findById(10L)).thenReturn(Optional.of(reto));
+    when(notificaciones.contarPendientesDelSalon(10L, 2, "A")).thenReturn(1L);
+  }
+
+  private static RetoDocente retoConPregunta(Long id) {
+    RetoDocente reto = reto(id, HOY.plusDays(5));
+    reto.agregarPregunta(
+        "¿Quién fundó el Tahuantinsuyo?", List.of("Manco Cápac", "Pachacútec", "Atahualpa"), 1);
+    return reto;
   }
 
   private int publicar(String seccion, LocalDate fecha, int xp) {

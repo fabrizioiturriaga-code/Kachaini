@@ -7,6 +7,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -72,6 +73,23 @@ public class RetoDocenteService {
       String objetivos,
       LocalDate fechaLimite,
       Integer xp) {
+    return publicar(
+        docenteId, grado, seccion, titulo, descripcion, objetivos, fechaLimite, xp, null, null, null);
+  }
+
+  @Transactional
+  public int publicar(
+      Long docenteId,
+      Integer grado,
+      String seccion,
+      String titulo,
+      String descripcion,
+      String objetivos,
+      LocalDate fechaLimite,
+      Integer xp,
+      String pregunta,
+      List<String> opciones,
+      Integer respuestaCorrecta) {
     if (!ProgresoDocenteService.esGradoValido(grado)) {
       throw new IllegalArgumentException("Selecciona un grado de 1 a 5.");
     }
@@ -93,6 +111,7 @@ public class RetoDocenteService {
     if (xp == null || xp < 0 || xp > XP_MAXIMA) {
       throw new IllegalArgumentException("La recompensa debe ser de 0 a " + XP_MAXIMA + " XP.");
     }
+    PreguntaValidada preguntaValidada = validarPregunta(pregunta, opciones, respuestaCorrecta);
 
     List<Estudiante> salon = new ArrayList<>();
     for (String s :
@@ -104,18 +123,22 @@ public class RetoDocenteService {
     }
 
     Instant ahora = reloj.instant();
-    RetoDocente reto =
-        retos.save(
-            new RetoDocente(
-                docenteId,
-                grado,
-                seccionValida,
-                tituloLimpio,
-                descripcionLimpia,
-                objetivosLimpios,
-                fechaLimite,
-                xp,
-                ahora));
+    RetoDocente nuevo =
+        new RetoDocente(
+            docenteId,
+            grado,
+            seccionValida,
+            tituloLimpio,
+            descripcionLimpia,
+            objetivosLimpios,
+            fechaLimite,
+            xp,
+            ahora);
+    if (preguntaValidada != null) {
+      nuevo.agregarPregunta(
+          preguntaValidada.texto(), preguntaValidada.opciones(), preguntaValidada.correcta());
+    }
+    RetoDocente reto = retos.save(nuevo);
     notificaciones.saveAll(
         salon.stream().map(e -> new Notificacion(e.getId(), reto.getId(), ahora)).toList());
     return salon.size();
@@ -146,7 +169,8 @@ public class RetoDocenteService {
         .map(
             n -> {
               RetoDocente reto = porId.get(n.getRetoId());
-              return new AvisoReto(reto, n.isLeida(), n.isCompletada(), reto.estadoEn(hoy));
+              return new AvisoReto(
+                  reto, n.isLeida(), n.isCompletada(), reto.estadoEn(hoy), n.isFallida());
             })
         .sorted(Comparator.comparing(AvisoReto::leida))
         .toList();
@@ -165,11 +189,17 @@ public class RetoDocenteService {
     Notificacion notificacion = notificacionDe(estudianteId, retoId);
     RetoDocente reto = retoPorId(retoId);
     notificacion.marcarLeida(reloj.instant());
-    return new AvisoReto(reto, true, notificacion.isCompletada(), reto.estadoEn(hoy()));
+    return new AvisoReto(
+        reto, true, notificacion.isCompletada(), reto.estadoEn(hoy()), notificacion.isFallida());
   }
 
   @Transactional
   public ResultadoReto completar(Long estudianteId, Long retoId) {
+    return completar(estudianteId, retoId, null);
+  }
+
+  @Transactional
+  public ResultadoReto completar(Long estudianteId, Long retoId, Integer respuesta) {
     Estudiante actual =
         estudiantes
             .findById(estudianteId)
@@ -187,11 +217,24 @@ public class RetoDocenteService {
     if (notificacion.isCompletada()) {
       throw new IllegalArgumentException("Ya completaste este reto.");
     }
+    if (notificacion.isFallida()) {
+      throw new IllegalArgumentException("Ya respondiste este reto y tu respuesta no fue correcta.");
+    }
     if (reto.estadoEn(hoy()) == RetoDocente.Estado.VENCIDO) {
       throw new IllegalArgumentException("Este reto ya venció.");
     }
 
     Instant ahora = reloj.instant();
+    if (reto.isConPregunta()) {
+      if (respuesta == null) {
+        throw new IllegalArgumentException("Elige una respuesta antes de enviar.");
+      }
+      if (!reto.esCorrecta(respuesta)) {
+        notificacion.registrarFallo(ahora);
+        return ResultadoReto.incorrecto();
+      }
+    }
+
     notificacion.completar(ahora);
     int xp = reto.getXp();
     if (xp > 0) {
@@ -203,6 +246,56 @@ public class RetoDocenteService {
         notificaciones.contarPendientesDelSalon(retoId, grado, seccion) == 0
             && foroService.anunciarRetoCompletado(reto, grado, seccion);
     return new ResultadoReto(xp, salonCompleto);
+  }
+
+  private record PreguntaValidada(String texto, List<String> opciones, int correcta) {}
+
+  private static PreguntaValidada validarPregunta(
+      String pregunta, List<String> opciones, Integer respuestaCorrecta) {
+    String texto = pregunta == null ? "" : pregunta.strip();
+    List<String> campos = opciones == null ? List.of() : opciones;
+    if (texto.isEmpty()) {
+      boolean hayOpciones = campos.stream().anyMatch(o -> o != null && !o.isBlank());
+      if (hayOpciones) {
+        throw new IllegalArgumentException("Escribe la pregunta o deja vacías sus opciones.");
+      }
+      return null;
+    }
+    if (texto.length() > RetoDocente.LARGO_PREGUNTA) {
+      throw new IllegalArgumentException(
+          "La pregunta no puede tener más de " + RetoDocente.LARGO_PREGUNTA + " caracteres.");
+    }
+    if (campos.size() > RetoDocente.MAXIMO_OPCIONES) {
+      throw new IllegalArgumentException(
+          "Puedes poner como máximo " + RetoDocente.MAXIMO_OPCIONES + " opciones.");
+    }
+    List<String> llenas = new ArrayList<>();
+    int correcta = -1;
+    for (int i = 0; i < campos.size(); i++) {
+      String opcion = campos.get(i) == null ? "" : campos.get(i).strip();
+      if (opcion.isEmpty()) {
+        continue;
+      }
+      if (opcion.length() > RetoDocente.LARGO_OPCION) {
+        throw new IllegalArgumentException(
+            "Cada opción puede tener como máximo " + RetoDocente.LARGO_OPCION + " caracteres.");
+      }
+      if (respuestaCorrecta != null && respuestaCorrecta == i) {
+        correcta = llenas.size();
+      }
+      llenas.add(opcion);
+    }
+    if (llenas.size() < 2) {
+      throw new IllegalArgumentException("La pregunta necesita al menos 2 opciones.");
+    }
+    long distintas = llenas.stream().map(o -> o.toLowerCase(Locale.ROOT)).distinct().count();
+    if (distintas < llenas.size()) {
+      throw new IllegalArgumentException("Las opciones deben ser distintas.");
+    }
+    if (correcta < 0) {
+      throw new IllegalArgumentException("Marca cuál de las opciones es la correcta.");
+    }
+    return new PreguntaValidada(texto, List.copyOf(llenas), correcta);
   }
 
   private List<String> nombresDeQuienesCompletaron(Long retoId) {
