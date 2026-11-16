@@ -177,4 +177,61 @@ class MultiplicadorXpServiceTest {
     ReflectionTestUtils.setField(estudiante, "id", id);
     return estudiante;
   }
+
+  private String errorAsignar(int grado, List<Long> ids, FactorXp factor, Integer dias) {
+    return assertThrows(
+            IllegalArgumentException.class, () -> servicio.asignar(9L, grado, ids, factor, dias))
+        .getMessage();
+  }
+
+  @Test
+  void cbDiasNulo() {
+    assertEquals("La duración debe ser de 1 a 30 días.", errorAsignar(3, List.of(1L), FactorXp.X2, null));
+  }
+
+  @Test
+  void cnAsignacionValida() {
+    assertEquals(1, servicio.asignar(9L, 3, List.of(1L), FactorXp.X2, 5));
+  }
+
+  @Test
+  void cnSinEstudiantes() {
+    assertEquals("Selecciona al menos un estudiante.", errorAsignar(3, List.of(), FactorXp.X2, 5));
+  }
+
+  @Test
+  void cnEstudianteDeOtroGrado() {
+    assertEquals(
+        "Solo puedes elegir estudiantes del grado seleccionado.",
+        errorAsignar(3, List.of(3L), FactorXp.X2, 5));
+  }
+
+  @Test
+  void cnSinFactor() {
+    assertEquals("Elige el multiplicador que quieres asignar.", errorAsignar(3, List.of(1L), null, 5));
+  }
+
+  @Test
+  void cnDiasCero() {
+    assertEquals("La duración debe ser de 1 a 30 días.", errorAsignar(3, List.of(1L), FactorXp.X2, 0));
+  }
+
+  @Test
+  void cnDiasTreintaYUno() {
+    assertEquals("La duración debe ser de 1 a 30 días.", errorAsignar(3, List.of(1L), FactorXp.X3, 31));
+  }
+
+  @Test
+  void cnLimitesDeDias() {
+    assertEquals(1, servicio.asignar(9L, 3, List.of(1L), FactorXp.X1_5, 1));
+    assertEquals(2, servicio.asignar(9L, 3, List.of(1L, 2L), FactorXp.X3, 30));
+  }
+
+  @Test
+  void cnRetirar() {
+    MultiplicadorXp existente =
+        new MultiplicadorXp(1L, 9L, FactorXp.X2, AHORA.minusSeconds(60), AHORA.plusSeconds(60));
+    when(repository.findByEstudianteIdIn(any())).thenReturn(List.of(existente));
+    assertEquals(1, servicio.retirar(3, List.of(1L)));
+  }
 }
