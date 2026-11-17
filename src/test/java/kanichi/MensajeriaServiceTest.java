@@ -252,4 +252,74 @@ class MensajeriaServiceTest {
     ReflectionTestUtils.setField(docente, "autorizado", autorizado);
     return docente;
   }
+
+  private String errorEnvio(Integer grado, String seccion, List<Long> ids, boolean todos, String texto) {
+    return assertThrows(
+            IllegalArgumentException.class,
+            () -> servicio.enviarAEstudiantes(10L, grado, seccion, ids, todos, texto))
+        .getMessage();
+  }
+
+  @Test
+  void cbSeleccionNula() {
+    assertEquals(
+        "Elige al menos un estudiante o envía el mensaje a todo el salón.",
+        errorEnvio(1, null, null, false, "Hola"));
+  }
+
+  @Test
+  void cnTodoElGrado() {
+    assertEquals(2, servicio.enviarAEstudiantes(10L, 1, null, null, true, "Hola"));
+  }
+
+  @Test
+  void cnUnaSeccion() {
+    assertEquals(1, servicio.enviarAEstudiantes(10L, 1, "B", null, true, "Hola"));
+  }
+
+  @Test
+  void cnEstudianteElegido() {
+    assertEquals(1, servicio.enviarAEstudiantes(10L, 1, null, List.of(2L), false, "Hola"));
+  }
+
+  @Test
+  void cnGradoSeis() {
+    assertEquals("Selecciona un grado de 1 a 5.", errorEnvio(6, null, null, true, "Hola"));
+  }
+
+  @Test
+  void cnSalonSinEstudiantes() {
+    assertEquals("No hay estudiantes registrados en este salón.", errorEnvio(4, null, null, true, "Hola"));
+  }
+
+  @Test
+  void cnSeleccionVacia() {
+    assertEquals(
+        "Elige al menos un estudiante o envía el mensaje a todo el salón.",
+        errorEnvio(1, null, List.of(), false, "Hola"));
+  }
+
+  @Test
+  void cnEstudianteDeOtroGrado() {
+    assertEquals(
+        "Solo puedes elegir estudiantes del grado seleccionado.",
+        errorEnvio(1, null, List.of(3L), false, "Hola"));
+  }
+
+  @Test
+  void cnTextoVacio() {
+    assertEquals("Escribe un mensaje antes de enviarlo.", errorEnvio(1, null, null, true, "   "));
+  }
+
+  @Test
+  void cnTextoLargo() {
+    assertEquals(
+        "El mensaje no puede tener más de 1000 caracteres.",
+        errorEnvio(1, null, null, true, "x".repeat(1001)));
+  }
+
+  @Test
+  void cnTextoEnElLimite() {
+    assertEquals(2, servicio.enviarAEstudiantes(10L, 1, null, null, true, "x".repeat(1000)));
+  }
 }

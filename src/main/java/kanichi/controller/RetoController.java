@@ -1,6 +1,9 @@
 package kanichi.controller;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+import kanichi.dto.ResultadoReto;
 import kanichi.dto.UsuarioSesion;
 import kanichi.service.ProgresoDocenteService;
 import kanichi.service.RetoDocenteService;
@@ -39,12 +42,29 @@ public class RetoController {
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
           LocalDate fechaLimite,
       @RequestParam(required = false) Integer xp,
+      @RequestParam(required = false) String pregunta,
+      @RequestParam(required = false) String opcion1,
+      @RequestParam(required = false) String opcion2,
+      @RequestParam(required = false) String opcion3,
+      @RequestParam(required = false) String opcion4,
+      @RequestParam(required = false) Integer respuestaCorrecta,
       Model model,
       RedirectAttributes mensajes) {
+    List<String> opciones = Arrays.asList(opcion1, opcion2, opcion3, opcion4);
     try {
       int notificados =
           retoDocenteService.publicar(
-              usuario.getId(), grado, seccion, titulo, descripcion, objetivos, fechaLimite, xp);
+              usuario.getId(),
+              grado,
+              seccion,
+              titulo,
+              descripcion,
+              objetivos,
+              fechaLimite,
+              xp,
+              pregunta,
+              opciones,
+              respuestaCorrecta);
       mensajes.addFlashAttribute(
           "mensaje",
           "Reto publicado. Se notificó a "
@@ -60,6 +80,9 @@ public class RetoController {
       model.addAttribute("objetivos", objetivos);
       model.addAttribute("fechaLimite", fechaLimite);
       model.addAttribute("xp", xp);
+      model.addAttribute("pregunta", pregunta);
+      model.addAttribute("opciones", opciones);
+      model.addAttribute("respuestaCorrecta", respuestaCorrecta);
       agregarFormulario(usuario, model);
       return "docente/retos";
     }
@@ -71,7 +94,7 @@ public class RetoController {
     return "estudiante/avisos";
   }
 
-   @GetMapping("/estudiante/avisos/{retoId}")
+  @GetMapping("/estudiante/avisos/{retoId}")
   public String aviso(
       @AuthenticationPrincipal UsuarioSesion usuario, @PathVariable Long retoId, Model model) {
     model.addAttribute("aviso", retoDocenteService.abrir(usuario.getId(), retoId));
@@ -83,10 +106,11 @@ public class RetoController {
   public String completar(
       @AuthenticationPrincipal UsuarioSesion usuario,
       @PathVariable Long retoId,
+      @RequestParam(required = false) Integer respuesta,
       RedirectAttributes mensajes) {
     try {
-      mensajes.addFlashAttribute(
-          "mensaje", retoDocenteService.completar(usuario.getId(), retoId).mensaje());
+      ResultadoReto resultado = retoDocenteService.completar(usuario.getId(), retoId, respuesta);
+      mensajes.addFlashAttribute(resultado.correcto() ? "mensaje" : "error", resultado.mensaje());
     } catch (IllegalArgumentException exception) {
       mensajes.addFlashAttribute("error", exception.getMessage());
     }

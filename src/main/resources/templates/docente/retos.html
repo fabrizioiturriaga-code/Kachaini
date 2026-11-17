@@ -50,6 +50,20 @@
         <label for="xp">Recompensa (XP)</label>
         <input id="xp" name="xp" type="number" min="0" th:max="${xpMaxima}" required
                th:value="${xp != null} ? ${xp} : 20">
+                <fieldset class="pregunta-reto">
+          <legend>Pregunta del reto (opcional)</legend>
+          <p class="ayuda">Si escribes una pregunta, el estudiante completa el reto solo si la responde bien. Tiene un solo intento. Marca la opción correcta.</p>
+          <label for="pregunta">Pregunta</label>
+          <input id="pregunta" name="pregunta" maxlength="300" th:value="${pregunta}">
+          <div class="opcion" th:each="i : ${#numbers.sequence(1, 4)}">
+            <input type="radio" name="respuestaCorrecta" th:id="|correcta${i}|" th:value="${i - 1}"
+                   th:checked="${respuestaCorrecta != null and respuestaCorrecta == i - 1}"
+                   th:attr="aria-label=|Marcar la opción ${i} como correcta|">
+            <input th:id="|opcion${i}|" th:name="|opcion${i}|" maxlength="150"
+                   th:placeholder="|Opción ${i}|"
+                   th:value="${opciones != null} ? ${opciones[i - 1]} : ''">
+          </div>
+        </fieldset>
 
         <button type="submit">Publicar reto</button>
       </form>

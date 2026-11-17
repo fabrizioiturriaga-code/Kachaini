@@ -178,6 +178,90 @@ class UnidadDocenteServiceTest {
     assertEquals(List.of("Primer párrafo.", "Segundo párrafo."), leccion.getParrafos());
   }
 
+  private String errorCrear(Integer grado, String titulo, LeccionDocenteForm formulario) {
+    return assertThrows(
+            IllegalArgumentException.class, () -> service.crear(10L, grado, titulo, formulario))
+        .getMessage();
+  }
+
+  @Test
+  void cbFormularioNulo() {
+    assertEquals("Completa los datos de la lección.", errorCrear(1, "Unidad", null));
+  }
+
+  @Test
+  void cbRespuestaNegativa() {
+    LeccionDocenteForm f = formulario();
+    f.setRespuestaCorrecta(-1);
+    assertEquals("Marca cuál de las tres opciones es la correcta.", errorCrear(1, "Unidad", f));
+  }
+
+  @Test
+  void cbRespuestaTres() {
+    LeccionDocenteForm f = formulario();
+    f.setRespuestaCorrecta(3);
+    assertEquals("Marca cuál de las tres opciones es la correcta.", errorCrear(1, "Unidad", f));
+  }
+
+  @Test
+  void cnUnidadValida() {
+    assertEquals(7L, service.crear(10L, 1, "Mi unidad", formulario()));
+  }
+
+  @Test
+  void cnGradoSeis() {
+    assertEquals("Elige un grado de 1.° a 5.° de secundaria.", errorCrear(6, "Unidad", formulario()));
+  }
+
+  @Test
+  void cnTituloUnidadVacio() {
+    assertEquals("Escribe el título de la unidad.", errorCrear(1, " ", formulario()));
+  }
+
+  @Test
+  void cnTituloLeccionVacio() {
+    LeccionDocenteForm f = formulario();
+    f.setTitulo("");
+    assertEquals("Escribe el título de la lección.", errorCrear(1, "Unidad", f));
+  }
+
+  @Test
+  void cnContenidoLargo() {
+    LeccionDocenteForm f = formulario();
+    f.setContenido("x".repeat(3001));
+    assertEquals(
+        "Escribe el contenido de la lección con 3000 caracteres como máximo.",
+        errorCrear(1, "Unidad", f));
+  }
+
+  @Test
+  void cnPreguntaVacia() {
+    LeccionDocenteForm f = formulario();
+    f.setPregunta(null);
+    assertEquals("Escribe la pregunta.", errorCrear(1, "Unidad", f));
+  }
+
+  @Test
+  void cnOpcionVacia() {
+    LeccionDocenteForm f = formulario();
+    f.setOpcionB(" ");
+    assertEquals("Escribe la opción 2.", errorCrear(1, "Unidad", f));
+  }
+
+  @Test
+  void cnOpcionesRepetidas() {
+    LeccionDocenteForm f = formulario();
+    f.setOpcionC("INCA");
+    assertEquals("Las tres opciones deben ser distintas.", errorCrear(1, "Unidad", f));
+  }
+
+  @Test
+  void cnRespuestaEnElLimite() {
+    LeccionDocenteForm f = formulario();
+    f.setRespuestaCorrecta(2);
+    assertEquals(7L, service.crear(10L, 5, "Unidad", f));
+  }
+
   static LeccionDocenteForm formulario() {
     LeccionDocenteForm formulario = new LeccionDocenteForm();
     formulario.setTitulo("Los incas");

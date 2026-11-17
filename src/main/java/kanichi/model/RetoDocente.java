@@ -16,8 +16,11 @@ import java.util.List;
 @Entity
 @Table(name = "retos_docente")
 public class RetoDocente {
-  
+
   public static final int DIAS_POR_VENCER = 2;
+  public static final int LARGO_PREGUNTA = 300;
+  public static final int LARGO_OPCION = 150;
+  public static final int MAXIMO_OPCIONES = 4;
 
   private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
@@ -68,6 +71,15 @@ public class RetoDocente {
   @Column(nullable = false)
   private Instant publicado;
 
+  @Column(length = 300)
+  private String pregunta;
+
+  @Column(length = 700)
+  private String opciones;
+
+  @Column(name = "respuesta_correcta")
+  private Integer respuestaCorrecta;
+
   protected RetoDocente() {}
 
   public RetoDocente(
@@ -89,6 +101,24 @@ public class RetoDocente {
     this.fechaLimite = fechaLimite;
     this.xp = xp;
     this.publicado = publicado;
+  }
+
+  public void agregarPregunta(String pregunta, List<String> opciones, int respuestaCorrecta) {
+    this.pregunta = pregunta;
+    this.opciones = String.join("\n", opciones);
+    this.respuestaCorrecta = respuestaCorrecta;
+  }
+
+  public boolean isConPregunta() {
+    return pregunta != null;
+  }
+
+  public boolean esCorrecta(Integer respuesta) {
+    return respuestaCorrecta != null && respuestaCorrecta.equals(respuesta);
+  }
+
+  public List<String> getListaOpciones() {
+    return opciones == null ? List.of() : List.of(opciones.split("\n"));
   }
 
   public Estado estadoEn(LocalDate hoy) {
@@ -154,5 +184,9 @@ public class RetoDocente {
 
   public Instant getPublicado() {
     return publicado;
+  }
+
+  public String getPregunta() {
+    return pregunta;
   }
 }
